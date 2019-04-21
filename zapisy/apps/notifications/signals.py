@@ -95,4 +95,3 @@ def notify_that_news_was_added(sender: News, **kwargs) -> None:
             NotificationType.NEWS_HAS_BEEN_ADDED, {}
         )
     )
-    
