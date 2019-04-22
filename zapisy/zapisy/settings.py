@@ -202,10 +202,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'zapisy.urls'
 
 INSTALLED_APPS = (
-    # nicer admin select widgets, see https://github.com/yourlabs/django-autocomplete-light
-    'dal',
-    'dal_select2',
-
     'modeltranslation',  # needs to be before django.contrib.admin
 
     'rest_framework',
