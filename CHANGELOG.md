@@ -1,5 +1,12 @@
 # projektzapisy Changelog
 
+# Version 25.2.19
+
+* CSS library updated to Bootstrap 4 across entire system (#603)
+* CAS server redirection back to the system after log-out (#655)
+* Attaching security-related (mainly XSS) headers (#552)
+* Upgrade of some Python dependencies, including Django (to v2.1) (#666)
+
 # Version 12.2.19
 
 * New opening times computation (#500).

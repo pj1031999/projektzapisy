@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.db.models import QuerySet
+from django.core.validators import MaxLengthValidator
 
 from apps.users.exceptions import NonUserException
 
@@ -106,7 +107,7 @@ class Employee(BaseUser):
         verbose_name="Użytkownik",
         related_name='employee',
         on_delete=models.CASCADE)
-    consultations = models.TextField(verbose_name="konsultacje", null=True, blank=True)
+    consultations = models.TextField(verbose_name="konsultacje", null=True, blank=True, validators=[MaxLengthValidator(4200)])
     homepage = models.URLField(verbose_name='strona domowa', default="", null=True, blank=True)
     room = models.CharField(max_length=20, verbose_name="pokój", null=True, blank=True)
     status = models.PositiveIntegerField(
@@ -125,7 +126,7 @@ class Employee(BaseUser):
 
         try:
             group = Group.objects.get(pk=group_id)
-            return group.teacher == self or self in group.course.teachers.all() or self.user.is_staff
+            return group.teacher == self or group.course.owner == self or self.user.is_staff
         except Group.DoesNotExist:
             logger.error(
                 'Function Employee.has_privileges_for_group(group_id = %d) throws Group.DoesNotExist exception.' %

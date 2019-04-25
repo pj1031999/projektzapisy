@@ -71,7 +71,7 @@ class CourseAdmin(admin.ModelAdmin):
                 'fields': [
                     'information', 'english']}), ('Szczegóły', {
                         'fields': [
-                            'records_start', 'records_end', 'teachers', 'semester', 'slug', 'web_page'], 'classes': ['collapse']}), ]
+                            'records_start', 'records_end', 'semester', 'slug', 'web_page'], 'classes': ['collapse']}), ]
     inlines = [GroupInline, ]
 
     form = CourseForm
@@ -204,9 +204,9 @@ class TermInline(admin.TabularInline):
 class RecordInline(admin.TabularInline):
     model = Record
     extra = 0
-    readonly_fields = ('id',)
+    fields = ('student', 'status',)
     raw_id_fields = ('student',)
-    can_delete = True
+    can_delete = False
 
     def get_queryset(self, request):
         """Only shows enrolled and queued students.
