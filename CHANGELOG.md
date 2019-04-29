@@ -1,6 +1,10 @@
 # projektzapisy Changelog
 
-# Version 25.2.19
+# Version 29.4.19
+
+* New model for course Proposal and base model for Course info (#669)
+
+# Version 25.4.19
 
 * CSS library updated to Bootstrap 4 across entire system (#603)
 * CAS server redirection back to the system after log-out (#655)
