@@ -114,7 +114,6 @@ class SingleVoteSerializer(serializers.ModelSerializer):
     """
     vote_points = serializers.SerializerMethodField()
     course_name = serializers.CharField(source='entity.name')
-    courseentity_id = serializers.IntegerField(source='entity.id')
 
     def get_vote_points(self, vote_model):
         """Getter function for vote_points field."""
@@ -122,7 +121,7 @@ class SingleVoteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SingleVote
-        fields = ('student', 'course_name', 'vote_points', 'courseentity_id')
+        fields = ('student', 'course_name', 'vote_points', 'entity')
 
 
 class SystemStateSerializer(serializers.ModelSerializer):
