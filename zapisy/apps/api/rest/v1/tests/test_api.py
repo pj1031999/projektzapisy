@@ -32,6 +32,7 @@ class VoteSystemTests(TestCase):
         self.state1 = state1
         self.state2 = state2
         self.students = students
+        self.courses = courses
         self.employee = EmployeeFactory()
 
         self.semester = SemesterFactory()
@@ -83,17 +84,20 @@ class VoteSystemTests(TestCase):
         self.assertDictEqual(response.data[0], {
             'student': self.students[1].pk,
             'course_name': "Pranie",
-            'vote_points': 1
+            'vote_points': 1,
+            'entity': self.courses[0].id,
         })
         self.assertDictEqual(response.data[1], {
             'student': self.students[0].pk,
             'course_name': "Zmywanie",
-            'vote_points': 3
+            'vote_points': 3,
+            'entity': self.courses[1].id,
         })
         self.assertDictEqual(response.data[2], {
             'student': self.students[1].pk,
             'course_name': "Zmywanie",
-            'vote_points': 2
+            'vote_points': 2,
+            'entity': self.courses[1].id,
         })
 
     def test_can_set_semester_usos_kod(self):
