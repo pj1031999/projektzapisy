@@ -13,6 +13,7 @@ from apps.users.models import Employee
 
 from choicesenum import ChoicesEnum
 
+
 class GroupType(ChoicesEnum):
     LECTURE = "1", "wykład"
     EXERCISE = "2", "ćwiczenia"
@@ -24,6 +25,7 @@ class GroupType(ChoicesEnum):
     PHYSICAL_EDUCATION = "8", "WF"
     REPETITORY = "9", "repetytorium"
     PROJECT = "10", "projektu"
+
 
 # compatybility layer
 GROUP_TYPE_CHOICES = GroupType.choices()
