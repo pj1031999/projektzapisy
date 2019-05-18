@@ -11,11 +11,22 @@ from django.urls import reverse
 from apps.enrollment.courses.models.course import Course
 from apps.users.models import Employee
 
-# w przypadku edycji, poprawić też javascript: Fereol.Enrollment.CourseGroup.groupTypes
-GROUP_TYPE_CHOICES = [('1', 'wykład'), ('2', 'ćwiczenia'), ('3', 'pracownia'),
-                      ('5', 'ćwiczenio-pracownia'),
-                      ('6', 'seminarium'), ('7', 'lektorat'), ('8', 'WF'),
-                      ('9', 'repetytorium'), ('10', 'projekt')]
+from choicesenum import ChoicesEnum
+
+class GroupType(ChoicesEnum):
+    LECTURE = "1", "wykład"
+    EXERCISE = "2", "ćwiczenia"
+    LABS = "3", "pracownia"
+    # For some reason, 4 is skipped
+    EXERCISE_LABS = "5", "ćwiczenio-pracownia"
+    SEMINARY = "6", "seminarium"
+    LECTORATE = "7", "lektorat"
+    PHYSICAL_EDUCATION = "8", "WF"
+    REPETITORY = "9", "repetytorium"
+    PROJECT = "10", "projektu"
+
+# compatybility layer
+GROUP_TYPE_CHOICES = GroupType.choices()
 
 GROUP_EXTRA_CHOICES = [('', ''),
                        ("pierwsze 7 tygodni", "pierwsze 7 tygodni"),
@@ -54,7 +65,7 @@ class Group(models.Model):
         blank=True,
         verbose_name='prowadzący',
         on_delete=models.CASCADE)
-    type = models.CharField(max_length=2, choices=GROUP_TYPE_CHOICES, verbose_name='typ zajęć')
+    type = models.CharField(max_length=2, choices=GroupType.choices(), verbose_name='typ zajęć')
     GROUP_TYPE_LECTURE = '1'
     limit = models.PositiveSmallIntegerField(default=0, verbose_name='limit miejsc')
     extra = models.CharField(
