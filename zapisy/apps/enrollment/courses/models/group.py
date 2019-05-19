@@ -186,5 +186,5 @@ class Group(models.Model):
         The Group.MultipleObjectsReturned exception will be raised when many
         lecture groups exist for course.
         """
-        group_query = cls.objects.filter(course_id=course_id, type=GroupType.LECTURE[0])
+        group_query = cls.objects.filter(course_id=course_id, type=GroupType.LECTURE)
         return list(group_query)

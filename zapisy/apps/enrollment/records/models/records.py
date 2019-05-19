@@ -297,7 +297,7 @@ class Record(models.Model):
         if not cls.can_enqueue(student, group, cur_time):
             return []
         enqueued_groups = []
-        if group.type != GroupType.LECTURE[0]:
+        if group.type != GroupType.LECTURE:
             lecture_groups = Group.get_lecture_groups(group.course_id)
             for lecture_group in lecture_groups:
                 enqueued_groups.extend(cls.enqueue_student(student, lecture_group))
@@ -337,7 +337,7 @@ class Record(models.Model):
             return []
         removed_groups = []
         # If this is a lecture, remove him from all other groups as well.
-        if record.group.type == GroupType.LECTURE[0]:
+        if record.group.type == GroupType.LECTURE:
             other_groups_query = Record.objects.filter(
                 student=student, group__course__id=record.group.course_id).exclude(
                     status=RecordStatus.REMOVED).exclude(pk=record.pk)
@@ -390,7 +390,7 @@ class Record(models.Model):
         # records into that group in order to avoid dropping the record, when a
         # student enqueues into the groups at the same time, and this group is
         # being worked before the lecture group.
-        if group.type != GroupType.LECTURE[0]:
+        if group.type != GroupType.LECTURE:
             lecture_groups = Group.get_lecture_groups(group.course_id)
             for lecture_group in lecture_groups:
                 cls.fill_group(lecture_group.pk)
@@ -461,7 +461,7 @@ class Record(models.Model):
                 status=RecordStatus.REMOVED).select_for_update()
 
             # Check if he is enrolled into the lecture group.
-            if group.type != GroupType.LECTURE[0]:
+            if group.type != GroupType.LECTURE:
                 lecture_groups = Group.get_lecture_groups(group.course_id)
                 if lecture_groups:
                     lecture_groups_is_recorded = self.is_recorded_in_groups(
