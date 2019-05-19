@@ -15,15 +15,15 @@ from choicesenum import ChoicesEnum
 
 
 class GroupType(ChoicesEnum):
-    LECTURE = "1", "wykład"
-    EXERCISE = "2", "ćwiczenia"
-    LABS = "3", "pracownia"
-    EXERCISE_LABS = "5", "ćwiczenio-pracownia"
-    SEMINARY = "6", "seminarium"
-    LECTORATE = "7", "lektorat"
-    PHYSICAL_EDUCATION = "8", "WF"
-    REPETITORY = "9", "repetytorium"
-    PROJECT = "10", "projektu"
+    LECTURE = '1', "wykład"
+    EXERCISE = '2', "ćwiczenia"
+    LABS = '3', "pracownia"
+    EXERCISE_LABS = '5', "ćwiczenio-pracownia"
+    SEMINARY = '6', "seminarium"
+    LECTORATE = '7', "lektorat"
+    PHYSICAL_EDUCATION = '8', "WF"
+    REPETITORY = '9', "repetytorium"
+    PROJECT = '10', "projektu"
 
 
 # compatybility layer
