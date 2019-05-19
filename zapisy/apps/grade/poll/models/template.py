@@ -2,7 +2,7 @@ from django.db import models
 
 from apps.users.models import Employee, \
     Program
-from apps.enrollment.courses.models.group import GROUP_TYPE_CHOICES
+from apps.enrollment.courses.models.group import GroupType
 from apps.enrollment.courses.models.course import CourseEntity
 
 from .section import SectionOrdering, Section
@@ -35,7 +35,7 @@ class Template(models.Model):
         blank=True,
         null=True,
         max_length=2,
-        choices=GROUP_TYPE_CHOICES,
+        choices=GroupType.choices(),
         verbose_name='typ zajęć')
     sections = models.ManyToManyField(Section, verbose_name='sekcje',
                                       through='TemplateSections')

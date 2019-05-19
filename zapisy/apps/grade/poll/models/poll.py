@@ -5,7 +5,7 @@ from apps.users.models import Employee, \
     Student, \
     Program
 from apps.enrollment.courses.models.group import Group, \
-    GROUP_TYPE_CHOICES
+    GroupType
 
 from apps.enrollment.courses.models.semester import Semester
 
@@ -106,7 +106,7 @@ class Poll(models.Model):
                 if viewer == self.group.teacher:
                     return True
 
-                lectureCode = next((code for code, desc in GROUP_TYPE_CHOICES if desc == 'wykład'))
+                lectureCode = next((code for code, desc in GroupType.choices() if desc == 'wykład'))
                 groups = Group.objects.filter(course=self.group.course,
                                               teacher=viewer,
                                               type=lectureCode)

@@ -12,7 +12,7 @@ from django.utils.safestring import SafeText, mark_safe
 from django.views.decorators.http import require_POST
 
 from apps.grade.poll.models.last_visit import LastVisit
-from apps.enrollment.courses.models.group import GROUP_TYPE_CHOICES
+from apps.enrollment.courses.models.group import GroupType
 from apps.enrollment.courses.models.course import Course, CourseEntity
 from apps.enrollment.courses.models.semester import Semester
 from apps.grade.ticket_create.utils import from_plaintext
@@ -534,7 +534,7 @@ def polls_list(request):
     data['employees'] = Employee.objects.all(). \
         select_related().order_by('user__last_name', 'user__first_name')
     data['studies_types'] = Program.objects.all()
-    data['types'] = GROUP_TYPE_CHOICES
+    data['types'] = GroupType.choices()
     data['keys_to_create'] = Poll.count_polls_without_keys()
 
     return render(request, 'grade/poll/managment/polls_list.html', data)

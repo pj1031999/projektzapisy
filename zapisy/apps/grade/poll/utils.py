@@ -23,7 +23,7 @@ from apps.grade.poll.exceptions import NoTitleException, NoPollException, \
     NoSectionException
 
 from apps.enrollment.courses.models.semester import Semester
-from apps.enrollment.courses.models.group import Group, GROUP_TYPE_CHOICES
+from apps.enrollment.courses.models.group import Group, GroupType
 from apps.enrollment.courses.models.course import Course, CourseEntity
 from apps.users.models import Program
 
@@ -743,7 +743,7 @@ def prepare_data_for_create_poll(request, group_id=0):
     data['studies_types'] = Program.objects.all()
     data['semesters'] = Semester.objects.all()
     data['sections'] = Section.objects.filter(deleted=False)
-    data['types'] = GROUP_TYPE_CHOICES
+    data['types'] = GroupType.choices()
 
     return data
 
@@ -763,7 +763,7 @@ def prepare_data_for_create_template(request, group_id=0):
 
     data['studies_types'] = Program.objects.all()
     data['sections'] = Section.objects.filter(deleted=False)
-    data['types'] = GROUP_TYPE_CHOICES
+    data['types'] = GroupType.choices()
 
     return data
 

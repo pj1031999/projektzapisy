@@ -26,9 +26,6 @@ class GroupType(ChoicesEnum):
     PROJECT = '10', "projektu"
 
 
-# compatybility layer
-GROUP_TYPE_CHOICES = GroupType.choices()
-
 GROUP_EXTRA_CHOICES = [('', ''),
                        ("pierwsze 7 tygodni", "pierwsze 7 tygodni"),
                        ("drugie 7 tygodni", "drugie 7 tygodni"),
