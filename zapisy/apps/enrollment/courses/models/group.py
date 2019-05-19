@@ -18,7 +18,6 @@ class GroupType(ChoicesEnum):
     LECTURE = "1", "wykład"
     EXERCISE = "2", "ćwiczenia"
     LABS = "3", "pracownia"
-    # For some reason, 4 is skipped
     EXERCISE_LABS = "5", "ćwiczenio-pracownia"
     SEMINARY = "6", "seminarium"
     LECTORATE = "7", "lektorat"
