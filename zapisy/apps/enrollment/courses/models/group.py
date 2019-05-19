@@ -23,7 +23,7 @@ class GroupType(ChoicesEnum):
     LECTORATE = '7', "lektorat"
     PHYSICAL_EDUCATION = '8', "WF"
     REPETITORY = '9', "repetytorium"
-    PROJECT = '10', "projektu"
+    PROJECT = '10', "projekt"
 
 
 GROUP_EXTRA_CHOICES = [('', ''),
