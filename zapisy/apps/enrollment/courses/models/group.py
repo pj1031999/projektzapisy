@@ -64,7 +64,6 @@ class Group(models.Model):
         verbose_name='prowadzący',
         on_delete=models.CASCADE)
     type = models.CharField(max_length=2, choices=GroupType.choices(), verbose_name='typ zajęć')
-    GROUP_TYPE_LECTURE = '1'
     limit = models.PositiveSmallIntegerField(default=0, verbose_name='limit miejsc')
     extra = models.CharField(
         max_length=20,
@@ -187,5 +186,5 @@ class Group(models.Model):
         The Group.MultipleObjectsReturned exception will be raised when many
         lecture groups exist for course.
         """
-        group_query = cls.objects.filter(course_id=course_id, type=Group.GROUP_TYPE_LECTURE)
+        group_query = cls.objects.filter(course_id=course_id, type=GroupType.LECTURE[0])
         return list(group_query)
