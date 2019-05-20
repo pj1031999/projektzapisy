@@ -57,6 +57,7 @@ class ImportedGroup:
         'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
         'start_time', 'end_time', 'classrooms', 'limit'
     ]
+
     def __init__(self, **names):
         for k, v in names.items():
             setattr(self, k, v)
