@@ -51,14 +51,16 @@ COURSES_DONT_IMPORT = [
     'TEORIA PRAWDOPODOBIEŃSTWA 1',
     'TOPOLOGIA']
 
+
 class ImportedGroup:
     __slots__ = [
-      'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
-      'start_time', 'end_time', 'classrooms', 'limit'
+        'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
+        'start_time', 'end_time', 'classrooms', 'limit'
     ]
     def __init__(self, **names):
         for k, v in names.items():
             setattr(self, k, v)
+
 
 class Command(BaseCommand):
     help = "Imports the timetable for the next semester from the external scheduler."
@@ -383,8 +385,8 @@ class Command(BaseCommand):
     def get_secrets_env(self):
         env = environ.Env()
         BASE_DIR = os.path.abspath(os.path.join(
-                                       os.path.dirname(os.path.abspath(__file__)),
-                                       *[os.pardir]*4))
+            os.path.dirname(os.path.abspath(__file__)),
+            *[os.pardir] * 4))
         self.stdout.write(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
         environ.Env.read_env(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
         return env
