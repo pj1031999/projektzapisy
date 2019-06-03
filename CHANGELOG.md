@@ -1,5 +1,12 @@
 # projektzapisy Changelog
 
+# Version 3.6.19
+
+* Link to issue tracker replaced with Github (#680)
+* Small interface changes
+* Re-write of offer/vote application (#678)
+* Re-write of offer/preferences application (#686)
+
 # Version 29.4.19
 
 * New model for course Proposal and base model for Course info (#669)
