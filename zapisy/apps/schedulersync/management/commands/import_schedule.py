@@ -76,6 +76,7 @@ class Command(BaseCommand):
         parser.add_argument('--dry-run', action='store_true')
         parser.add_argument('--slack', action='store_true', dest='write_to_slack')
         parser.add_argument('--delete-groups', action='store_true')
+        parser.add_argument('--interactive', action='store_true')
 
     def get_entity(self, name):
         name = name.upper()
@@ -88,7 +89,7 @@ class Command(BaseCommand):
             ce = CourseEntity.objects.get(name_pl__iexact=name)
         except CourseEntity.DoesNotExist:
             self.stdout.write(
-                self.style.ERROR(">Couldn't find course entity for {}".format(name))
+                self.style.ERROR(f">Couldn't find course entity for {name}")
             )
         except CourseEntity.MultipleObjectsReturned:
             ces = CourseEntity.objects.filter(name_pl__iexact=name, status=2).order_by('-id')
@@ -108,7 +109,7 @@ class Command(BaseCommand):
         except Course.DoesNotExist:
             if entity.slug is None:
                 self.stdout.write(
-                    self.style.ERROR("Couldn't find slug for {}".format(entity))
+                    self.style.ERROR(f"Couldn't find slug for {entity}")
                 )
             else:
                 newslug = '{}_{}'.format(entity.slug,
@@ -129,9 +130,28 @@ class Command(BaseCommand):
                     classrooms.append(Classroom.objects.get(number=room))
             except Classroom.DoesNotExist:
                 self.stdout.write(
-                    self.style.ERROR("Couldn't find classroom for {}".format(room))
+                    self.style.ERROR(f"Couldn't find classroom for {room}")
                 )
         return classrooms
+
+    def prompt(self, message, choices):
+        if not self.interactive:
+            return 0
+
+        self.stdout.write(self.style.WARNING(message))
+        for idx, choice in enumerate(choices):
+            if idx == 0:
+                idx = '(default) 0'
+            self.stdout.write(self.style.NOTICE(f"{idx:11}: {choice}"))
+
+        choice = input().strip()
+        try:
+            choice = int(choice)
+            if 0 <= choice < len(choices):
+                return choice
+        except ValueError:
+            pass
+        return 0
 
     def get_employee(self, name):
         details = self.employee_map[name]
@@ -139,12 +159,64 @@ class Command(BaseCommand):
         try:
             return Employee.objects.get(user__username=username)
         except Employee.DoesNotExist:
-            possible = Employee.objects.filter(user__first_name=details['first_name'],
-                                               user__last_name=details['last_name'])
-            if len(possible) == 1:
-                details['sz_username'] = possible[0].user.username
-            self.unknown_employees[name] = details
-            return Employee.objects.get(user__username='nieznany')
+            if not self.interactive:
+                details = details.copy()
+                del details['terms']
+                self.unknown_employees[name] = details
+                return self.unknown_employee
+
+        possible = Employee.objects.filter(user__first_name=details['first_name'],
+                                           user__last_name=details['last_name'])
+        choices = [self.unknown_employee,
+                   "*not listed*",
+                   "*create a new user (using scheduler-provided data)*"
+                  ] + list(possible)
+
+        user = self.prompt(f"The following teachers were found for {name}"
+                           f" ({details['first_name']} {details['last_name']}):", choices)
+
+        save_back = False
+        if user == 0: # unknown
+            if self.prompt(f"Save back that the teacher is unknown?", ("no", "yes")):
+                save_back = True
+        elif user == 1: # not listed
+            while True:
+                username = input("Please type the exact username [default: nieznany] ").strip()
+                if not username:
+                    username = 'nieznany'
+                try:
+                    choices[user] = Employee.objects.get(user__username=username)
+                    break
+                except Employee.DoesNotExist:
+                    self.stdout.write(self.style.ERROR("No such employee!"))
+            save_back = True
+        elif user == 2: # create a new user
+            employees, _ = Group.objects.get_or_create(name='employees')
+            user = User.objects.create(
+                first_name=details['first_name'], last_name=details['last_name'],
+                username=username
+            )
+            employees.user_set.add(user)
+            return Employee.objects.create(user=user)
+        else:
+            save_back = True
+
+        details['sz_username'] = choices[user].user.username
+        if save_back:
+            response = self.client.post(SCHEDULER_BASE + self.url_assignments + 'add/', json={
+                'config_id': self.assignments['id'],
+                'type': 'teacher',
+                'mode': 'edit',
+                'teacher': details
+            }, headers={'X-CSRFToken': self.client.cookies['csrftoken']})
+
+            if response.status_code != 200:
+                raise ValueError(
+                    "Request to scheduler returned an error %s, the response is:\n%s"
+                    % (response.status_code, response.text[:10000])
+                )
+
+        return user
 
     def create_or_update_group(self, course, data, create_terms=True):
         sync_data_objects = TermSyncData.objects.filter(
@@ -173,14 +245,10 @@ class Command(BaseCommand):
                 term.save()
                 self.all_creations.append(term)
                 TermSyncData.objects.create(term=term, scheduler_id=data.id)
-            self.stdout.write(self.style.SUCCESS("Group with scheduler_id={} created!"
-                                                 .format(data.id)))
-            self.stdout.write(self.style.SUCCESS("  time: {}-{}"
-                                                 .format(data.start_time, data.end_time)))
-            self.stdout.write(self.style.SUCCESS("  teacher: {}"
-                                                 .format(data.teacher)))
-            self.stdout.write(self.style.SUCCESS("  classrooms: {}\n"
-                                                 .format(data.classrooms)))
+            self.stdout.write(self.style.SUCCESS(f"Group with scheduler_id={data.id} created!"))
+            self.stdout.write(self.style.SUCCESS(f"  time: {data.start_time}-{data.end_time}"))
+            self.stdout.write(self.style.SUCCESS(f"  teacher: {data.teacher}"))
+            self.stdout.write(self.style.SUCCESS(f"  classrooms: {data.classrooms}\n"))
             self.created_terms += 1
         else:
             for sync_data_object in sync_data_objects:
@@ -258,9 +326,9 @@ class Command(BaseCommand):
         return group
 
     def get_groups(self):
-        client = requests.session()
-        client.get(URL_LOGIN)
-        csrftoken = client.cookies['csrftoken']
+        self.client = requests.session()
+        self.client.get(URL_LOGIN)
+        csrftoken = self.client.cookies['csrftoken']
         secrets_env = self.get_secrets_env()
         scheduler_username = secrets_env.str('SCHEDULER_USERNAME')
         scheduler_password = secrets_env.str('SCHEDULER_PASSWORD')
@@ -268,18 +336,23 @@ class Command(BaseCommand):
                       'csrfmiddlewaretoken': csrftoken, 'next': self.url_assignments}
 
         # the first request is redirected through the login page
-        req1 = client.post(URL_LOGIN, data=login_data)
-        assignments = req1.json()
+        req1 = self.client.post(URL_LOGIN, data=login_data)
+        self.assignments = req1.json()
 
         # and the second one goes directly
-        req2 = client.get(SCHEDULER_BASE + self.url_schedule)
+        req2 = self.client.get(SCHEDULER_BASE + self.url_schedule)
         results = req2.json()['timetable']['results']
 
         groups = []
-        terms = {t['id']: t for t in assignments['terms']}
-        self.employee_map = {t['id']: t['extra'] for t in assignments['teachers']}
+        terms = {t['id']: t for t in self.assignments['terms']}
+        self.employee_map = {}
+        for t in self.assignments['teachers']:
+            self.employee_map[t['id']] = t
+            t.update(t['extra'])
+            del t['extra']
+        self.employee_map = {t['id']: t for t in self.assignments['teachers']}
 
-        for g in assignments['groups']:
+        for g in self.assignments['groups']:
             prepared_group = self.prepare_group(g, results, terms)
             if prepared_group is not None:
                 groups.append(prepared_group)
@@ -320,6 +393,7 @@ class Command(BaseCommand):
         self.used_courses = set()
         self.scheduler_ids = set()
         self.unknown_employees = {}
+        self.unknown_employee = Employee.objects.get(user__username='nieznany')
         groups = self.get_groups()
         for g in groups:
             self.scheduler_ids.add(int(g.id))
@@ -327,9 +401,10 @@ class Command(BaseCommand):
             if entity is not None:
                 course = self.get_course(entity, create_courses)
                 if course is None:
+                  if False:
                     raise CommandError("Course {} does not exist! Check your input file."
                                        .format(entity))
-                self.create_or_update_group(course, g, create_terms)
+                else: self.create_or_update_group(course, g, create_terms)
         self.remove_groups()
         self.stdout.write(self.style.SUCCESS("Created {} courses successfully! "
                                              "Moreover {} courses were already there."
@@ -395,13 +470,14 @@ class Command(BaseCommand):
     def handle(self, *args,
                dry_run=False, write_to_slack=False, delete_groups=False,
                verbosity=None, url_schedule=None, url_assignments=None,
-               semester=0, create_courses=False,
+               semester=0, create_courses=False, interactive=False,
                **options):
         self.semester = (Semester.objects.get_next() if semester == 0
                          else Semester.objects.get(pk=semester))
         self.url_assignments = url_assignments
         self.url_schedule = url_schedule
         self.verbosity = verbosity
+        self.interactive = interactive
         if self.verbosity >= 1:
             self.stdout.write("Adding to semester: {}\n".format(self.semester))
         self.delete_groups = delete_groups
