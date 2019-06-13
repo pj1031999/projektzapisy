@@ -18,7 +18,8 @@ from apps.schedulersync.models import TermSyncData
 
 SCHEDULER_BASE = 'http://scheduler.gtch.eu'
 
-URL_LOGIN = SCHEDULER_BASE + '/admin/login/'
+URL_LOGIN  = SCHEDULER_BASE + '/admin/login/'
+URL_CONFIG = SCHEDULER_BASE + '/scheduler/api/config/{id}/'
 
 SLACK_WEBHOOK_URL = (
     'https://hooks.slack.com/services/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'
@@ -67,8 +68,6 @@ class Command(BaseCommand):
     help = "Imports the timetable for the next semester from the external scheduler."
 
     def add_arguments(self, parser):
-        parser.add_argument('url_assignments', help="(config url) Should look like this: "
-                            '/scheduler/api/config/2017-18-lato3-2/')
         parser.add_argument('url_schedule', help="(task url) Should look like this: "
                             '/scheduler/api/task/07164b02-de37-4ddc-b81b-ddedab533fec/')
         parser.add_argument('--semester', type=int, default=0)
@@ -170,7 +169,7 @@ class Command(BaseCommand):
         choices = [self.unknown_employee,
                    "*not listed*",
                    "*create a new user (using scheduler-provided data)*"
-                  ] + list(possible)
+                  ] + [f"{teacher.id} ({teacher})" for teacher in possible]
 
         user = self.prompt(f"The following teachers were found for {name}"
                            f" ({details['first_name']} {details['last_name']}):", choices)
@@ -203,7 +202,7 @@ class Command(BaseCommand):
 
         details['sz_username'] = choices[user].user.username
         if save_back:
-            response = self.client.post(SCHEDULER_BASE + self.url_assignments + 'add/', json={
+            response = self.client.post(self.url_assignments + 'add/', json={
                 'config_id': self.assignments['id'],
                 'type': 'teacher',
                 'mode': 'edit',
@@ -333,15 +332,17 @@ class Command(BaseCommand):
         scheduler_username = secrets_env.str('SCHEDULER_USERNAME')
         scheduler_password = secrets_env.str('SCHEDULER_PASSWORD')
         login_data = {'username': scheduler_username, 'password': scheduler_password,
-                      'csrfmiddlewaretoken': csrftoken, 'next': self.url_assignments}
+                      'csrfmiddlewaretoken': csrftoken, 'next': self.url_schedule}
 
         # the first request is redirected through the login page
         req1 = self.client.post(URL_LOGIN, data=login_data)
-        self.assignments = req1.json()
+        task = req1.json()
+        results = task['timetable']['results']
 
         # and the second one goes directly
-        req2 = self.client.get(SCHEDULER_BASE + self.url_schedule)
-        results = req2.json()['timetable']['results']
+        self.url_assignments = URL_CONFIG.format(id=task['config_id'])
+        req2 = self.client.get(self.url_assignments)
+        self.assignments = req2.json()
 
         groups = []
         terms = {t['id']: t for t in self.assignments['terms']}
@@ -469,12 +470,11 @@ class Command(BaseCommand):
 
     def handle(self, *args,
                dry_run=False, write_to_slack=False, delete_groups=False,
-               verbosity=None, url_schedule=None, url_assignments=None,
+               verbosity=None, url_schedule=None,
                semester=0, create_courses=False, interactive=False,
                **options):
         self.semester = (Semester.objects.get_next() if semester == 0
                          else Semester.objects.get(pk=semester))
-        self.url_assignments = url_assignments
         self.url_schedule = url_schedule
         self.verbosity = verbosity
         self.interactive = interactive
