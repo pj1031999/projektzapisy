@@ -169,10 +169,13 @@ class Command(BaseCommand):
         choices = [self.unknown_employee,
                    "*not listed*",
                    "*create a new user (using scheduler-provided data)*"
-                  ] + [f"{teacher.id} ({teacher})" for teacher in possible]
+                  ] + list(possible)
+        choices_show = [teacher if isinstance(teacher, str) else
+                        f"{teacher.user.username} ({teacher})"
+                        for teacher in choices]
 
         user = self.prompt(f"The following teachers were found for {name}"
-                           f" ({details['first_name']} {details['last_name']}):", choices)
+                           f" ({details['first_name']} {details['last_name']}):", choices_show)
 
         save_back = False
         if user == 0: # unknown
@@ -184,7 +187,7 @@ class Command(BaseCommand):
                 if not username:
                     username = 'nieznany'
                 try:
-                    choices[user] = Employee.objects.get(user__username=username)
+                    possible[user] = Employee.objects.get(user__username=username)
                     break
                 except Employee.DoesNotExist:
                     self.stdout.write(self.style.ERROR("No such employee!"))
@@ -200,7 +203,8 @@ class Command(BaseCommand):
         else:
             save_back = True
 
-        details['sz_username'] = choices[user].user.username
+        user = choices[user]
+        details['sz_username'] = user.user.username
         if save_back:
             response = self.client.post(self.url_assignments + 'add/', json={
                 'config_id': self.assignments['id'],
@@ -402,7 +406,6 @@ class Command(BaseCommand):
             if entity is not None:
                 course = self.get_course(entity, create_courses)
                 if course is None:
-                  if False:
                     raise CommandError("Course {} does not exist! Check your input file."
                                        .format(entity))
                 else: self.create_or_update_group(course, g, create_terms)
