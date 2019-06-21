@@ -166,9 +166,10 @@ class Command(BaseCommand):
 
         possible = Employee.objects.filter(user__first_name=details['first_name'],
                                            user__last_name=details['last_name'])
-        choices = [self.unknown_employee,
-                   "*not listed*",
-                   "*create a new user (using scheduler-provided data)*"
+        choices = [
+            self.unknown_employee,
+            "*not listed*",
+            "*create a new user (using scheduler-provided data)*"
         ] + list(possible)
         choices_show = [teacher if isinstance(teacher, str) else
                         f"{teacher.user.username} ({teacher})"
