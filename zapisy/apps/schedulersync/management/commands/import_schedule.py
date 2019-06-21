@@ -8,7 +8,7 @@ from django.db import transaction
 import environ
 import requests
 
-from apps.users.models import Employee
+from apps.users.models import Employee, User, Group as AuthGroup
 from apps.enrollment.courses.models.classroom import Classroom
 from apps.enrollment.courses.models.course import Course, CourseEntity
 from apps.enrollment.courses.models.semester import Semester
@@ -18,7 +18,7 @@ from apps.schedulersync.models import TermSyncData
 
 SCHEDULER_BASE = 'http://scheduler.gtch.eu'
 
-URL_LOGIN  = SCHEDULER_BASE + '/admin/login/'
+URL_LOGIN = SCHEDULER_BASE + '/admin/login/'
 URL_CONFIG = SCHEDULER_BASE + '/scheduler/api/config/{id}/'
 
 SLACK_WEBHOOK_URL = (
@@ -169,7 +169,7 @@ class Command(BaseCommand):
         choices = [self.unknown_employee,
                    "*not listed*",
                    "*create a new user (using scheduler-provided data)*"
-                  ] + list(possible)
+        ] + list(possible)
         choices_show = [teacher if isinstance(teacher, str) else
                         f"{teacher.user.username} ({teacher})"
                         for teacher in choices]
@@ -178,10 +178,10 @@ class Command(BaseCommand):
                            f" ({details['first_name']} {details['last_name']}):", choices_show)
 
         save_back = False
-        if user == 0: # unknown
+        if user == 0:  # unknown
             if self.prompt(f"Save back that the teacher is unknown?", ("no", "yes")):
                 save_back = True
-        elif user == 1: # not listed
+        elif user == 1:  # not listed
             while True:
                 username = input("Please type the exact username [default: nieznany] ").strip()
                 if not username:
@@ -192,8 +192,8 @@ class Command(BaseCommand):
                 except Employee.DoesNotExist:
                     self.stdout.write(self.style.ERROR("No such employee!"))
             save_back = True
-        elif user == 2: # create a new user
-            employees, _ = Group.objects.get_or_create(name='employees')
+        elif user == 2:  # create a new user
+            employees, _ = AuthGroup.objects.get_or_create(name='employees')
             user = User.objects.create(
                 first_name=details['first_name'], last_name=details['last_name'],
                 username=username
@@ -408,7 +408,7 @@ class Command(BaseCommand):
                 if course is None:
                     raise CommandError("Course {} does not exist! Check your input file."
                                        .format(entity))
-                else: self.create_or_update_group(course, g, create_terms)
+                self.create_or_update_group(course, g, create_terms)
         self.remove_groups()
         self.stdout.write(self.style.SUCCESS("Created {} courses successfully! "
                                              "Moreover {} courses were already there."
