@@ -1,67 +1,29 @@
 import re
 from datetime import time
-import os
 
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-import environ
 import requests
 
-from apps.users.models import Employee, User, Group as AuthGroup
+from apps.users.models import Employee
+from django.contrib.auth.models import User, Group as AuthGroup
 from apps.enrollment.courses.models.classroom import Classroom
 from apps.enrollment.courses.models.course import Course, CourseEntity
 from apps.enrollment.courses.models.semester import Semester
 from apps.enrollment.courses.models.term import Term
 from apps.enrollment.courses.models.group import Group
 from apps.schedulersync.models import TermSyncData
-
-SCHEDULER_BASE = 'http://scheduler.gtch.eu'
-
-URL_LOGIN = SCHEDULER_BASE + '/admin/login/'
-URL_CONFIG = SCHEDULER_BASE + '/scheduler/api/config/{id}/'
-
-SLACK_WEBHOOK_URL = (
-    'https://hooks.slack.com/services/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'
+from apps.schedulersync.utils import (
+    COURSES_DONT_IMPORT,
+    COURSES_MAP,
+    LIMITS,
+    GROUP_TYPES,
+    URL_LOGIN,
+    URL_CONFIG,
+    ImportedGroup,
+    get_secrets_env,
 )
-
-# The mapping between group types in scheduler and enrollment system
-# w (wykład), p (pracownia), c (ćwiczenia), s (seminarium), r (ćwiczenio-pracownia),
-# e (repetytorium), o (projekt)
-GROUP_TYPES = {'w': '1', 'e': '9', 'c': '2', 'p': '3',
-               'r': '5', 's': '6', 'o': '10'}
-
-# The default limits for group types
-LIMITS = {'1': 300, '9': 300, '2': 20, '3': 15, '5': 18, '6': 15, '10': 15}
-
-COURSES_MAP = {
-    'PRAKTYKA ZAWODOWA - 3 TYGODNIE': 'PRAKTYKA ZAWODOWA - TRZY TYGODNIE',
-    'PRAKTYKA ZAWODOWA - 4 TYGODNIE': 'PRAKTYKA ZAWODOWA - CZTERY TYGODNIE',
-    'PRAKTYKA ZAWODOWA - 5 TYGODNI': 'PRAKTYKA ZAWODOWA - PIĘĆ TYGODNI',
-    'PRAKTYKA ZAWODOWA - 6 TYGODNI': 'PRAKTYKA ZAWODOWA - SZEŚĆ TYGODNI'
-}
-
-COURSES_DONT_IMPORT = [
-    'ALGEBRA I',
-    'ALGEBRA LINIOWA 2',
-    'ALGEBRA LINIOWA 2R',
-    'ANALIZA MATEMATYCZNA II',
-    'FUNKCJE ANALITYCZNE 1',
-    'RÓWNANIA RÓŻNICZKOWE 1',
-    'RÓWNANIA RÓŻNICZKOWE 1R',
-    'TEORIA PRAWDOPODOBIEŃSTWA 1',
-    'TOPOLOGIA']
-
-
-class ImportedGroup:
-    __slots__ = [
-        'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
-        'start_time', 'end_time', 'classrooms', 'limit'
-    ]
-
-    def __init__(self, **names):
-        for k, v in names.items():
-            setattr(self, k, v)
 
 
 class Command(BaseCommand):
@@ -333,7 +295,7 @@ class Command(BaseCommand):
         self.client = requests.session()
         self.client.get(URL_LOGIN)
         csrftoken = self.client.cookies['csrftoken']
-        secrets_env = self.get_secrets_env()
+        secrets_env = get_secrets_env()
         scheduler_username = secrets_env.str('SCHEDULER_USERNAME')
         scheduler_password = secrets_env.str('SCHEDULER_PASSWORD')
         login_data = {'username': scheduler_username, 'password': scheduler_password,
@@ -463,16 +425,7 @@ class Command(BaseCommand):
                 % (response.status_code, response.text)
             )
 
-    def get_secrets_env(self):
-        env = environ.Env()
-        BASE_DIR = os.path.abspath(os.path.join(
-            os.path.dirname(os.path.abspath(__file__)),
-            *[os.pardir] * 4))
-        self.stdout.write(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
-        environ.Env.read_env(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
-        return env
-
-    def handle(self, *args,
+    def handle(self, *,
                dry_run=False, write_to_slack=False, delete_groups=False,
                verbosity=None, url_schedule=None,
                semester=0, create_courses=False, interactive=False,
