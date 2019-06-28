@@ -57,4 +57,3 @@ def get_secrets_env():
         os.pardir, os.pardir))
     environ.Env.read_env(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
     return env
-

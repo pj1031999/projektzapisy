@@ -17,8 +17,9 @@ from apps.schedulersync.models import TermSyncData
 from apps.schedulersync.utils import (
     COURSES_DONT_IMPORT,
     COURSES_MAP,
-    LIMITS,
     GROUP_TYPES,
+    LIMITS,
+    SLACK_WEBHOOK_URL,
     URL_LOGIN,
     URL_CONFIG,
     ImportedGroup,
