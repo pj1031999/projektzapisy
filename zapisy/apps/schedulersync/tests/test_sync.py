@@ -1,10 +1,8 @@
 import copy
-import io
 import json
 import os
 
-from django import test
-from django.conf import settings
+from django.test import TestCase, override_settings
 
 from apps.users.models import Employee
 from apps.enrollment.courses.models.course import Course
@@ -24,14 +22,20 @@ class StdoutSuppressor:
         self.cmd = test.cmd
         self.save_stdout = self.cmd.stdout
 
+    def write(self, *args, **kw):
+        pass
+
     def __enter__(self):
-        self.cmd.stdout = io.StringIO()
+        self.cmd.stdout = self
 
     def __exit__(self, val, tp, tb):
         self.cmd.stdout = self.save_stdout
 
 
-class Test(test.TestCase):
+# Przy zapisywaniu zmodyfikowanych grup przesuwają się kolejki.
+# Do testów może nie być redisa, a asynchroniczne przesuwanie kolejek może go wymagać.
+@override_settings(RUN_ASYNC=False)
+class Test(TestCase):
     """Testy do importu danych ze Schedulera.
     """
 
@@ -72,9 +76,6 @@ class Test(test.TestCase):
     def test_removal(self):
         self.test_creation()
 
-        # Przy zapisywaniu zmodyfikowanych grup przesuwają się kolejki.
-        # Do testów może nie być redisa, a asynchroniczne przesuwanie kolejek może go wymagać.
-        settings.RUN_ASYNC = False
         try:
             self.cmd.assignments = copy.deepcopy(self.assignments2)
             with StdoutSuppressor(self):
