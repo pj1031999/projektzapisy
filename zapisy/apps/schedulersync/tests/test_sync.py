@@ -4,6 +4,7 @@ import json
 import os
 
 from django import test
+from django.conf import settings
 
 from apps.users.models import Employee
 from apps.enrollment.courses.models.course import Course
@@ -61,19 +62,23 @@ class Test(test.TestCase):
     def test_creation(self):
         # interactive=True, ale prompt == fake_prompt
         self.cmd.assignments = copy.deepcopy(self.assignments)
-        self.cmd.handle(task_data=self.task1, create_courses=True, interactive=True)
+        with StdoutSuppressor(self):
+            self.cmd.handle(task_data=self.task1, create_courses=True, interactive=True)
 
         self.assertEqual(Employee.objects.get(user__username='teach1').user.last_name, 'Pierwszy')
         self.assertEqual(Employee.objects.get(user__username='teach2').user.last_name, 'Drugi')
         self.assertEqual(Group.objects.get(course__entity__name_pl='Myślenie').course.entity.name_pl, 'Myślenie')
 
     def test_removal(self):
-        with StdoutSuppressor(self):
-            self.test_creation()
+        self.test_creation()
 
+        # Przy zapisywaniu zmodyfikowanych grup przesuwają się kolejki.
+        # Do testów może nie być redisa, a asynchroniczne przesuwanie kolejek może go wymagać.
+        settings.RUN_ASYNC = False
         try:
             self.cmd.assignments = copy.deepcopy(self.assignments2)
-            self.cmd.handle(task_data=self.task2, delete_groups=True)
+            with StdoutSuppressor(self):
+                self.cmd.handle(task_data=self.task2, delete_groups=True)
             self.assertRaises(Group.DoesNotExist, Group.objects.get, course__entity__name_pl='Myślenie')
         finally:
             Course.objects.get(entity__name_pl='Myślenie').delete()
