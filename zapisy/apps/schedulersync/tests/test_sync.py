@@ -32,8 +32,8 @@ class StdoutSuppressor:
         self.cmd.stdout = self.save_stdout
 
 
-# Przy zapisywaniu zmodyfikowanych grup przesuwają się kolejki.
-# Do testów może nie być redisa, a asynchroniczne przesuwanie kolejek może go wymagać.
+# When saving modified groups, the queues move.
+# The tests can be run without Redis, and asynchronous queues may require that.
 @override_settings(RUN_ASYNC=False)
 class Test(TestCase):
     """Testy do importu danych ze Schedulera.
@@ -64,9 +64,9 @@ class Test(TestCase):
         SemesterFactory()
 
     def test_creation(self):
-        # interactive=True, ale prompt == fake_prompt
         self.cmd.assignments = copy.deepcopy(self.assignments)
         with StdoutSuppressor(self):
+            # interactive=True, but cmd.prompt == fake_prompt
             self.cmd.handle(task_data=self.task1, create_courses=True, interactive=True)
 
         self.assertEqual(Employee.objects.get(user__username='teach1').user.last_name, 'Pierwszy')
