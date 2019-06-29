@@ -16,18 +16,16 @@ from .utils import (
     COURSES_MAP,
     GROUP_TYPES,
     LIMITS,
-    SLACK_WEBHOOK_URL,
     ImportedGroup,
 )
 
 
 class ScheduleImporter(BaseCommand):
     def get_entity(self, name):
-        name = name.upper()
-        if name in COURSES_MAP:
-            name = COURSES_MAP[name]
-        if name in COURSES_DONT_IMPORT:
+        name_u = name.upper()
+        if name_u in COURSES_DONT_IMPORT:
             return None
+        name = COURSES_MAP.get(name_u, name)
         ce = None
         try:
             ce = CourseEntity.objects.get(name_pl__iexact=name)
@@ -35,6 +33,8 @@ class ScheduleImporter(BaseCommand):
             self.stdout.write(
                 self.style.ERROR(f">Couldn't find course entity for {name}")
             )
+            if self.prompt("Do you want to create it?"):
+                ce = CourseEntity.objects.create(name_pl=name)
         except CourseEntity.MultipleObjectsReturned:
             ces = CourseEntity.objects.filter(name_pl__iexact=name, status=2).order_by('-id')
             if self.verbosity >= 1:
@@ -78,7 +78,7 @@ class ScheduleImporter(BaseCommand):
                 )
         return classrooms
 
-    def prompt(self, message, choices):
+    def prompt(self, message, choices=("no", "yes")):
         if not self.interactive:
             return 0
 
@@ -125,7 +125,7 @@ class ScheduleImporter(BaseCommand):
 
         save_back = False
         if user == 0:  # unknown
-            if self.prompt(f"Save back that the teacher is unknown?", ("no", "yes")):
+            if self.prompt(f"Save back that the teacher is unknown?"):
                 save_back = True
         elif user == 1:  # not listed
             while True:
@@ -152,17 +152,7 @@ class ScheduleImporter(BaseCommand):
         user = choices[user]
         details['sz_username'] = user.user.username
         if save_back:
-            response = self.client.post(self.url_assignments + 'add/', json={
-                'config_id': self.assignments['id'],
-                'type': 'teacher',
-                'mode': 'edit',
-                'teacher': details
-            }, headers={'X-CSRFToken': self.client.cookies['csrftoken']})
-
-            if response.status_code != 200:
-                raise ValueError(
-                        f"Request to scheduler returned an error {response.status_code}, the response is:\n{response.text[:10000]}"
-                )
+            self.save_back(details)
 
         return user
 
@@ -193,10 +183,11 @@ class ScheduleImporter(BaseCommand):
                 term.save()
                 self.all_creations.append(term)
                 TermSyncData.objects.create(term=term, scheduler_id=data.id)
-            self.stdout.write(self.style.SUCCESS(f"Group with scheduler_id={data.id} created!"))
-            self.stdout.write(self.style.SUCCESS(f"  time: {data.start_time}-{data.end_time}"))
-            self.stdout.write(self.style.SUCCESS(f"  teacher: {data.teacher}"))
-            self.stdout.write(self.style.SUCCESS(f"  classrooms: {data.classrooms}\n"))
+            self.stdout.write(
+                    self.style.SUCCESS(f"Group with scheduler_id={data.id} created!\n"
+                                       f"  time: {data.start_time}-{data.end_time}\n"
+                                       f"  teacher: {data.teacher}\n"
+                                       f"  classrooms: {data.classrooms}\n"))
             self.created_terms += 1
         else:
             for sync_data_object in sync_data_objects:
@@ -248,7 +239,8 @@ class ScheduleImporter(BaseCommand):
             id=g['id'],
             entity_name=g['extra']['course'],
             group_type=GROUP_TYPES[g['extra']['group_type']],
-            teacher=self.get_employee(g['teachers'][0])
+            teacher=self.get_employee(g['teachers'][0]),
+            limit=g['students_num'],
         )
 
         # start_time will be determined as the minimum start_time among all terms
@@ -270,7 +262,7 @@ class ScheduleImporter(BaseCommand):
         group.start_time = time(hour=start_time)
         group.end_time = time(hour=end_time)
         group.classrooms = self.get_classrooms(classrooms)
-        group.limit = LIMITS[group.group_type]
+        # group.limit = LIMITS[group.group_type]
         return group
 
     def get_groups(self, task=None):
@@ -319,7 +311,7 @@ class ScheduleImporter(BaseCommand):
                     group.delete()
 
     @transaction.atomic
-    def import_from_api(self, create_courses=False, create_terms=True):
+    def import_from_api(self, create_courses=False, create_terms=True, task=None):
         self.created_terms = 0
         self.updated_terms = 0
         self.created_courses = 0
@@ -330,15 +322,16 @@ class ScheduleImporter(BaseCommand):
         self.scheduler_ids = set()
         self.unknown_employees = {}
         self.unknown_employee = Employee.objects.get(user__username='nieznany')
-        groups = self.get_groups()
+        groups = self.get_groups(task)
         for g in groups:
             self.scheduler_ids.add(int(g.id))
             entity = self.get_entity(g.entity_name)
             if entity is not None:
                 course = self.get_course(entity, create_courses)
                 if course is None:
-                    raise CommandError(f"Course {entity} does not exist! Check your input file.")
-                self.create_or_update_group(course, g, create_terms)
+                    self.stdout.write(self.style.WARNING(f"Course {entity} does not exist!"))
+                else:
+                    self.create_or_update_group(course, g, create_terms)
         self.remove_groups()
         self.stdout.write(
             self.style.SUCCESS(f"Created {self.created_courses} courses successfully! "

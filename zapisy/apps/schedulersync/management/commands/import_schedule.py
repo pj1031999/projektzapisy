@@ -3,10 +3,12 @@ import requests
 from apps.enrollment.courses.models.semester import Semester
 from ...importer import ScheduleImporter
 from ...utils import (
+    SLACK_WEBHOOK_URL,
     URL_CONFIG,
     URL_LOGIN,
     get_secrets_env,
 )
+
 
 class Command(ScheduleImporter):
     help = "Imports the timetable for the next semester from the external scheduler."
@@ -42,10 +44,25 @@ class Command(ScheduleImporter):
 
         return task
 
+    def save_back(self, details):
+        response = self.client.post(self.url_assignments + 'add/', json={
+            'config_id': self.assignments['id'],
+            'type': 'teacher',
+            'mode': 'edit',
+            'teacher': details
+        }, headers={'X-CSRFToken': self.client.cookies['csrftoken']})
+
+        if response.status_code != 200:
+            raise ValueError(
+                f"Request to scheduler returned an error {response.status_code}, "
+                f"the response is:\n{response.text[:10000]}"
+            )
+
     def handle(self, *,
                dry_run=False, write_to_slack=False, delete_groups=False,
-               verbosity=None, url_schedule=None,
+               verbosity=0, url_schedule=None,
                semester=0, create_courses=False, interactive=False,
+               task_data=None,
                **options):
         self.semester = (Semester.objects.get_next() if semester == 0
                          else Semester.objects.get(pk=semester))
@@ -58,9 +75,9 @@ class Command(ScheduleImporter):
         if dry_run:
             if self.verbosity >= 1:
                 self.stdout.write("Dry run is on. Nothing will be saved.")
-            self.import_from_api(False, False)
+            self.import_from_api(False, False, task=task_data)
         else:
-            self.import_from_api(create_courses)
+            self.import_from_api(create_courses, task=task_data)
         if write_to_slack:
             self.write_to_slack()
 

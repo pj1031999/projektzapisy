@@ -1,0 +1,85 @@
+{
+    "status": "finished",
+    "config_id": "2019-20-1",
+    "algorithm": "random",
+    "rating_helper": {
+        "room_rating_helper": {
+            "empty_chair_groups": {
+                "5": [
+                    "3"
+                ],
+                "27": [
+                    "2"
+                ],
+                "15": [
+                    "1"
+                ]
+            }
+        },
+        "teacher_rating_helper": {
+            "gap_hours": {
+                "teach2": {
+                    "1": 4
+                },
+                "teach1": {
+                    "3": 0
+                }
+            },
+            "hours_in_work": {
+                "teach2": {
+                    "1": 405
+                },
+                "teach1": {
+                    "3": 105
+                }
+            }
+        },
+        "term_rating_helper": {
+            "end_even_groups": [
+                "1"
+            ],
+            "start_even_groups": [
+                "1",
+                "3"
+            ],
+            "start_odd_groups": [
+                "2"
+            ],
+            "end_odd_groups": [
+                "2",
+                "3"
+            ]
+        }
+    },
+    "timetable": {
+        "results": {
+            "1": [
+                {
+                    "term": "314",
+                    "room": "105"
+                },
+                {
+                    "term": "315",
+                    "room": "105"
+                }
+            ],
+            "3": [
+                {
+                    "term": "112",
+                    "room": "108"
+                }
+            ],
+            "2": [
+                {
+                    "term": "117",
+                    "room": "141"
+                },
+                {
+                    "term": "118",
+                    "room": "141"
+                }
+            ]
+        }
+    },
+    "id": "952df651-9741-4516-af80-7ce5fa12f35e"
+}
