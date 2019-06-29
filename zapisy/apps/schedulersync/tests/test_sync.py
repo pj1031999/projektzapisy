@@ -15,7 +15,7 @@ from ..management.commands.import_schedule import Command as ImportCommand
 
 
 def fake_prompt(message, choices=("no", "yes")):
-    return len(choices)-1
+    return len(choices) - 1
 
 
 class StdoutSuppressor:

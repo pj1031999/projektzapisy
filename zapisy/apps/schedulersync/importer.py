@@ -1,7 +1,7 @@
 import re
 from datetime import time
 
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from apps.users.models import Employee
@@ -184,10 +184,10 @@ class ScheduleImporter(BaseCommand):
                 self.all_creations.append(term)
                 TermSyncData.objects.create(term=term, scheduler_id=data.id)
             self.stdout.write(
-                    self.style.SUCCESS(f"Group with scheduler_id={data.id} created!\n"
-                                       f"  time: {data.start_time}-{data.end_time}\n"
-                                       f"  teacher: {data.teacher}\n"
-                                       f"  classrooms: {data.classrooms}\n"))
+                self.style.SUCCESS(f"Group with scheduler_id={data.id} created!\n"
+                                   f"  time: {data.start_time}-{data.end_time}\n"
+                                   f"  teacher: {data.teacher}\n"
+                                   f"  classrooms: {data.classrooms}\n"))
             self.created_terms += 1
         else:
             for sync_data_object in sync_data_objects:
