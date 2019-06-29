@@ -106,10 +106,9 @@ class Poll(models.Model):
                 if viewer == self.group.teacher:
                     return True
 
-                lectureCode = next((code for code, desc in GroupType.choices() if desc == 'wykład'))
                 groups = Group.objects.filter(course=self.group.course,
                                               teacher=viewer,
-                                              type=lectureCode)
+                                              type=GroupType.LECTURE)
                 if groups:
                     return True
             else:
