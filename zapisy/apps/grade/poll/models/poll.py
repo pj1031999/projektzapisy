@@ -105,7 +105,7 @@ class Poll(models.Model):
             if self.group:
                 if viewer == self.group.teacher:
                     return True
-
+                # rerun tests
                 groups = Group.objects.filter(course=self.group.course,
                                               teacher=viewer,
                                               type=GroupType.LECTURE)
