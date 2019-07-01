@@ -1,12 +1,12 @@
 import requests
 
+from django.conf import settings
 from apps.enrollment.courses.models.semester import Semester
 from ...importer import ScheduleImporter
-from ...utils import (
+from ...constants import (
     SLACK_WEBHOOK_URL,
     URL_CONFIG,
     URL_LOGIN,
-    get_secrets_env,
 )
 
 
@@ -24,10 +24,11 @@ class Command(ScheduleImporter):
         parser.add_argument('--interactive', action='store_true')
 
     def get_task(self):
+        """Fetch a task from Scheduler and return it, setting up a session."""
         self.client = requests.session()
         self.client.get(URL_LOGIN)
         csrftoken = self.client.cookies['csrftoken']
-        secrets_env = get_secrets_env()
+        secrets_env = settings.env
         scheduler_username = secrets_env.str('SCHEDULER_USERNAME')
         scheduler_password = secrets_env.str('SCHEDULER_PASSWORD')
         login_data = {'username': scheduler_username, 'password': scheduler_password,
@@ -45,6 +46,7 @@ class Command(ScheduleImporter):
         return task
 
     def save_back(self, details):
+        """Save employee details back to Scheduler (used in interactive mode)."""
         response = self.client.post(self.url_assignments + 'add/', json={
             'config_id': self.assignments['id'],
             'type': 'teacher',
@@ -56,6 +58,23 @@ class Command(ScheduleImporter):
             raise ValueError(
                 f"Request to scheduler returned an error {response.status_code}, "
                 f"the response is:\n{response.text[:10000]}"
+            )
+
+    def write_to_slack(self):
+        """Write a summary of changes to Slack."""
+        attachments = self.prepare_slack_message()
+        if attachments:
+            text = "The following groups were updated in fereol (scheduler's sync):"
+        else:
+            text = "No groups were updated in fereol (scheduler's sync)."
+        slack_data = {
+            'text': text,
+            'attachments': attachments
+        }
+        response = requests.post(SLACK_WEBHOOK_URL, json=slack_data)
+        if response.status_code != 200:
+            raise ValueError(
+                f"Request to slack returned an error {response.status_code}, the response is:\n{response.text}"
             )
 
     def handle(self, *,
@@ -72,6 +91,9 @@ class Command(ScheduleImporter):
         self.delete_groups = delete_groups
         if self.verbosity >= 1:
             self.stdout.write(f"Adding to semester: {self.semester}\n")
+        if not task_data:
+            task_data = self.get_task()
+
         if dry_run:
             if self.verbosity >= 1:
                 self.stdout.write("Dry run is on. Nothing will be saved.")
@@ -80,14 +102,3 @@ class Command(ScheduleImporter):
             self.import_from_api(create_courses, task=task_data)
         if write_to_slack:
             self.write_to_slack()
-
-    def write_to_slack(self):
-        slack_data = {
-            'text': "The following groups were updated in fereol (scheduler's sync):",
-            'attachments': self.prepare_slack_message()
-        }
-        response = requests.post(SLACK_WEBHOOK_URL, json=slack_data)
-        if response.status_code != 200:
-            raise ValueError(
-                f"Request to slack returned an error {response.status_code}, the response is:\n{response.text}"
-            )

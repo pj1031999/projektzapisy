@@ -37,23 +37,3 @@ COURSES_DONT_IMPORT = [
     'RÓWNANIA RÓŻNICZKOWE 1R',
     'TEORIA PRAWDOPODOBIEŃSTWA 1',
     'TOPOLOGIA']
-
-
-class ImportedGroup:
-    __slots__ = [
-        'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
-        'start_time', 'end_time', 'classrooms', 'limit'
-    ]
-
-    def __init__(self, **names):
-        for k, v in names.items():
-            setattr(self, k, v)
-
-
-def get_secrets_env():
-    env = environ.Env()
-    BASE_DIR = os.path.abspath(os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        os.pardir, os.pardir))
-    environ.Env.read_env(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
-    return env

@@ -11,17 +11,34 @@ from apps.enrollment.courses.models.course import Course, CourseEntity
 from apps.enrollment.courses.models.term import Term
 from apps.enrollment.courses.models.group import Group
 from .models import TermSyncData
-from .utils import (
+from .constants import (
     COURSES_DONT_IMPORT,
     COURSES_MAP,
     GROUP_TYPES,
     LIMITS,
-    ImportedGroup,
 )
 
 
+class ImportedGroup:
+    """An intermediate format for storing imported group details"""
+    __slots__ = [
+        'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
+        'start_time', 'end_time', 'classrooms', 'limit'
+    ]
+
+    def __init__(self, **names):
+        for k, v in names.items():
+            setattr(self, k, v)
+
+
 class ScheduleImporter(BaseCommand):
+    """The base class for the command importing schedule.
+
+    It is not a fully-functional class, just all the conversion logic.
+    For the command interface, and Scheduler interface, see .management.commands.import_schedule.
+    """
     def get_entity(self, name):
+        """Get a course entity from database by Scheduler-provided course name"""
         name_u = name.upper()
         if name_u in COURSES_DONT_IMPORT:
             return None
@@ -46,6 +63,8 @@ class ScheduleImporter(BaseCommand):
         return ce
 
     def get_course(self, entity, create_courses=False):
+        """Get a course from database by its course entity and current semester number
+        (possibly creating a new one)."""
         course = None
         try:
             course = Course.objects.get(semester=self.semester, entity=entity)
@@ -56,8 +75,7 @@ class ScheduleImporter(BaseCommand):
                     self.style.ERROR(f"Couldn't find slug for {entity}")
                 )
             else:
-                newslug = '{}_{}'.format(entity.slug,
-                                         re.sub(r'[^\w]', '_', self.semester.get_short_name()))
+                newslug = f'{entity.slug}_' + re.sub(r'[^\w]', '_', self.semester.get_short_name())
                 if create_courses:
                     course = Course(entity=entity, information=entity.information,
                                     semester=self.semester, slug=newslug)
@@ -66,6 +84,7 @@ class ScheduleImporter(BaseCommand):
         return course
 
     def get_classrooms(self, rooms):
+        """Get a list of classroom objects for a list of room numbers."""
         classrooms = []
         for room in rooms:
             room = room.strip()
@@ -79,6 +98,7 @@ class ScheduleImporter(BaseCommand):
         return classrooms
 
     def prompt(self, message, choices=("no", "yes")):
+        """Ask the interactive user a question with choices provided and return chosen choice's number."""
         if not self.interactive:
             return 0
 
@@ -98,6 +118,8 @@ class ScheduleImporter(BaseCommand):
         return 0
 
     def get_employee(self, name):
+        """Given an employee identifier from Scheduler (most probably a username),
+        find a matching employee from the database (possibly creating one)."""
         details = self.employee_map[name]
         username = details.get('sz_username') or name
         try:
@@ -157,6 +179,7 @@ class ScheduleImporter(BaseCommand):
         return user
 
     def create_or_update_group(self, course, data, create_terms=True):
+        """Get a group for the course, and update it according to the data."""
         sync_data_objects = TermSyncData.objects.filter(
             scheduler_id=data.id, term__group__course__semester=self.semester).select_related(
                 'term', 'term__group').prefetch_related('term__classrooms')
@@ -232,7 +255,7 @@ class ScheduleImporter(BaseCommand):
                     self.updated_terms += 1
 
     def prepare_group(self, g, results, terms):
-        """Convert information about group from scheduler format."""
+        """Convert information about group from scheduler format to intermediate format."""
         if g['id'] not in results:
             return None
         group = ImportedGroup(
@@ -265,10 +288,8 @@ class ScheduleImporter(BaseCommand):
         # group.limit = LIMITS[group.group_type]
         return group
 
-    def get_groups(self, task=None):
-        if not task:
-            task = self.get_task()
-
+    def get_groups(self, task):
+        """Get all the groups for a given task."""
         results = task['timetable']['results']
 
         groups = []
@@ -291,6 +312,7 @@ class ScheduleImporter(BaseCommand):
         return groups
 
     def remove_groups(self):
+        """Remove the groups that were not there in the imported data, but were created by import."""
         groups_to_remove = set()
         sync_data_objects = TermSyncData.objects.filter(term__group__course__semester=self.semester)
         for sync_data_object in sync_data_objects:
@@ -312,6 +334,7 @@ class ScheduleImporter(BaseCommand):
 
     @transaction.atomic
     def import_from_api(self, create_courses=False, create_terms=True, task=None):
+        """Perform an import from Scheduler."""
         self.created_terms = 0
         self.updated_terms = 0
         self.created_courses = 0
@@ -344,6 +367,7 @@ class ScheduleImporter(BaseCommand):
                 self.style.SUCCESS(f"These employees were not found: {self.unknown_employees}"))
 
     def prepare_slack_message(self):
+        """After a successful import, prepare a summary of changes to display on Slack."""
         attachments = []
         for term in self.all_creations:
             text = (f"day: {term.dayOfWeek}\nstart_time: {term.start_time}\n"
