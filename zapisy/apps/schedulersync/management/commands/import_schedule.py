@@ -97,8 +97,8 @@ class Command(ScheduleImporter):
         if dry_run:
             if self.verbosity >= 1:
                 self.stdout.write("Dry run is on. Nothing will be saved.")
-            self.import_from_api(False, False, task=task_data)
+            self.import_task(task_data, False, False)
         else:
-            self.import_from_api(create_courses, task=task_data)
+            self.import_task(task_data, create_courses)
         if write_to_slack:
             self.write_to_slack()

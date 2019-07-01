@@ -333,8 +333,8 @@ class ScheduleImporter(BaseCommand):
                     group.delete()
 
     @transaction.atomic
-    def import_from_api(self, create_courses=False, create_terms=True, task=None):
-        """Perform an import from Scheduler."""
+    def import_task(self, task, create_courses=False, create_terms=True):
+        """Perform an import from a Scheduler task."""
         self.created_terms = 0
         self.updated_terms = 0
         self.created_courses = 0
