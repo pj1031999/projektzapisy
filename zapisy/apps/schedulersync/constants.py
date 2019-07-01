@@ -1,7 +1,3 @@
-
-import environ
-import os
-
 SCHEDULER_BASE = 'http://scheduler.gtch.eu'
 
 URL_LOGIN = SCHEDULER_BASE + '/admin/login/'
