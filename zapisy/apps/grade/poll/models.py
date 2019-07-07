@@ -135,7 +135,12 @@ class Poll(models.Model):
         if self.group:
             if not records_models.Record.is_enrolled(student.id, self.group_id):
                 return False
-        # TODO: if self.course (?)
+        if self.course:
+            return records_models.Record.objects.filter(
+                student=student,
+                group__course=self.course,
+                status=records_models.RecordStatus.ENROLLED
+            ).exists()
         return True
 
     @staticmethod

@@ -1,3 +1,13 @@
+"""Signals in the grade/poll module
+
+Historically, all polls for a given semester would be created manually
+by an administrator either by invoking a command or by pressing a button.
+
+This necessity has been eliminated by an introduction of methods that
+automatically create new polls for groups/courses/semesters by listening
+for a `post_save` signal. These methods shall not create any duplicates.
+"""
+
 from django.contrib.auth import user_logged_in
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -34,7 +44,6 @@ def create_poll_for_semester(
 
 @receiver(user_logged_in)
 def clear_saved_submissions(sender, request, **kwargs):
-    """Removes submissions from the active session when user performs
-        a login."""
+    """Removes submissions from the active session when user logs in."""
     if "grade_poll_submissions" in request.session:
         del request.session["grade_poll_submissions"]

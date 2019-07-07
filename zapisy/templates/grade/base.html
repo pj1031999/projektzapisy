@@ -15,7 +15,7 @@
   <a class="nav-link" href="{% url 'grade-ticket-tickets-generate' %}">Pobieranie kluczy</a>
 </li>
 {% endif %}
-{% if is_grade_active and not user.employee and not user.is_superuser %}
+{% if is_grade_active and not user.employee %}
 <li class="{% block nav-grade-tickets-enter %}{% endblock %}">
   <a class="nav-link" href="{% url 'grade-poll-tickets-enter' %}">Wprowadzanie kluczy</a>
 </li>

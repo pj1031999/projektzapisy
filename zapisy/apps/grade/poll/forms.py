@@ -17,8 +17,7 @@ class SubmissionEntryForm(forms.ModelForm):
     The main logic for detecting and parsing the schema for various
     question types is defined in the `__determine_field_by_type()`
     method. Out of the box, this method provides support for textareas
-    (for both short and long answers) as well as various types of
-    radioselects defined in the `apps.grade.poll.enum` classes.
+    (for both short and long answers) as well as radioselects.
 
     The save() method can only process the data when grade is active
     for a semester corresponding to the poll's semester.
