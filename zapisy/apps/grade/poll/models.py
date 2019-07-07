@@ -19,7 +19,7 @@ class PollType(ChoicesEnum):
     EXERCISE = 2, "ankieta dla ćwiczeń"
     LABS = 3, "ankieta dla pracowni"
     EXERCISE_LABS = 5, "ankieta dla ćwiczenio-pracowni"
-    SEMINARY = 6, "ankieta dla seminarium"
+    SEMINAR = 6, "ankieta dla seminarium"
     LECTORATE = 7, "ankieta dla lektoratu"
     PHYSICAL_EDUCATION = 8, "ankieta dla zajęć wf"
     REPETITORY = 9, "ankieta dla repetytorium"
