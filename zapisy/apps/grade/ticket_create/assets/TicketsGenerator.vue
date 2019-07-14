@@ -66,7 +66,7 @@ export default class TicketsGenerator extends Vue {
             style="width:1000px; height:400px"
           ></textarea>
         </div>
-        <div class="ticket-error" v-for="msg in errors" :key="msg.id" >
+        <div class="alert alert-danger" v-for="msg in errors" :key="msg.id" >
           Błąd: {{ msg }}
         </div>
       </div>

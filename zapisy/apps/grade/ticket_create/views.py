@@ -72,11 +72,11 @@ def tickets_generate(request):
             request, "Ocena zajęć jest w tej chwili zamknięta; nie można pobrać biletów"
         )
         return render(
-            request, "ticket_create/tickets_generate.html", {"is_grade_active": grade}
+            request, 'ticket_create/tickets_generate.html', {'is_grade_active': grade}
         )
     polls = get_grouped_polls(request.user.student)
     data = {
-        "polls": polls,
-        "is_grade_active": grade,
+        'polls': polls,
+        'is_grade_active': grade,
     }
-    return render(request, "ticket_create/tickets_generate.html", data)
+    return render(request, 'ticket_create/tickets_generate.html', data)

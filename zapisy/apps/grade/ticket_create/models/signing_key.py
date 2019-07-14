@@ -14,9 +14,9 @@ PollWithTicketId = namedtuple('PollWithTicketId', ['ticket_id', 'poll'])
 
 
 class SigningKey(models.Model):
-    '''RSA private key, encoded in PEM format.
+    """RSA private key, encoded in PEM format.
     Due to nature of RSA, this key also holds its public part.
-    '''
+    """
     poll = models.OneToOneField(Poll, verbose_name='ankieta', on_delete=models.CASCADE)
     private_key = models.TextField(verbose_name='klucz prywatny')
     students = models.ManyToManyField('users.Student', related_name='signingkeys')
@@ -45,7 +45,7 @@ class SigningKey(models.Model):
         return ticket_hash_as_int == signature_pow_e
 
     def serialize_for_signing_protocol(self) -> Dict[str, str]:
-        '''Extracts public parts of the key, needed for ticket signing protocol'''
+        """Extracts public parts of the key, needed for ticket signing protocol"""
         key = RSA.importKey(self.private_key)
         return {
             'n': str(key.n),
@@ -53,7 +53,7 @@ class SigningKey(models.Model):
         }
 
     def student_used_key(self, student: Student) -> bool:
-        '''Checks if student already used this key to sign his ticket'''
+        """Checks if student already used this key to sign his ticket"""
         return self.students.filter(pk=student.pk).exists()
 
     @staticmethod
@@ -71,7 +71,7 @@ class SigningKey(models.Model):
 
     @staticmethod
     def parse_raw_tickets(raw_tickets: str) -> Tuple[List[PollWithTicketId], List[Poll]]:
-        '''Parses raw json containing tickets.
+        """Parses raw json containing tickets.
 
         Raises:
             JSONDecodeError: when provided string is not in json format.
@@ -85,7 +85,7 @@ class SigningKey(models.Model):
             polls, for which signature was incorrect, and valid_polls is list of named tuples,
             containing two fields, ticket_id and poll, where ticket_id can be used to
             track which ticket has already been used to vote.
-        '''
+        """
         tickets = json.loads(raw_tickets)
         valid_ser = TicketsListSerializer(data=tickets)
         if not valid_ser.is_valid():

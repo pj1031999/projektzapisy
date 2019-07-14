@@ -6,7 +6,6 @@ from django.contrib import messages
 from django.shortcuts import redirect, render, reverse
 from django.views.generic import TemplateView, UpdateView, View
 
-from apps.cache_utils import cache_result, cache_result_for
 from apps.enrollment.courses.models.semester import Semester
 from apps.grade.poll.forms import SubmissionEntryForm, TicketsEntryForm
 from apps.grade.poll.models import Poll, Submission
@@ -24,7 +23,7 @@ from apps.users.models import BaseUser
 
 
 class TicketsEntry(TemplateView):
-    template_name = "grade/poll/tickets_enter.html"
+    template_name = 'grade/poll/tickets_enter.html'
 
     def get(self, request):
         """Displays a basic but sufficient form for entering tickets."""
@@ -34,7 +33,10 @@ class TicketsEntry(TemplateView):
         return render(
             request,
             self.template_name,
-            {"form": form, "is_grade_active": is_grade_active},
+            {
+                'form': form,
+                'is_grade_active': is_grade_active,
+            },
         )
 
     def post(self, request):
@@ -46,14 +48,14 @@ class TicketsEntry(TemplateView):
         form = TicketsEntryForm(request.POST)
 
         if form.is_valid():
-            tickets = form.cleaned_data["tickets"]
+            tickets = form.cleaned_data['tickets']
             try:
                 correct_polls, failed_polls = SigningKey.parse_raw_tickets(tickets)
             except json.JSONDecodeError:
                 messages.error(
                     request, "Wprowadzone klucze nie są w poprawnym formacie."
                 )
-                return redirect("grade-poll-tickets-enter")
+                return redirect('grade-poll-tickets-enter')
 
             entries = []
             for poll_with_ticket_id in correct_polls:
@@ -63,35 +65,35 @@ class TicketsEntry(TemplateView):
                 )
                 entries.append(entry)
 
-            self.request.session["grade_poll_submissions"] = entries
+            self.request.session['grade_poll_submissions'] = entries
 
-        return redirect("grade-poll-submissions")
+        return redirect('grade-poll-submissions')
 
 
 class SubmissionEntry(UpdateView):
     """Allows the user to update and view his submission(s)."""
 
-    template_name = "grade/poll/submission.html"
+    template_name = 'grade/poll/submission.html'
     model = Submission
-    slug_field = "submissions"
+    slug_field = 'submissions'
     form_class = SubmissionEntryForm
 
     def get(self, *args, **kwargs):
         """Checks whether any submissions are present in the session."""
-        if "grade_poll_submissions" in self.request.session:
+        if 'grade_poll_submissions' in self.request.session:
             return super(SubmissionEntry, self).get(*args, **kwargs)
-        return redirect("grade-poll-tickets-enter")
+        return redirect('grade-poll-tickets-enter')
 
     def get_context_data(self, **kwargs):
         """Sets the variables used for templating."""
         context = super().get_context_data(**kwargs)
-        context["is_grade_active"] = check_grade_status()
-        context["active_submission"] = self.active_submission
-        context["current_index"] = self.current_index
-        context["grouped_submissions"] = group_submissions_with_statuses(
+        context['is_grade_active'] = check_grade_status()
+        context['active_submission'] = self.active_submission
+        context['current_index'] = self.current_index
+        context['grouped_submissions'] = group_submissions_with_statuses(
             self.submissions
         )
-        context["iterator"] = itertools.count()
+        context['iterator'] = itertools.count()
 
         return context
 
@@ -101,7 +103,7 @@ class SubmissionEntry(UpdateView):
         kw = super().get_form_kwargs()
         submission = self.active_submission
         if submission:
-            kw["jsonfields"] = submission.answers["schema"]
+            kw['jsonfields'] = submission.answers['schema']
 
         return kw
 
@@ -111,9 +113,9 @@ class SubmissionEntry(UpdateView):
         initial = super().get_initial()
         submission = self.active_submission
 
-        for index, field in enumerate(submission.answers["schema"]):
-            field_name = f"field_{index}"
-            initial[field_name] = submission.answers["schema"][index]["answer"]
+        for index, field in enumerate(submission.answers['schema']):
+            field_name = f'field_{index}'
+            initial[field_name] = submission.answers['schema'][index]['answer']
 
         return initial
 
@@ -130,11 +132,11 @@ class SubmissionEntry(UpdateView):
 
     @property
     def submissions(self):
-        return self.request.session["grade_poll_submissions"]
+        return self.request.session['grade_poll_submissions']
 
     @property
     def current_index(self):
-        return int(self.kwargs["submission_index"])
+        return int(self.kwargs['submission_index'])
 
     def get_object(self):
         return self.active_submission
@@ -150,7 +152,7 @@ class SubmissionEntry(UpdateView):
         submissions[self.current_index] = SubmissionWithStatus(
             submission=self.active_submission, submitted=True
         )
-        self.request.session["grade_poll_submissions"] = submissions
+        self.request.session['grade_poll_submissions'] = submissions
         next_index = 0
 
         for index in range(
@@ -162,17 +164,16 @@ class SubmissionEntry(UpdateView):
                 break
 
         return reverse(
-            "grade-poll-submissions", kwargs={"submission_index": next_index}
+            'grade-poll-submissions', kwargs={'submission_index': next_index}
         )
 
 
 class PollResults(TemplateView):
     """Displays results for all archived and submitted submissions."""
 
-    template_name = "grade/poll/results.html"
+    template_name = 'grade/poll/results.html'
 
     @staticmethod
-    @cache_result
     def __get_counter_for_categories(polls):
         number_of_submissions_for_category = defaultdict(int)
 
@@ -185,22 +186,21 @@ class PollResults(TemplateView):
         return number_of_submissions_for_category
 
     @staticmethod
-    @cache_result
     def __get_processed_results(submissions):
         poll_results = PollSummarizedResults(
             display_answers_count=True, display_plots=True
         )
 
         for submission in submissions:
-            if "schema" in submission.answers:
-                for entry in submission.answers["schema"]:
+            if 'schema' in submission.answers:
+                for entry in submission.answers['schema']:
                     choices = None
-                    if "choices" in entry:
-                        choices = entry["choices"]
+                    if 'choices' in entry:
+                        choices = entry['choices']
                     poll_results.add_entry(
-                        question=entry["question"],
-                        field_type=entry["type"],
-                        answer=entry["answer"],
+                        question=entry['question'],
+                        field_type=entry['type'],
+                        answer=entry['answer'],
                         choices=choices,
                     )
 
@@ -232,7 +232,7 @@ class PollResults(TemplateView):
                 messages.error(
                     request, "Nie masz uprawnień do wyświetlenia tej ankiety."
                 )
-                return redirect("grade-poll-results", semester_id=semester_id)
+                return redirect('grade-poll-results', semester_id=semester_id)
         else:
             submissions = []
 
@@ -243,45 +243,45 @@ class PollResults(TemplateView):
                 request,
                 self.template_name,
                 {
-                    "is_grade_active": is_grade_active,
-                    "polls": group(entries=available_polls, sort=True),
-                    "results": self.__get_processed_results(submissions),
-                    "results_iterator": itertools.count(),
-                    "semesters": semesters,
-                    "current_semester": current_semester,
-                    "current_poll_id": poll_id,
-                    "current_poll": current_poll,
-                    "selected_semester": selected_semester,
-                    "submissions_count": self.__get_counter_for_categories(
+                    'is_grade_active': is_grade_active,
+                    'polls': group(entries=available_polls, sort=True),
+                    'results': self.__get_processed_results(submissions),
+                    'results_iterator': itertools.count(),
+                    'semesters': semesters,
+                    'current_semester': current_semester,
+                    'current_poll_id': poll_id,
+                    'current_poll': current_poll,
+                    'selected_semester': selected_semester,
+                    'submissions_count': self.__get_counter_for_categories(
                         available_polls
                     ),
-                    "iterator": itertools.count(),
+                    'iterator': itertools.count(),
                 },
             )
 
         messages.error(request, "Nie masz uprawnień do wyświetlania wyników oceny.")
-        return redirect("grade-main")
+        return redirect('grade-main')
 
 
 class GradeDetails(TemplateView):
     """Displays details and rules about how the grade is set up."""
 
-    template_name = "grade/main.html"
+    template_name = 'grade/main.html'
 
     def get(self, request):
         is_grade_active = check_grade_status()
 
-        return render(request, self.template_name, {"is_grade_active": is_grade_active})
+        return render(request, self.template_name, {'is_grade_active': is_grade_active})
 
 
 class ClearSession(View):
     """Removes submissions from the active session."""
 
     def get(self, request):
-        del self.request.session["grade_poll_submissions"]
+        del self.request.session['grade_poll_submissions']
         messages.success(
             request,
             "Dziękujemy za wzięcie udziału w ocenie zajęć! "
             "Sesja została wyczyszczona.",
         )
-        return redirect("grade-poll-tickets-enter")
+        return redirect('grade-poll-tickets-enter')

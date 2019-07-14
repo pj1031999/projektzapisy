@@ -9,17 +9,17 @@ from apps.enrollment.courses.models.semester import Semester
 from apps.grade.poll.models import Poll, Submission
 from apps.users.models import Student
 
-SubmissionWithStatus = namedtuple("SubmissionWithStatus", ["submission", "submitted"])
+SubmissionWithStatus = namedtuple('SubmissionWithStatus', ['submission', 'submitted'])
 
 GroupedSubmissions = namedtuple(
-    "GroupedSubmissions",
+    'GroupedSubmissions',
     [
-        "with_categories",
-        "statuses",
-        "submitted",
-        "total",
-        "progress",
-        "progress_numerical",
+        'with_categories',
+        'statuses',
+        'submitted',
+        'total',
+        'progress',
+        'progress_numerical',
     ],
 )
 
@@ -136,7 +136,7 @@ class PollSummarizedResultsEntry:
     def field_choices(self):
         """Lists all possible answers that could be selected for
         radio fields."""
-        if self.field_type == "radio":
+        if self.field_type == 'radio':
             return self._choices
         return []
 
@@ -147,7 +147,7 @@ class PollSummarizedResultsEntry:
         will be counted if and only if it is present in the set of
         predefined choices.
         """
-        if self.field_type == "radio" and answer in self._choices:
+        if self.field_type == 'radio' and answer in self._choices:
             choice_index = self._choices.index(answer)
             self._choices_occurences[choice_index] += 1
         self._answers.append(answer)
@@ -168,17 +168,17 @@ class PollSummarizedResultsEntry:
         if not self._components:
             plot = bokeh.plotting.figure(
                 y_range=self._choices,
-                sizing_mode="scale_width",
+                sizing_mode='scale_width',
                 plot_height=250,
                 toolbar_location=None,
-                tools="",
+                tools='',
             )
 
             source = bokeh.models.sources.ColumnDataSource(
                 data=dict(choices=self._choices, values=self._choices_occurences)
             )
 
-            plot.hbar(y="choices", right="values", source=source, height=0.8)
+            plot.hbar(y='choices', right='values', source=source, height=0.8)
             plot.x_range.start = 0
             plot.axis.minor_tick_line_color = None
             plot.xaxis.ticker = list(range(max(self._choices_occurences) + 1))
