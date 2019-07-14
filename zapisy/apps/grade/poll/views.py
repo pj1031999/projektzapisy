@@ -65,6 +65,14 @@ class TicketsEntry(TemplateView):
                 )
                 entries.append(entry)
 
+            if failed_polls:
+                failed_polls = map(lambda x: f"- {x}", failed_polls)
+                messages.error(
+                    request, 
+                    "Poniższe ankiety nie mogły zostać załadowane:<br>" 
+                    + "<br>".join(failed_polls)
+                )
+
             self.request.session['grade_poll_submissions'] = entries
 
         return redirect('grade-poll-submissions')

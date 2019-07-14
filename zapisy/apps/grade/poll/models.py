@@ -173,11 +173,11 @@ class Poll(models.Model):
 
             if semester == current_semester:
                 if course.exam:
-                    poll_for_course = Poll.objects.filter(course=course).get()
+                    poll_for_course = Poll.objects.get(course=course)
                     if poll_for_course and poll_for_course not in polls:
                         polls.append(poll_for_course)
 
-                poll_for_group = Poll.objects.filter(group=group).get()
+                poll_for_group = Poll.objects.get(group=group)
                 if poll_for_group:
                     polls.append(poll_for_group)
 
