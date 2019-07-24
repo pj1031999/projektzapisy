@@ -246,7 +246,7 @@ class ScheduleImporter(BaseCommand):
         else:
             for sync_data_object in sync_data_objects:
                 term = sync_data_object.term
-                diffs = UpdateDiff(term)
+                diffs = UpdateDiff(term, data)
 
                 diffs.field('dayOfWeek')
                 diffs.field('start_time')
