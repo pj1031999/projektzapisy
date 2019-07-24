@@ -24,7 +24,7 @@ class Command(ScheduleImporter):
         parser.add_argument('--interactive', action='store_true')
 
     def get_task(self):
-        """Fetch a task from Scheduler and return it, setting up a session."""
+        """Fetch a task from Scheduler, setting up a session."""
         self.client = requests.session()
         self.client.get(URL_LOGIN)
         csrftoken = self.client.cookies['csrftoken']
@@ -36,16 +36,14 @@ class Command(ScheduleImporter):
 
         # the first request is redirected through the login page
         req1 = self.client.post(URL_LOGIN, data=login_data)
-        task = req1.json()
+        self.task = req1.json()
 
         # and the second one goes directly
-        self.url_assignments = URL_CONFIG.format(id=task['config_id'])
+        self.url_assignments = URL_CONFIG.format(id=self.task['config_id'])
         req2 = self.client.get(self.url_assignments)
         self.assignments = req2.json()
 
-        return task
-
-    def save_back(self, details):
+    def save_employee_to_scheduler(self, details):
         """Save employee details back to Scheduler (used in interactive mode)."""
         response = self.client.post(self.url_assignments + 'add/', json={
             'config_id': self.assignments['id'],
@@ -81,7 +79,6 @@ class Command(ScheduleImporter):
                dry_run=False, write_to_slack=False, delete_groups=False,
                verbosity=0, url_schedule=None,
                semester=0, create_courses=False, interactive=False,
-               task_data=None,
                **options):
         self.semester = (Semester.objects.get_next() if semester == 0
                          else Semester.objects.get(pk=semester))
@@ -91,14 +88,14 @@ class Command(ScheduleImporter):
         self.delete_groups = delete_groups
         if self.verbosity >= 1:
             self.stdout.write(f"Adding to semester: {self.semester}\n")
-        if not task_data:
-            task_data = self.get_task()
+        if not self.task:
+            self.get_task()
 
         if dry_run:
             if self.verbosity >= 1:
                 self.stdout.write("Dry run is on. Nothing will be saved.")
-            self.import_task(task_data, False, False)
+            self.import_task(False, False)
         else:
-            self.import_task(task_data, create_courses)
+            self.import_task(create_courses)
         if write_to_slack:
             self.write_to_slack()

@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 from datetime import time
 
 from django.core.management.base import BaseCommand
@@ -19,6 +20,27 @@ from .constants import (
 )
 
 
+Deletion = namedtuple("Deletion", ["term", "group"])
+DiffItem = namedtuple("DiffItem", ["field", "val1", "val2"])
+
+
+class UpdateDiff(list):
+    """An intermediate format for storing a difference between updated courses."""
+    def __init__(self, term, data):
+        super().__init__()
+        self.term = term
+        self.data = data
+
+    def field(self, field):
+        diff = (getattr(self.term, field),
+                getattr(self.data, field))
+        self.simple(field, *diff)
+
+    def simple(self, field, val1, val2):
+        if val1 != val2:
+            self.append(DiffItem(field=field, val1=val1, val2=val2))
+
+
 class ImportedGroup:
     """An intermediate format for storing imported group details"""
     __slots__ = [
@@ -37,6 +59,12 @@ class ScheduleImporter(BaseCommand):
     It is not a fully-functional class, just all the conversion logic.
     For the command interface, and Scheduler interface, see .management.commands.import_schedule.
     """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # This is only for the tests. Note that all the initialization should get into import_task.
+        self.task = None
+
     def get_entity(self, name):
         """Get a course entity from database by Scheduler-provided course name"""
         name_u = name.upper()
@@ -174,9 +202,12 @@ class ScheduleImporter(BaseCommand):
         user = choices[user]
         details['sz_username'] = user.user.username
         if save_back:
-            self.save_back(details)
+            self.save_employee_to_scheduler(details)
 
         return user
+
+    def save_employee_to_scheduler(self, details):
+        pass  # implemented in .management.commands.import_schedule
 
     def create_or_update_group(self, course, data, create_terms=True):
         """Get a group for the course, and update it according to the data."""
@@ -215,27 +246,24 @@ class ScheduleImporter(BaseCommand):
         else:
             for sync_data_object in sync_data_objects:
                 term = sync_data_object.term
-                diff_track_fields = ['dayOfWeek', 'start_time', 'end_time']
-                diffs = []
-                for field in diff_track_fields:
-                    diff = tuple(getattr(obj, field) for obj in (term, data))
-                    if diff[0] != diff[1]:
-                        diffs.append((field, diff))
-                if term.group.type != data.group_type:
-                    diffs.append(('type', (term.group.type, data.group_type)))
-                if term.group.teacher != data.teacher:
-                    diffs.append(('teacher', (term.group.teacher, data.teacher)))
+                diffs = UpdateDiff(term)
+
+                diffs.field('dayOfWeek')
+                diffs.field('start_time')
+                diffs.field('end_time')
+                diffs.simple('type', term.group.type, data.group_type)
+                diffs.simple('teacher', term.group.teacher, data.teacher)
                 term.dayOfWeek = data.dayOfWeek
                 term.start_time = data.start_time
                 term.end_time = data.end_time
                 term.group.type = data.group_type
                 term.group.teacher = data.teacher
-                old_classrooms = set(term.classrooms.all())
-                if old_classrooms != set(data.classrooms):
-                    diffs.append(('classroom', (list(old_classrooms),
-                                                data.classrooms)))
+                old_classrooms = sorted(term.classrooms.all())
+                new_classrooms = sorted(data.classrooms)
+                if old_classrooms != new_classrooms:
+                    diffs.simple('classroom', old_classrooms, new_classrooms)
                     if create_terms:
-                        term.classrooms.set(data.classrooms)  # this already saves the relation!
+                        term.classrooms.set(new_classrooms)  # this already saves the relation!
                 if diffs:
                     if create_terms:
                         term.save()
@@ -246,12 +274,12 @@ class ScheduleImporter(BaseCommand):
                         )
                     )
                     for diff in diffs:
-                        self.stdout.write(self.style.WARNING(f"  {diff[0]}: "), ending="")
-                        self.stdout.write(self.style.NOTICE(str(diff[1][0])), ending="")
+                        self.stdout.write(self.style.WARNING(f"  {diff.field}: "), ending="")
+                        self.stdout.write(self.style.NOTICE(str(diff.val1)), ending="")
                         self.stdout.write(self.style.WARNING(" -> "), ending="")
-                        self.stdout.write(self.style.SUCCESS(str(diff[1][1])))
+                        self.stdout.write(self.style.SUCCESS(str(diff.val2)))
                     self.stdout.write("\n")
-                    self.all_updates.append((term, diffs))
+                    self.all_updates.append(diffs)
                     self.updated_terms += 1
 
     def prepare_group(self, g, results, terms):
@@ -285,12 +313,11 @@ class ScheduleImporter(BaseCommand):
         group.start_time = time(hour=start_time)
         group.end_time = time(hour=end_time)
         group.classrooms = self.get_classrooms(classrooms)
-        # group.limit = LIMITS[group.group_type]
         return group
 
-    def get_groups(self, task):
-        """Get all the groups for a given task."""
-        results = task['timetable']['results']
+    def get_groups(self):
+        """Get all the groups for the fetched task."""
+        results = self.task['timetable']['results']
 
         groups = []
         terms = {t['id']: t for t in self.assignments['terms']}
@@ -312,17 +339,17 @@ class ScheduleImporter(BaseCommand):
         return groups
 
     def remove_groups(self):
-        """Remove the groups that were not there in the imported data, but were created by import."""
+        """Remove the previously imported groups that were not there in the imported data."""
         groups_to_remove = set()
         sync_data_objects = TermSyncData.objects.filter(term__group__course__semester=self.semester)
         for sync_data_object in sync_data_objects:
             if sync_data_object.scheduler_id not in self.scheduler_ids:
                 groups_to_remove.add(sync_data_object.term.group)
-                deletion = (str(sync_data_object.term),
-                            str(sync_data_object.term.group))
+                deletion = Deletion(term=str(sync_data_object.term),
+                                    group=str(sync_data_object.term.group))
                 self.stdout.write(
                     self.style.NOTICE(
-                        f"Term {deletion[0]} for group {deletion[1]} removed\n"))
+                        f"Term {deletion.term} for group {deletion.group} removed\n"))
                 self.all_deletions.append(deletion)
                 if self.delete_groups:
                     sync_data_object.term.delete()
@@ -333,8 +360,12 @@ class ScheduleImporter(BaseCommand):
                     group.delete()
 
     @transaction.atomic
-    def import_task(self, task, create_courses=False, create_terms=True):
-        """Perform an import from a Scheduler task."""
+    def import_task(self, create_courses=False, create_terms=True):
+        """Perform an import from Scheduler.
+
+        This is where all the per-import initialization takes place.
+        It imports a task that was previously fetched using
+        class fields `task` and `assignments`."""
         self.created_terms = 0
         self.updated_terms = 0
         self.created_courses = 0
@@ -345,8 +376,7 @@ class ScheduleImporter(BaseCommand):
         self.scheduler_ids = set()
         self.unknown_employees = {}
         self.unknown_employee = Employee.objects.get(user__username='nieznany')
-        groups = self.get_groups(task)
-        for g in groups:
+        for g in self.get_groups():
             self.scheduler_ids.add(int(g.id))
             entity = self.get_entity(g.entity_name)
             if entity is not None:
@@ -378,21 +408,21 @@ class ScheduleImporter(BaseCommand):
                 'text': text
             }
             attachments.append(attachment)
-        for term, diffs in self.all_updates:
+        for diffs in self.all_updates:
             text = ""
             for diff in diffs:
-                text += f"{diff[0]}: {diff[1][0]}->{diff[1][1]}\n"
+                text += f"{diff.field}: {diff.val1}->{diff.val2}\n"
             attachment = {
                 'color': 'warning',
-                'title': f"Updated: {term.group}",
+                'title': f"Updated: {diffs.term.group}",
                 'text': text
             }
             attachments.append(attachment)
-        for term_str, group_str in self.all_deletions:
+        for deletion in self.all_deletions:
             attachment = {
                 'color': 'danger',
                 'title': "Deleted a term:",
-                'text': f"group: {group_str}\nterm: {term_str}"
+                'text': f"group: {deletion.group}\nterm: {deletion.term}"
             }
             attachments.append(attachment)
         return attachments
