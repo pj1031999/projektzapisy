@@ -67,7 +67,8 @@ class Test(TestCase):
         self.cmd.assignments = copy.deepcopy(self.assignments)
         with StdoutSuppressor(self):
             # interactive=True, but cmd.prompt == fake_prompt
-            self.cmd.handle(task_data=self.task1, create_courses=True, interactive=True)
+            self.cmd.task = self.task1
+            self.cmd.handle(create_courses=True, interactive=True)
 
         self.assertEqual(Employee.objects.get(user__username='teach1').user.last_name, 'Pierwszy')
         self.assertEqual(Employee.objects.get(user__username='teach2').user.last_name, 'Drugi')
@@ -79,7 +80,8 @@ class Test(TestCase):
         try:
             self.cmd.assignments = copy.deepcopy(self.assignments2)
             with StdoutSuppressor(self):
-                self.cmd.handle(task_data=self.task2, delete_groups=True)
+                self.cmd.task = self.task2
+                self.cmd.handle(delete_groups=True)
             self.assertRaises(Group.DoesNotExist, Group.objects.get, course__entity__name_pl='Myślenie')
         finally:
             Course.objects.get(entity__name_pl='Myślenie').delete()
