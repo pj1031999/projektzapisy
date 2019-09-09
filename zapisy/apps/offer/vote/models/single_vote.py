@@ -11,13 +11,9 @@ class SingleVoteQuerySet(models.QuerySet):
     """Defines chainable filters on SingleVote querysets."""
 
     def in_semester(self, semester: Semester):
-        """Filters only votes for courses taught in a given semester.
-
-        NOTE: This function will need to be modified when CourseEntity is
-        fully replaced with proposal model.
-        """
+        """Filters only votes for courses taught in a given semester."""
         system_state = SystemState.get_state_for_semester(semester)
-        return self.filter(state=system_state, proposal__entity__course__semester=semester)
+        return self.filter(state=system_state, proposal__courseinstance__semester=semester)
 
     def in_vote(self):
         """Filters only votes for courses in vote."""
@@ -46,8 +42,7 @@ class SingleVote(models.Model):
     VALUE_CHOICES = [(0, '0'), (1, '1'), (2, '2'), (3, '3')]
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="głosujący")
-    proposal = models.ForeignKey(
-        Proposal, verbose_name="propozycja", on_delete=models.CASCADE, null=True)
+    proposal = models.ForeignKey(Proposal, verbose_name="propozycja", on_delete=models.CASCADE)
 
     state = models.ForeignKey(SystemState, on_delete=models.CASCADE, verbose_name="Rok akademicki")
 

@@ -1,12 +1,10 @@
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.generic import TemplateView
 from django.urls import path
 from django_cas_ng import views as cas_views
 
 import apps.news.views
 from apps.api.rest.v1.urls import router as api_router_v1
-from apps.enrollment.courses import admin_views as courses_admin_views
 from apps.feeds import LatestNews
 from apps.users import views as users_views
 
@@ -30,14 +28,10 @@ urlpatterns = [
     url(r'^s/(?P<query>.*)/$', users_views.students_list, name='users-list-search'),
     url(r'^e/(?P<query>.*)/$', users_views.employees_list, name='users-list-search'),
 
-    url(r'^fereol_admin/courses/import_semester', courses_admin_views.import_semester),
-    url(r'^fereol_admin/courses/import_schedule', courses_admin_views.import_schedule),
-    url(r'^fereol_admin/courses/refresh_semester', courses_admin_views.refresh_semester),
     url(r'^offer/', include('apps.offer.proposal.urls')),
     url(r'^prefs/', include('apps.offer.preferences.urls')),
     url(r'^desiderata/', include('apps.offer.desiderata.urls')),
     url(r'^', include(('apps.schedule.urls', 'events'), namespace='events')),
-    url(r'^', include(('apps.notifications.urls', 'notifications'), namespace='notifications')),
     url(r'^vote/', include('apps.offer.vote.urls')),
     url(r'^admin/doc/', include('django.contrib.admindocs.urls')),
     url(r'^fereol_admin/', admin.site.urls),
@@ -52,4 +46,5 @@ urlpatterns = [
 
 urlpatterns += [
     path('django-rq/', include('django_rq.urls')),
+    path('notifications/', include('apps.notifications.urls')),
 ]

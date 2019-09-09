@@ -1,7 +1,6 @@
 import os
 import logging
 import environ
-
 from django.contrib.messages import constants as messages
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -56,6 +55,13 @@ RQ_QUEUES = {
         'DB': 0,
         'PASSWORD': '',
         'DEFAULT_TIMEOUT': 360,
+        'ASYNC': RUN_ASYNC,
+    },
+    'dispatch-notifications': {
+        'HOST': 'localhost',
+        'PORT': 6379,
+        'DB': 0,
+        'ASYNC': RUN_ASYNC,
     },
 }
 
@@ -191,8 +197,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'zapisy.urls'
 
 INSTALLED_APPS = (
-    'modeltranslation',  # needs to be before django.contrib.admin
-
     'rest_framework',
     'rest_framework.authtoken',
 
@@ -240,8 +244,6 @@ INSTALLED_APPS = (
     'webpack_loader',
 )
 
-MODELTRANSLATION_FALLBACK_LANGUAGES = ('pl',)
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'django_cas_ng.backends.CASBackend',
@@ -281,8 +283,6 @@ ECTS_FINAL_LIMIT = 45
 
 VOTE_LIMIT = 60
 
-# MSc Computer Science Program will have id=1 in database table users_program.
-M_PROGRAM = 1
 LETURE_TYPE = '1'
 QUEUE_PRIORITY_LIMIT = 5
 
