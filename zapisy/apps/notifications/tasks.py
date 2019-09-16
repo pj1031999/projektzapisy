@@ -3,14 +3,13 @@ import time
 from django.conf import settings
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django_rq import job
 
 from apps.notifications.repositories import get_notifications_repository
 from apps.notifications.utils import render_description
 from apps.notifications.models import NotificationPreferencesStudent, NotificationPreferencesTeacher
 from apps.users.models import BaseUser
-
-THROTTLE_SECONDS = 30
 
 
 @job('dispatch-notifications')
@@ -24,8 +23,10 @@ def dispatch_notifications_task(user):
     """
     if BaseUser.is_employee(user):
         model, created = NotificationPreferencesTeacher.objects.get_or_create(user=user)
-    else:
+    elif BaseUser.is_student(user):
         model, created = NotificationPreferencesStudent.objects.get_or_create(user=user)
+    else:
+        return
 
     repo = get_notifications_repository()
     pending_notifications = repo.get_unsent_for_user(user)
@@ -36,7 +37,7 @@ def dispatch_notifications_task(user):
     for pn in pending_notifications:
         # User controls in account settings
         # what notifications will be send
-        if not getattr(model, pn.description_id):
+        if not getattr(model, pn.description_id, None):
             continue
 
         ctx = {
@@ -45,9 +46,10 @@ def dispatch_notifications_task(user):
             'greeting': f'Dzień dobry, {user.first_name}',
         }
 
+        message_contents = render_to_string('notifications/email_base.html', ctx)
         messages.append((
-            'Wiadomość od Systemu Zapisów IIUWr',  # FIXME (?)
-            render_to_string('notifications/email_base.html', ctx),
+            'Wiadomość od Systemu Zapisów IIUWr',
+            strip_tags(message_contents),
             settings.MASS_MAIL_FROM,
             [user.email],
         ))
@@ -57,4 +59,4 @@ def dispatch_notifications_task(user):
     for pn in pending_notifications:
         repo.mark_as_sent(user, pn)
 
-    time.sleep(THROTTLE_SECONDS)
+    time.sleep(settings.EMAIL_THROTTLE_SECONDS)
