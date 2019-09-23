@@ -4,7 +4,6 @@ from django.conf import settings
 from apps.enrollment.courses.models.semester import Semester
 from ...importer import ScheduleImporter
 from ...constants import (
-    SLACK_WEBHOOK_URL,
     URL_CONFIG,
     URL_LOGIN,
 )
@@ -69,7 +68,7 @@ class Command(ScheduleImporter):
             'text': text,
             'attachments': attachments
         }
-        response = requests.post(SLACK_WEBHOOK_URL, json=slack_data)
+        response = requests.post(settings.env.str('SLACK_WEBHOOK_URL'), json=slack_data)
         if response.status_code != 200:
             raise ValueError(
                 f"Request to slack returned an error {response.status_code}, the response is:\n{response.text}"

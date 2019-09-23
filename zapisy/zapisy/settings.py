@@ -24,6 +24,7 @@ EMAIL_HOST_USER = env.str('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = env.str('EMAIL_HOST_PASSWORD', default='')
 EMAIL_PORT = env.int('EMAIL_PORT', default=25)
 SERVER_EMAIL = env.str('SERVER_EMAIL', default='root@localhost')
+EMAIL_THROTTLE_SECONDS = env.int('EMAIL_THROTTLE_SECONDS', default=0)
 
 # django-environ doesn't support nested arrays, but decoding json objects works fine
 ARRAY_VALS = env.json('ARRAY_VALS', {})
@@ -197,8 +198,6 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'zapisy.urls'
 
 INSTALLED_APPS = (
-    'modeltranslation',  # needs to be before django.contrib.admin
-
     'rest_framework',
     'rest_framework.authtoken',
 
@@ -246,8 +245,6 @@ INSTALLED_APPS = (
     'webpack_loader',
 )
 
-MODELTRANSLATION_FALLBACK_LANGUAGES = ('pl',)
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'django_cas_ng.backends.CASBackend',
@@ -287,8 +284,6 @@ ECTS_FINAL_LIMIT = 45
 
 VOTE_LIMIT = 60
 
-# MSc Computer Science Program will have id=1 in database table users_program.
-M_PROGRAM = 1
 LETURE_TYPE = '1'
 QUEUE_PRIORITY_LIMIT = 5
 

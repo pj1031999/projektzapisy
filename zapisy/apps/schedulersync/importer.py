@@ -8,9 +8,10 @@ from django.db import transaction
 from apps.users.models import Employee
 from django.contrib.auth.models import User, Group as AuthGroup
 from apps.enrollment.courses.models.classroom import Classroom
-from apps.enrollment.courses.models.course import Course, CourseEntity
+from apps.enrollment.courses.models import CourseInstance
 from apps.enrollment.courses.models.term import Term
 from apps.enrollment.courses.models.group import Group
+from apps.offer.proposal.models import Proposal, ProposalStatus
 from .models import TermSyncData
 from .constants import (
     COURSES_DONT_IMPORT,
@@ -44,7 +45,7 @@ class UpdateDiff(list):
 class ImportedGroup:
     """An intermediate format for storing imported group details"""
     __slots__ = [
-        'id', 'entity_name', 'group_type', 'teacher', 'dayOfWeek',
+        'id', 'course_name', 'group_type', 'teacher', 'dayOfWeek',
         'start_time', 'end_time', 'classrooms', 'limit'
     ]
 
@@ -65,50 +66,48 @@ class ScheduleImporter(BaseCommand):
         # This is only for the tests. Note that all the initialization should get into import_task.
         self.task = None
 
-    def get_entity(self, name):
-        """Get a course entity from database by Scheduler-provided course name"""
+    def get_proposal(self, name):
+        """Get a course proposal from database by Scheduler-provided course name"""
         name_u = name.upper()
         if name_u in COURSES_DONT_IMPORT:
             return None
         name = COURSES_MAP.get(name_u, name)
         ce = None
         try:
-            ce = CourseEntity.objects.get(name_pl__iexact=name)
-        except CourseEntity.DoesNotExist:
+            ce = Proposal.objects.get(
+                name_pl__iexact=name,
+                status__in=[ProposalStatus.IN_OFFER,
+                            ProposalStatus.IN_VOTE])
+        except Proposal.DoesNotExist:
             self.stdout.write(
-                self.style.ERROR(f">Couldn't find course entity for {name}")
+                self.style.ERROR(f">Couldn't find course proposal for {name}")
             )
             if self.prompt("Do you want to create it?"):
-                ce = CourseEntity.objects.create(name_pl=name)
-        except CourseEntity.MultipleObjectsReturned:
-            ces = CourseEntity.objects.filter(name_pl__iexact=name, status=2).order_by('-id')
+                ce = Proposal.objects.create(name_pl=name)
+        except Proposal.MultipleObjectsReturned:
+            ces = Proposal.objects.filter(
+                 name_pl__iexact=name,
+                 status__in=[ProposalStatus.IN_OFFER,
+                             ProposalStatus.IN_VOTE]).order_by('-id')
             if self.verbosity >= 1:
-                self.stdout.write(self.style.WARNING("Multiple course entity. Took first among:"))
+                self.stdout.write(self.style.WARNING("Multiple course proposals. Took first among:"))
                 for ce in ces:
                     self.stdout.write(self.style.WARNING(f"  {ce!s}"))
                 self.stdout.write("")
             ce = ces[0]
         return ce
 
-    def get_course(self, entity, create_courses=False):
-        """Get a course from database by its course entity and current semester number
+    def get_course(self, proposal, create_courses=False):
+        """Get a course from database by its course proposal and current semester number
         (possibly creating a new one)."""
         course = None
         try:
-            course = Course.objects.get(semester=self.semester, entity=entity)
+            course = CourseInstance.objects.get(semester=self.semester, offer=proposal)
             self.used_courses.add(course)
-        except Course.DoesNotExist:
-            if entity.slug is None:
-                self.stdout.write(
-                    self.style.ERROR(f"Couldn't find slug for {entity}")
-                )
-            else:
-                newslug = f'{entity.slug}_' + re.sub(r'[^\w]', '_', self.semester.get_short_name())
-                if create_courses:
-                    course = Course(entity=entity, information=entity.information,
-                                    semester=self.semester, slug=newslug)
-                    course.save()
-                    self.created_courses += 1
+        except CourseInstance.DoesNotExist:
+            if create_courses:
+                course = CourseInstance.create_proposal_instance(proposal, self.semester)
+                self.created_courses += 1
         return course
 
     def get_classrooms(self, rooms):
@@ -288,7 +287,7 @@ class ScheduleImporter(BaseCommand):
             return None
         group = ImportedGroup(
             id=g['id'],
-            entity_name=g['extra']['course'],
+            course_name=g['extra']['course'],
             group_type=GROUP_TYPES[g['extra']['group_type']],
             teacher=self.get_employee(g['teachers'][0]),
             limit=g['students_num'],
@@ -378,11 +377,11 @@ class ScheduleImporter(BaseCommand):
         self.unknown_employee = Employee.objects.get(user__username='nieznany')
         for g in self.get_groups():
             self.scheduler_ids.add(int(g.id))
-            entity = self.get_entity(g.entity_name)
-            if entity is not None:
-                course = self.get_course(entity, create_courses)
+            proposal = self.get_proposal(g.course_name)
+            if proposal is not None:
+                course = self.get_course(proposal, create_courses)
                 if course is None:
-                    self.stdout.write(self.style.WARNING(f"Course {entity} does not exist!"))
+                    self.stdout.write(self.style.WARNING(f"Course {proposal.name} does not exist!"))
                 else:
                     self.create_or_update_group(course, g, create_terms)
         self.remove_groups()
