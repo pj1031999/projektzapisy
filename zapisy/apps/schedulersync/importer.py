@@ -86,9 +86,9 @@ class ScheduleImporter(BaseCommand):
                 ce = Proposal.objects.create(name_pl=name)
         except Proposal.MultipleObjectsReturned:
             ces = Proposal.objects.filter(
-                 name_pl__iexact=name,
-                 status__in=[ProposalStatus.IN_OFFER,
-                             ProposalStatus.IN_VOTE]).order_by('-id')
+                name_pl__iexact=name,
+                status__in=[ProposalStatus.IN_OFFER,
+                            ProposalStatus.IN_VOTE]).order_by('-id')
             if self.verbosity >= 1:
                 self.stdout.write(self.style.WARNING("Multiple course proposals. Took first among:"))
                 for ce in ces:
