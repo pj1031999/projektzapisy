@@ -5,9 +5,9 @@ import os
 from django.test import TestCase, override_settings
 
 from apps.users.models import Employee
-from apps.enrollment.courses.models.course import Course
+from apps.enrollment.courses.models import CourseInstance
 from apps.enrollment.courses.models.group import Group
-from apps.enrollment.courses.tests.factories import ClassroomFactory, SemesterFactory
+from apps.enrollment.courses.tests.factories import ClassroomFactory, CourseTypeFactory, SemesterFactory
 from apps.users.tests.factories import UserFactory, EmployeeFactory
 
 from ..management.commands.import_schedule import Command as ImportCommand
@@ -15,6 +15,10 @@ from ..management.commands.import_schedule import Command as ImportCommand
 
 def fake_prompt(message, choices=("no", "yes")):
     return len(choices) - 1
+
+
+def fake_input_employee():
+    return Employee.objects.get(user__username='nieznany')
 
 
 class StdoutSuppressor:
@@ -43,6 +47,7 @@ class Test(TestCase):
     def setUpTestData(cls):
         cls.cmd = cmd = ImportCommand()
         cmd.prompt = fake_prompt
+        cmd.input_employee = fake_input_employee
         cmd.save_back = None
 
         files = 'sample-config.json', 'sample-config2.json', 'sample-task.json', 'sample-task2.json'
@@ -62,6 +67,7 @@ class Test(TestCase):
         ClassroomFactory(number="108")
         ClassroomFactory(number="141")
         SemesterFactory()
+        CourseTypeFactory()
 
     def test_creation(self):
         self.cmd.assignments = copy.deepcopy(self.assignments)
@@ -72,7 +78,7 @@ class Test(TestCase):
 
         self.assertEqual(Employee.objects.get(user__username='teach1').user.last_name, 'Pierwszy')
         self.assertEqual(Employee.objects.get(user__username='teach2').user.last_name, 'Drugi')
-        self.assertEqual(Group.objects.get(course__entity__name_pl='Myślenie').course.entity.name_pl, 'Myślenie')
+        self.assertEqual(Group.objects.get(course__offer__name='Myślenie').course.offer.name, 'Myślenie')
 
     def test_removal(self):
         self.test_creation()
@@ -82,6 +88,6 @@ class Test(TestCase):
             with StdoutSuppressor(self):
                 self.cmd.task = self.task2
                 self.cmd.handle(delete_groups=True)
-            self.assertRaises(Group.DoesNotExist, Group.objects.get, course__entity__name_pl='Myślenie')
+            self.assertRaises(Group.DoesNotExist, Group.objects.get, course__offer__name='Myślenie')
         finally:
-            Course.objects.get(entity__name_pl='Myślenie').delete()
+            CourseInstance.objects.get(offer__name='Myślenie').delete()

@@ -1,4 +1,3 @@
-import re
 from collections import namedtuple
 from datetime import time
 
@@ -9,6 +8,7 @@ from apps.users.models import Employee
 from django.contrib.auth.models import User, Group as AuthGroup
 from apps.enrollment.courses.models.classroom import Classroom
 from apps.enrollment.courses.models import CourseInstance
+from apps.enrollment.courses.models.course_type import Type as CourseType
 from apps.enrollment.courses.models.term import Term
 from apps.enrollment.courses.models.group import Group
 from apps.offer.proposal.models import Proposal, ProposalStatus
@@ -75,7 +75,7 @@ class ScheduleImporter(BaseCommand):
         ce = None
         try:
             ce = Proposal.objects.get(
-                name_pl__iexact=name,
+                name__iexact=name,
                 status__in=[ProposalStatus.IN_OFFER,
                             ProposalStatus.IN_VOTE])
         except Proposal.DoesNotExist:
@@ -83,10 +83,20 @@ class ScheduleImporter(BaseCommand):
                 self.style.ERROR(f">Couldn't find course proposal for {name}")
             )
             if self.prompt("Do you want to create it?"):
-                ce = Proposal.objects.create(name_pl=name)
+                course_types = list(CourseType.objects.all())
+                ct = self.prompt("Please choose course type (can be changed later):", course_types)
+                ct = course_types[ct]
+
+                self.stdout.write("Please choose a course owner.")
+                owner = self.input_employee()
+                ce = Proposal.objects.create(name=name,
+                                             course_type=ct,
+                                             owner_id=owner.pk,
+                                             status=ProposalStatus.IN_OFFER)
+                ce.save()
         except Proposal.MultipleObjectsReturned:
             ces = Proposal.objects.filter(
-                name_pl__iexact=name,
+                name__iexact=name,
                 status__in=[ProposalStatus.IN_OFFER,
                             ProposalStatus.IN_VOTE]).order_by('-id')
             if self.verbosity >= 1:
@@ -144,6 +154,20 @@ class ScheduleImporter(BaseCommand):
             pass
         return 0
 
+    def input_employee(self):
+        """Ask the interactive user for an employee name"""
+        while True:
+            if self.interactive:
+                username = input("Please type the exact username [default: nieznany] ").strip()
+            else:
+                username = None
+            if not username:
+                username = 'nieznany'
+            try:
+                return Employee.objects.get(user__username=username)
+            except Employee.DoesNotExist:
+                self.stdout.write(self.style.ERROR("No such employee!"))
+
     def get_employee(self, name):
         """Given an employee identifier from Scheduler (most probably a username),
         find a matching employee from the database (possibly creating one)."""
@@ -177,15 +201,7 @@ class ScheduleImporter(BaseCommand):
             if self.prompt(f"Save back that the teacher is unknown?"):
                 save_back = True
         elif user == 1:  # not listed
-            while True:
-                username = input("Please type the exact username [default: nieznany] ").strip()
-                if not username:
-                    username = 'nieznany'
-                try:
-                    possible[user] = Employee.objects.get(user__username=username)
-                    break
-                except Employee.DoesNotExist:
-                    self.stdout.write(self.style.ERROR("No such employee!"))
+            possible[user] = self.input_employee()
             save_back = True
         elif user == 2:  # create a new user
             employees, _ = AuthGroup.objects.get_or_create(name='employees')
