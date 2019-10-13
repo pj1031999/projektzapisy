@@ -82,7 +82,7 @@ def list_courses_in_semester(semester: Semester):
             'url': reverse('prototype-get-course', args=(course.id,)),
         })
         courses.append(course_dict)
-    return json.dumps(list(courses))
+    return list(courses)
 
 
 def student_timetable_data(student: Student):
@@ -103,7 +103,7 @@ def student_timetable_data(student: Student):
     data = {
         'groups': groups,
         'sum_points': sum(points_for_courses.values()),
-        'groups_json': json.dumps(group_dicts, cls=DjangoJSONEncoder),
+        'groups_json': group_dicts,
     }
     return data
 
@@ -116,7 +116,7 @@ def employee_timetable_data(employee: Employee):
             'term', 'term__classrooms', 'guaranteed_spots', 'guaranteed_spots__role')
     group_dicts = build_group_list(groups)
     data = {
-        'groups_json': json.dumps(group_dicts, cls=DjangoJSONEncoder),
+        'groups_json': group_dicts,
     }
     return data
 
@@ -130,10 +130,7 @@ def my_timetable(request):
     if is_student and is_employee:
         data = student_timetable_data(request.user.student)
         employee_timetable = employee_timetable_data(request.user.employee)
-        data['groups_json'] = json.dumps(
-            json.loads(data['groups_json']) + json.loads(employee_timetable['groups_json']),
-            cls=DjangoJSONEncoder
-        )
+        data['groups_json'] = data['groups_json'] + employee_timetable['groups_json']
     elif is_student:
         data = student_timetable_data(request.user.student)
     elif is_employee:
@@ -188,8 +185,8 @@ def my_prototype(request):
         CourseInstance.objects.filter(semester=semester))
     courses_json = list_courses_in_semester(semester)
     data = {
-        'groups_json': json.dumps(group_dicts, cls=DjangoJSONEncoder),
-        'filters_json': json.dumps(filters_dict, cls=DjangoJSONEncoder),
+        'groups_json': group_dicts,
+        'filters_json': filters_dict,
         'courses_json': courses_json,
     }
     return render(request, 'timetable/prototype.html', data)
