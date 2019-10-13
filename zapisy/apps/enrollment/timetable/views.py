@@ -124,7 +124,7 @@ def employee_timetable_data(employee: Employee):
 @login_required
 def my_timetable(request):
     """Shows the student/employee his own timetable page."""
-    is_student = BaseUser.is_student(request.user) 
+    is_student = BaseUser.is_student(request.user)
     is_employee = BaseUser.is_employee(request.user)
 
     if is_student and is_employee:
