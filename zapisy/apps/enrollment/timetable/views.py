@@ -124,9 +124,19 @@ def employee_timetable_data(employee: Employee):
 @login_required
 def my_timetable(request):
     """Shows the student/employee his own timetable page."""
-    if BaseUser.is_student(request.user):
+    is_student = BaseUser.is_student(request.user) 
+    is_employee = BaseUser.is_employee(request.user)
+
+    if is_student and is_employee:
         data = student_timetable_data(request.user.student)
-    elif BaseUser.is_employee(request.user):
+        employee_timetable = employee_timetable_data(request.user.employee)
+        data['groups_json'] = json.dumps(
+            json.loads(data['groups_json']) + json.loads(employee_timetable['groups_json']),
+            cls=DjangoJSONEncoder
+        )
+    elif is_student:
+        data = student_timetable_data(request.user.student)
+    elif is_employee:
         data = employee_timetable_data(request.user.employee)
     else:
         messages.error(
