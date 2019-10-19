@@ -125,7 +125,7 @@ def employee_timetable_data(employee: Employee):
 def my_timetable(request):
     """Shows the student/employee his own timetable page."""
     data = {
-        'sum_points' : 0,
+        'sum_points': 0,
         'groups_json': [],
     }
     user_has_timetable = False
