@@ -124,18 +124,20 @@ def employee_timetable_data(employee: Employee):
 @login_required
 def my_timetable(request):
     """Shows the student/employee his own timetable page."""
-    is_student = BaseUser.is_student(request.user)
-    is_employee = BaseUser.is_employee(request.user)
+    data = {
+        'sum_points' : 0,
+        'groups_json': [],
+    }
+    user_has_timetable = False
 
-    if is_student and is_employee:
+    if BaseUser.is_student(request.user):
         data = student_timetable_data(request.user.student)
+        user_has_timetable = True
+    if BaseUser.is_employee(request.user):
         employee_timetable = employee_timetable_data(request.user.employee)
         data['groups_json'] = data['groups_json'] + employee_timetable['groups_json']
-    elif is_student:
-        data = student_timetable_data(request.user.student)
-    elif is_employee:
-        data = employee_timetable_data(request.user.employee)
-    else:
+        user_has_timetable = True
+    elif not user_has_timetable:
         messages.error(
             request,
             "Nie masz planu zajęć, ponieważ nie jesteś ani studentem ani pracownikiem.")
