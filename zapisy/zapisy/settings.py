@@ -237,6 +237,7 @@ INSTALLED_APPS = (
     'apps.email_change',
     'apps.schedulersync',
     'apps.theses.apps.ThesesConfig',
+    'apps.theses2',
     'django_extensions',
     'django_filters',
     'bootstrap_pagination',
