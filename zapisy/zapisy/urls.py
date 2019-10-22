@@ -18,7 +18,8 @@ urlpatterns = [
     path('timetable/', include('apps.enrollment.timetable.urls')),
     url(r'^statistics/', include(('apps.statistics.urls', 'statistics'), namespace='statistics')),
     url(r'^consultations/$', users_views.consultations_list, name="consultations-list"),
-    path('theses/', include(('apps.theses2.urls', 'theses'), namespace='theses')),
+    path('theses2/', include(('apps.theses2.urls', 'theses2'), namespace='theses2')),
+    path('theses/', include(('apps.theses.urls', 'theses'), namespace='theses')),
 
     url(r'^news/', include('apps.news.urls')),
     url(r'^users/', include('apps.users.urls')),
