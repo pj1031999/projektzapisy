@@ -11,8 +11,32 @@
 
 {% block all-content %}
 <div id="theses-react-root">
-	<div class="row justify-content-center">
-		<h3>TUTAJ COŚ BĘDZIE</h3>
+	<p class="row justify-content-center">
+		        <h1>Prace dyplomowe</h1>
+				{% if theses %}
+					<table class="table table-hover">
+						<thead>
+							<tr>
+								<th>Nazwa</th>
+								<th>Typ</th>
+								<th>Status</th>
+								<th>Data dodania</th>
+							</tr>
+						</thead>
+						<tbody>
+							{% for thesis in theses %}
+								<tr>
+									<td>{{ thesis.title }}</td>
+									<td>{{ thesis.kind }}</td>
+									<td>{{ thesis.status }}</td>
+									<td>{{ thesis.added }}</td>
+								</tr>
+							{% endfor %}
+						</tbody>
+					</table>
+				{% else %}
+					<p>Nie ma jeszcze żadnej pracy dyplomowej.</p>
+				{% endif %}
 	</div>
 </div>
 {% endblock %}
