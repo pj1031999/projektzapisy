@@ -157,3 +157,29 @@ colgroup col.table-info-type  {
     transition: transform 250ms;
   }
 }
+
+//sidebar for screens under 1000px
+
+#sidebarCollapse {
+	display: hidden;
+}
+
+@media (max-width: 1000px) {
+	#main-content {
+		position: relative;
+		}
+	
+    #sidebar {
+		margin-left: -1000px;
+		left: 0;
+		position: absolute;
+		background: #fff;
+    }
+    #sidebar.active {
+        margin-left: 0;
+    }
+	#sidebarCollapse {
+		display: block;
+	}
+	
+}

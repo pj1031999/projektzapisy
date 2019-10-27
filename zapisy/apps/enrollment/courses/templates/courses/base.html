@@ -2,6 +2,14 @@
 {% load render_bundle from webpack_loader %}
 
 {% block sidebar %}
+<script> $(document).ready(function () {
+
+    $('#sidebarCollapse').on('click', function () {
+        $('#sidebar').toggleClass('active');
+    });
+
+});
+</script>
     <div class="dropdown">
         <div class="btn-group btn-block mb-3">
             <button class="btn btn-light" disabled>
@@ -23,6 +31,7 @@
     
     <script id="courses-data" type="application/json">{{ courses_json|safe }}</script>
 	<div id="course-list"></div>
+
 {% endblock %}
 
 {% block rendered_bundles %}
