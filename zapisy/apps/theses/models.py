@@ -47,6 +47,3 @@ class Thesis(models.Model):
     # The "official" rejection reason, filled out by the rejecter
     rejection_reason = models.TextField(blank=True)
 
-    class Meta:
-        verbose_name = "praca dyplomowa"
-        verbose_name_plural = "prace dyplomowe"
