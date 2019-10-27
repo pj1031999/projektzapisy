@@ -5,8 +5,10 @@ from apps.theses.forms import ThesisForm
 from apps.theses.models import Thesis
 
 
+
 class ThesisAdmin(admin.ModelAdmin):
     autocomplete_fields = ['advisor', 'supporting_advisor']
+    list_display = ('title', 'kind', 'status', 'added')
     form = ThesisForm
 
 
