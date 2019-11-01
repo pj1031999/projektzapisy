@@ -28,6 +28,22 @@
             <label for="t-advisor" class="font-weight-bold">Wybrany promotor:</label>
             <input type="text" class="form-control" id="t-advisor" readonly value="{{ thesis.advisor }}"/>
         </div>
+        {% if thesis.supporting_advisor %}
+        <div class="form-group">
+            <label for="t-supporting_advisor" class="font-weight-bold">Promotor wspierający:</label>
+            <input type="text" class="form-control" id="t-supporting_advisor" readonly value="{{ thesis.supporting_advisor }}"/>
+        </div>
+        {% endif %}
+        <div class="form-group">
+            <label for="t-kind" class="font-weight-bold">Rodzaj pracy:</label>
+            <select class="form-control" id="t-kind" readonly/>
+                {% for key, value in thesiskind.items %}
+                    <option {% if key == thesis.kind %}selected{% endif %}>
+                        {{ value }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
         <div class="form-group">
             <label for="t-advisor" class="font-weight-bold">Opis pracy:</label>
             <textarea type="text" class="form-control" id="t-advisor" readonly/>{{ thesis.description }}</textarea>

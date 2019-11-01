@@ -26,7 +26,10 @@
 						<tbody>
 							{% for thesis in theses %}
 								<tr>
-									<td>{{ thesis.title }}</td>
+									<td><a href="{% url 'theses:selected_thesis' thesis.id %}">
+											{{ thesis.title }}
+										</a>
+									</td>
 									<td>{{ thesis.kind }}</td>
 									<td>{{ thesis.status }}</td>
 									<td>{{ thesis.added }}</td>
