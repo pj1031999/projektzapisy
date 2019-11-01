@@ -158,25 +158,29 @@ colgroup col.table-info-type  {
   }
 }
 
-//sidebar for screens under 1000px
+//sidebar for screens under 992px (Bootstrap4 grid breakpoint) 
 
 #sidebarCollapse {
-	display: hidden;
+	display: none;
 }
 
-@media (max-width: 1000px) {
+@media (max-width: 992px) {
 	#main-content {
 		position: relative;
 		}
 	
     #sidebar {
-		margin-left: -1000px;
-		left: 0;
+		visibility: hidden;
 		position: absolute;
+		max-width: 90%;
 		background: #fff;
+		opacity: 0;
+		transition: all 0.5s ease-out;
     }
     #sidebar.active {
-        margin-left: 0;
+		visibility: visible;
+		opacity: 1;
+		transition: all 0.5s ease-out;
     }
 	#sidebarCollapse {
 		display: block;
