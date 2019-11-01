@@ -214,6 +214,16 @@
                 <div class="col">
                     {% block top-content %}
                     {% endblock %}
+					<script>
+						function ClickSidebar()	{
+							var element = document.getElementById("sidebar");
+							element.classList.toggle("active");
+						}
+					</script>
+					<button type="button" id="sidebarCollapse" class="btn btn-light btn-lg btn-block" onclick="ClickSidebar()">
+						<i class="fa fa-bars"></i> 
+						Lista przedmiotów
+					</button>
                 </div>
             </div>
             <div class="row my-4">
