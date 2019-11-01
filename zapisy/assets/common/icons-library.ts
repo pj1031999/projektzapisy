@@ -18,5 +18,8 @@ library.add(faPlus);
 import { faMinus } from "@fortawesome/free-solid-svg-icons/faMinus";
 library.add(faMinus);
 
+import { faBars } from "@fortawesome/free-solid-svg-icons/faBars";
+library.add(faBars);
+
 // This allows us to include an icon with <i class="fa fa-[ICON-NAME]"></i>.
 dom.watch();
