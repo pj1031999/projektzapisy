@@ -228,6 +228,7 @@ INSTALLED_APPS = (
     'apps.offer.proposal',
     'apps.offer.vote',
     'apps.offer.desiderata',
+    'apps.offer.plan',
 
     'apps.utils',
     'apps.schedule',
