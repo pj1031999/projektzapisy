@@ -58,3 +58,9 @@ class Thesis(models.Model):
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
+
+    def get_kind_display(self):
+        return ThesisKind(self.kind).display
+
+    def get_status_display(self):
+        return ThesisStatus(self.status).display

@@ -30,8 +30,8 @@
 											{{ thesis.title }}
 										</a>
 									</td>
-									<td>{{ thesis.kind }}</td>
-									<td>{{ thesis.status }}</td>
+									<td>{{ thesis.get_kind_display }}</td>
+									<td>{{ thesis.get_status_display }}</td>
 									<td>{{ thesis.added }}</td>
 								</tr>
 							{% endfor %}

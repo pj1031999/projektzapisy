@@ -11,44 +11,46 @@
 
 {% block all-content %}
 <div id="thesis-root">
-    <form>
-        <div class="form-inline">
-            <label for="t-added" class="font-weight-bold pr-3">Dodana:</label>
-            <input type="text" class="form-control mb-2 mr-sm-2" id="t-added" value="{{ thesis.added }}">
-            {% if not thesis.reserved_until %}
-            <label for="t-reserved" class="font-weight-bold pr-3 ml-5">Zarezerwowana do:</label>
-            <input type="text" class="form-control mb-2 mr-sm-2" id="t-added" value="{{ thesis.reserved_until }}">
-            {% endif %}
-        </div><br/>
-        <div class="form-group">
-            <label for="t-title" class="font-weight-bold">Tytuł pracy:</label>
-            <input type="text" class="form-control" id="t-title" readonly value="{{ thesis.title }}"/>
-        </div>
-        <div class="form-group">
-            <label for="t-advisor" class="font-weight-bold">Wybrany promotor:</label>
-            <input type="text" class="form-control" id="t-advisor" readonly value="{{ thesis.advisor }}"/>
-        </div>
-        {% if thesis.supporting_advisor %}
-        <div class="form-group">
-            <label for="t-supporting_advisor" class="font-weight-bold">Promotor wspierający:</label>
-            <input type="text" class="form-control" id="t-supporting_advisor" readonly value="{{ thesis.supporting_advisor }}"/>
-        </div>
-        {% endif %}
-        <div class="form-group">
-            <label for="t-kind" class="font-weight-bold">Rodzaj pracy:</label>
-            <select class="form-control" id="t-kind" readonly/>
-                {% for key, value in thesiskind.items %}
-                    <option {% if key == thesis.kind %}selected{% endif %}>
-                        {{ value }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-        <div class="form-group">
-            <label for="t-advisor" class="font-weight-bold">Opis pracy:</label>
-            <textarea type="text" class="form-control" id="t-advisor" readonly/>{{ thesis.description }}</textarea>
-        </div>
-
-    </form>
+	<p class="row justify-content-center">
+		        <h1>{{thesis.title}}</h1>
+    <table class="table table-bordered table-md-responsive d-print-none" id="table-info">
+    <colgroup>
+        <col class="table-info-type"></col>
+    </colgroup>
+    <tbody>
+        <tr>
+            <th scope="row">Data dodania</th>
+            <td>{{ thesis.added }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Zarezerwowana do</th>
+            <td>{% if thesis.reserved_until %}
+                    {{ thesis.reserved_until }}
+                {% else %}
+                    Brak daty rezerwacji
+                {% endif %}</td>
+        </tr>
+        <tr>
+            <th scope="row">Promotor</th>
+            <td>{% if thesis.advisor %}
+                    {{ thesis.advisor }}
+                {% else %}
+                    Brak
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Promotor wspierający</th>
+            <td>{% if thesis.supporting_advisor %}
+                    {{ thesis.supporting_advisor }}
+                {% else %}
+                    Brak
+                {% endif %}
+            </td>
+        </tr>
+    </tbody>
+    </table>
+    <h2>Opis pracy dyplomowej</h2>
+    {{ thesis.description }}
 </div>
 {% endblock %}

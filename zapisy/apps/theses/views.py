@@ -5,6 +5,7 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from apps.theses.models import Thesis
 from apps.theses.enums import ThesisKind
+from apps.theses.enums import ThesisStatus
 
 @login_required
 def list_all(request):
@@ -22,7 +23,7 @@ def view_thesis(request, id):
     """
 
     query = Thesis.objects.filter(id=id)
-    thesiskind = {int(i):i.display for i in ThesisKind}
-    thesis = None if len(query)==0 else query[0]
+    thesiskind = {int(i): i.display for i in ThesisKind}
+    thesis = None if len(query) == 0 else query[0]
 
     return render(request, 'theses/thesis.html', {'thesis': thesis, 'thesiskind': thesiskind})
