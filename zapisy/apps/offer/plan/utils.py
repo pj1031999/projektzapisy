@@ -20,7 +20,6 @@ def get_votes(years: int) -> SingleVoteQuerySet:
     year_list = [current_year]
 
     for (i, state) in enumerate(states):
-        print(str(i) + '\n')
         if i >= years:
             break
         elif state.year != current_year:
