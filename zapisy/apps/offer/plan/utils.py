@@ -13,8 +13,8 @@ from apps.enrollment.courses.models.group import Group
 from functools import reduce
 from typing import List
 
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
+# import gspread
+# from oauth2client.service_account import ServiceAccountCredentials
 
 
 def get_votes(years: int):

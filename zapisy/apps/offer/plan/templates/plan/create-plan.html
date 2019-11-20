@@ -1,11 +1,70 @@
 {% extends "offer/base.html" %}
 {% block content %}
 <h2>Stwórz przydział zajęć</h2>
-<a href="">>> Wyniki głosowania - arkusz Google</a>
-<br>
-<a href="">>> Proponowany przydział zajęć - arkusz Google</a>
+<a href="" class="d-block mb-1 mt-5">>> Wyniki głosowania - arkusz Google</a>
+<a href="" class="d-block mb-5">>> Proponowany przydział zajęć - arkusz Google</a>
 
 <h4>Przedmioty na następny rok:</h4>
-Proponowane przedmioty są już zaznaczone. Aby je usunąć lub dodać inne prosimy zaznaczyć/odznaczyć checkboxy.
+<p class="lead">Proponowane przedmioty są już zaznaczone. Aby je usunąć lub dodać inne prosimy zaznaczyć/odznaczyć checkboxy.</p>
+
+
+<form class="mt-5" action="{% url 'plan-vote' %}" method="post">
+    {% csrf_token %}
+    <div class="d-flex justify-content-between">
+        <div class="mr-2">
+            <h4>Przedmioty zimowe:</h4>
+            <table class="table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th scope="col" class="text-white"></th>
+                        <th scope="col" class="text-white">Przedmiot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course, semester, is_set in courses_proposal %}
+                        {% if semester == 'z' %}
+                            <tr>
+                                {% if is_set %}
+                                    <th scope="row"><input type="checkbox" checked></th>
+                                {% else %}
+                                    <th scope="row"><input type="checkbox"></th>
+                                {% endif %}
+                                <td>{{ course }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div>
+            <h4>Przedmioty letnie:</h4>
+            <table class="table">
+                <thead class="bg-primary">
+                    <tr>
+                        <th scope="col" class="text-white"></th>
+                        <th scope="col" class="text-white">Przedmiot</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for course, semester, is_set in courses_proposal %}
+                        {% if semester == 'l' %}
+                            <tr>
+                                {% if is_set %}
+                                    <th scope="row"><input type="checkbox" checked></th>
+                                {% else %}
+                                    <th scope="row"><input type="checkbox"></th>
+                                {% endif %}
+                                <td>{{ course }}</td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <button type="submit" class="btn btn-primary m-auto">Zaakceptuj przedmioty </button>
+</form>
+
+<a href="" class="d-block mt-4">>> Proponowany przydział zajęć - arkusz Google</a>
 
 {% endblock %}
