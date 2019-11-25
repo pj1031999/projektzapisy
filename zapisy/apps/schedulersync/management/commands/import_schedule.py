@@ -30,6 +30,7 @@ LIMITS = {'1': 300, '9': 300, '2': 20, '3': 15, '5': 18, '6': 15, '10': 15}
 
 EMPLOYEE_MAP = {
     'PLISOWSKI': '258497',
+<<<<<<< HEAD
     'PRATIKGHOSAL': '268909',
     'AMORAWIEC': 'NN',
     'AMALINOWSKI': 'NN',
@@ -85,12 +86,42 @@ COURSES_DONT_IMPORT = [
     'ALGEBRA LINIOWA 2',
     'ALGEBRA LINIOWA 2R',
     'MIARA I CAŁKA',
+=======
+    'TELSNER': 'NN',
+    'AMORAWIEC': 'NN',
+    'AMALINOWSKI': 'NN',
+    'RSZWARC': 'NN',
+    'EDAMEK': 'NN',
+    'GPLEBANEK': 'NN',
+    'ARACZYNSKI': 'NN',
+    'GKARCH': 'NN',
+    'SCYGAN': 'NN',
+    'JDZIUBANSKI': 'NN'
+}
+
+COURSES_MAP = {
+    'PRAKTYKA ZAWODOWA - 3 TYGODNIE': 'PRAKTYKA ZAWODOWA - TRZY TYGODNIE',
+    'PRAKTYKA ZAWODOWA - 4 TYGODNIE': 'PRAKTYKA ZAWODOWA - CZTERY TYGODNIE',
+    'PRAKTYKA ZAWODOWA - 5 TYGODNI': 'PRAKTYKA ZAWODOWA - PIĘĆ TYGODNI',
+    'PRAKTYKA ZAWODOWA - 6 TYGODNI': 'PRAKTYKA ZAWODOWA - SZEŚĆ TYGODNI'
+}
+
+COURSES_DONT_IMPORT = [
+    'ALGEBRA I',
+    'ALGEBRA LINIOWA 2',
+    'ALGEBRA LINIOWA 2R',
+    'ANALIZA MATEMATYCZNA II',
+>>>>>>> Schedulersync: hotfixes from production (#616)
     'FUNKCJE ANALITYCZNE 1',
     'RÓWNANIA RÓŻNICZKOWE 1',
     'RÓWNANIA RÓŻNICZKOWE 1R',
     'TEORIA PRAWDOPODOBIEŃSTWA 1',
+<<<<<<< HEAD
     'TOPOLOGIA',
     'INSTYTUT MATEMATYCZNY']
+=======
+    'TOPOLOGIA']
+>>>>>>> Schedulersync: hotfixes from production (#616)
 
 
 class Command(BaseCommand):
