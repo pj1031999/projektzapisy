@@ -10,29 +10,48 @@
 {% endblock %}
 
 {% block all-content %}
+
+<script type="text/javascript">
+   var a = "{{someDjangoVariable}}";
+</script>
+
 <div id="theses-react-root">
 	<p class="row justify-content-center">
 		        <h1>Prace dyplomowe</h1>
 				{% if theses %}
 					<table class="table table-hover">
-						<thead>
+						<thead style="text-align: center">
 							<tr>
-								<th>Nazwa</th>
-								<th>Typ</th>
-								<th>Status</th>
-								<th>Data dodania</th>
+								<th style="width: 5%">Rezerwacja</th>
+								<th style="width: 65%">Tytuł</th>
+								<th style="width: 10%">Typ</th>
+								<th style="width: 20%">Promotor</th>
 							</tr>
 						</thead>
-						<tbody>
+						<script>
+							jQuery(document).ready(function($) {
+							    $('*[data-href]').on('click', function() {
+							        window.location = $(this).data("href");
+							    });
+							});
+						</script>
+						<tbody style="text-align: center">
 							{% for thesis in theses %}
-								<tr>
-									<td><a href="{% url 'theses:selected_thesis' thesis.id %}">
-											{{ thesis.title }}
-										</a>
+								<tr data-href="{% url 'theses:selected_thesis' thesis.id %}" style="cursor: pointer">
+									<td>
+										{% if thesis.is_reserved %}
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" disabled checked>
+											</div>
+										{% else %}
+											<div class="form-check">
+												<input type="checkbox" class="form-check-input" disabled>
+											</div>
+										{% endif %}
 									</td>
+									<td style="text-align: left">{{ thesis.title }}</td>
 									<td>{{ thesis.get_kind_display }}</td>
-									<td>{{ thesis.get_status_display }}</td>
-									<td>{{ thesis.added }}</td>
+									<td>{{ thesis.advisor }}</td>
 								</tr>
 							{% endfor %}
 						</tbody>

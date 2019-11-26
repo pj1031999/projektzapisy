@@ -4,6 +4,7 @@ from django.db import models
 from datetime import datetime, timedelta
 from apps.users.models import Student, Employee
 from apps.theses.enums import ThesisKind, ThesisStatus
+from datetime import date
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
@@ -64,3 +65,7 @@ class Thesis(models.Model):
 
     def get_status_display(self):
         return ThesisStatus(self.status).display
+
+    @property
+    def is_reserved(self):
+        return date.today() <= self.reserved_until and self.reserved_until
