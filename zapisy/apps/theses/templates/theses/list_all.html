@@ -49,7 +49,12 @@
 											</div>
 										{% endif %}
 									</td>
-									<td style="text-align: left">{{ thesis.title }}</td>
+									<td style="text-align: left">
+										{{ thesis.title }} 
+										{% if not thesis.has_been_accepted %}
+										<em class="text-muted">({{ thesis.get_status_display }})</em>
+										{% endif %}
+									</td>
 									<td>{{ thesis.get_kind_display }}</td>
 									<td>{{ thesis.advisor }}</td>
 								</tr>

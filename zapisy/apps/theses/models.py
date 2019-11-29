@@ -68,4 +68,8 @@ class Thesis(models.Model):
 
     @property
     def is_reserved(self):
-        return date.today() <= self.reserved_until and self.reserved_until
+        return self.reserved_until and date.today() <= self.reserved_until
+
+    @property
+    def has_been_accepted(self):
+        return self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS and self.status != ThesisStatus.BEING_EVALUATED
