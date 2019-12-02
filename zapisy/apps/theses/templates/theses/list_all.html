@@ -11,6 +11,9 @@
 
 {% block all-content %}
 <div id="theses-react-root">
+	{% if board_member %}
+		<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
+	{% endif %}
 	<p class="row justify-content-center">
 		        <h1>Prace dyplomowe</h1>
 				{% if theses %}

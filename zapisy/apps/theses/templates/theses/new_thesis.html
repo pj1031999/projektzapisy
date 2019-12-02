@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
+
+{% load crispy_forms_tags %}
+
+{% block main-subtitle %}System prac dyplomowych{% endblock %}
+
+{% block theses_active %} class="active"{% endblock %}
+
+
+{% block uwr_logo %}
+{% endblock %}
+
+{% block all-content %}
+<div id="thesis-root">
+    <form method="POST" class="post-form">
+        {% csrf_token %}
+        {% crispy thesis_form %}
+        <script>
+            $(function () {
+                $("#id_reserved_until").datepicker({
+                    format:'dd/mm/yyyy',
+                });
+            });
+        </script>
+        {% comment %} <button type="submit" name="Zapisz" class="save btn btn-default">Zapisz</button> {% endcomment %}
+    </form>
+</div>
+{% endblock %}
