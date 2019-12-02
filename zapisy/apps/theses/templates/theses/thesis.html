@@ -11,24 +11,31 @@
 
 {% block all-content %}
 <div id="thesis-root">
-	<p class="row justify-content-center">
-		        <h1>{{thesis.title}}</h1>
+
+<div class="d-flex justify-content-between align-items-center">
+        <h1 class="d-inline-block">
+            {{ thesis.title }}
+        </h1>
+        {% if user.is_staff or thesis.advisor == request.user.employee %}
+            <a class="btn btn-sm btn-outline-info float-right align-bottom" href="">Edytuj</a>
+        {% endif %}
+    </div>
     <table class="table table-bordered table-md-responsive d-print-none" id="table-info">
     <colgroup>
         <col class="table-info-type"></col>
     </colgroup>
     <tbody>
         <tr>
-            <th scope="row">Data dodania</th>
-            <td>{{ thesis.added }}</td>
+            <th scope="row" style="width: 50%">Typ</th>
+            <td>
+                {{ thesis.get_kind_display }}
+            </td>
         </tr>
         <tr>
-            <th scope="row">Zarezerwowana do</th>
-            <td>{% if thesis.reserved_until %}
-                    {{ thesis.reserved_until }}
-                {% else %}
-                    Brak daty rezerwacji
-                {% endif %}</td>
+            <th scope="row">Status</th>
+            <td>
+                {{ thesis.get_status_display }}
+            </td>
         </tr>
         <tr>
             <th scope="row">Promotor</th>
@@ -47,6 +54,23 @@
                     Brak
                 {% endif %}
             </td>
+        </tr>
+        <tr>
+            <th scope="row">Zarezerwowana do</th>
+            <td>{% if thesis.reserved_until %}
+                    {{ thesis.reserved_until }}
+                {% else %}
+                    Brak daty rezerwacji
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
+            <th scope="row">Data dodania</th>
+            <td>{{ thesis.added }}</td>
+        </tr>
+        <tr>
+            <th scope="row">Data aktualizacji</th>
+            <td>{{ thesis.modified }}</td>
         </tr>
     </tbody>
     </table>
