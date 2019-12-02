@@ -30,3 +30,15 @@ def view_thesis(request, id):
     thesis = None if len(query) == 0 else query[0]
 
     return render(request, 'theses/thesis.html', {'thesis': thesis, 'thesiskind': thesiskind})
+
+@login_required
+def edit_thesis(request, id):
+    """
+        Show edit subpage for one thesis
+    """
+
+    query = Thesis.objects.filter(id=id)
+    thesiskind = {int(i): i.display for i in ThesisKind}
+    thesis = None if len(query) == 0 else query[0]
+
+    return render(request, 'theses/thesis_form.html', {'thesis': thesis, 'thesiskind': thesiskind})
