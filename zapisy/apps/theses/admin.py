@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django import forms
 
-from apps.theses.forms import ThesisForm
-from apps.theses.models import Thesis
-
+from apps.theses.forms import ThesisForm, RemarkForm
+from apps.theses.models import Thesis, Remark
 
 
 class ThesisAdmin(admin.ModelAdmin):
@@ -12,4 +11,10 @@ class ThesisAdmin(admin.ModelAdmin):
     form = ThesisForm
 
 
+class RemarkAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['author']
+    form = RemarkForm
+
+
 admin.site.register(Thesis, ThesisAdmin)
+admin.site.register(Remark, RemarkAdmin)
