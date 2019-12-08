@@ -214,15 +214,6 @@
                 <div class="col">
                     {% block top-content %}
                     {% endblock %}
-                <script>
-                    function ClickSidebar()	{
-                        var element = document.getElementById("sidebar");
-                        element.classList.toggle("active");
-                    }
-                </script>
-                    <button type="button" id="sidebarCollapse" class="btn btn-light btn-lg btn-block" onclick="ClickSidebar()">
-                        <i class="fa fa-bars"></i>
-                    </button>
                 </div>
             </div>
             <div class="row my-4">
@@ -231,9 +222,21 @@
                         {% block content %}
                         {% endblock %}
                 </div>
-                <nav class="col-lg-3 col-12 d-print-none" id="sidebar">
-                    {% block sidebar %}
-                    {% endblock %}
+                <nav class="col-lg-3 col-12 d-print-none" id="sidebar-wrapper">
+                    <script>
+                        function ClickSidebar()	{
+                            const wrapper = document.getElementById("sidebar-wrapper");
+                            wrapper.classList.toggle("active");
+                        }
+                    </script>
+                    <button type="button" id="sidebarCollapse" class="btn btn-light btn-sm float-right" onclick="ClickSidebar()">
+                        ← <i class="fa fa-bars"></i>
+                    </button>
+                    <div id="sidebar">
+                        <span id="sidebar-close" onclick="ClickSidebar()">→</span>
+                        {% block sidebar %}
+                        {% endblock %}
+                    </div>
                 </nav>
             </div>
             {% endblock %}
