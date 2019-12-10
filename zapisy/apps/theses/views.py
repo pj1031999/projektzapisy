@@ -8,14 +8,18 @@ from apps.theses.models import Thesis
 from apps.theses.enums import ThesisKind, ThesisStatus
 from apps.theses.users import is_theses_board_member
 from apps.theses.forms import ThesisForm
+from apps.users.models import BaseUser
 
 @login_required
 def list_all(request):
     theses = Thesis.objects.all()
     board_member = is_theses_board_member(request.user)
 
+    filtered_theses = [thesis for thesis in theses if thesis.can_see_thesis(request.user)]
+
     return render(request, 'theses/list_all.html', {
-        'theses': theses, 'board_member': board_member,
+        'theses': filtered_theses,
+        'board_member': board_member,
     })
 
 

@@ -4,6 +4,8 @@ from django.db import models
 from datetime import datetime, timedelta
 from apps.users.models import Student, Employee
 from apps.theses.enums import ThesisKind, ThesisStatus
+from datetime import date
+from apps.theses.users import is_theses_board_member
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
@@ -65,3 +67,18 @@ class Thesis(models.Model):
 
     def get_status_display(self):
         return ThesisStatus(self.status).display
+
+    def can_see_thesis(self, user):
+        return ((self.status != ThesisStatus.BEING_EVALUATED and self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS)
+        or is_theses_board_member(user)
+        or user == (self.advisor.user if self.advisor != None else None)
+        or user == (self.supporting_advisor.user if self.supporting_advisor != None else None)
+        or user.is_staff)
+
+    @property
+    def is_reserved(self):
+        return self.reserved_until and date.today() <= self.reserved_until
+
+    @property
+    def has_been_accepted(self):
+        return self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS and self.status != ThesisStatus.BEING_EVALUATED
