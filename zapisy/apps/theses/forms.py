@@ -1,6 +1,6 @@
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit
+from crispy_forms.layout import Submit, Layout, Row, Column
 from .models import Thesis, Remark, MAX_THESIS_TITLE_LEN
 from .enums import ThesisKind
 from apps.users.models import Employee, Student
@@ -13,17 +13,34 @@ class ThesisForm(forms.ModelForm):
                   'reserved_until', 'description')
 
     title = forms.CharField(label="Tytuł pracy", max_length=MAX_THESIS_TITLE_LEN)
-    advisor = forms.ModelChoiceField(Employee.objects,label="Promotor", required=False)
-    supporting_advisor = forms.ModelChoiceField(Employee.objects, label="Promotor wspierający", required=False)
+    advisor = forms.ModelChoiceField(queryset=Employee.objects.all(),label="Promotor", required=True)
+    supporting_advisor = forms.ModelChoiceField(queryset=Employee.objects.all(), label="Promotor wspierający", required=False)
     kind = forms.ChoiceField(choices=ThesisKind.choices(), label="Typ")
-    reserved_until = forms.DateTimeField(input_formats=['%d/%m/%Y %H:%M'], label="Zarezerwowana do",required=False)
+    reserved_until = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}),
+                                     input_formats=['%d/%m/%Y'], label="Zarezerwowana do", required=False)
     description = forms.CharField(label="Opis", widget=forms.Textarea, required=False)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, default_advisor=False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+        if default_advisor:
+            self.fields['advisor'].widget.attrs['disabled'] = True
+        self.helper.layout = Layout(
+            'title',
+            Row(
+                Column('advisor', css_class='form-group col-md-6 mb-0'),
+                Column('supporting_advisor', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'
+            ),
+            Row(
+                Column('kind', css_class='form-group col-md-6 mb-0'),
+                Column('reserved_until', css_class='form-group col-md-6 mb-0'),
+                css_class='form-row'
+            ),
+            'description',
+            Submit('submit', 'Zapisz')
+        )
         self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Zapisz'))
 
     def clean(self):
         """

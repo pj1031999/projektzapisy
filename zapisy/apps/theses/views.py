@@ -3,12 +3,13 @@ from django.urls import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from apps.users.decorators import employee_required
 from django.utils import timezone
 from apps.theses.models import Thesis
 from apps.theses.enums import ThesisKind, ThesisStatus
 from apps.theses.users import is_theses_board_member
 from apps.theses.forms import ThesisForm
-from apps.users.models import BaseUser
+from apps.users.models import BaseUser, Employee
 
 @login_required
 def list_all(request):
@@ -39,6 +40,7 @@ def view_thesis(request, id):
 
 
 @login_required
+@employee_required
 def edit_thesis(request, id):
     """
         Show form for edit selected thesis
@@ -53,6 +55,7 @@ def edit_thesis(request, id):
 
 
 @login_required
+@employee_required
 def new_thesis(request):
     """
         Show form for create new thesis
@@ -68,6 +71,9 @@ def new_thesis(request):
             post.save()
             return redirect('theses:main')
     else:
-        form = ThesisForm()
+        if request.user.is_staff:
+            form = ThesisForm()
+        else:
+            form = ThesisForm(default_advisor=True, initial={"advisor": request.user.employee})
 
     return render(request, 'theses/new_thesis.html', {'thesis_form': form})
