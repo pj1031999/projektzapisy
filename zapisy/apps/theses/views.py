@@ -61,19 +61,16 @@ def new_thesis(request):
         Show form for create new thesis
     """
     if request.method == "POST":
-        form = ThesisForm(request.POST)
+        print(request.POST)
+        form = ThesisForm(request.user, request.POST)
         # check whether it's valid:
         if form.is_valid():
             post = form.save(commit=False)
             post.status = ThesisStatus.BEING_EVALUATED.value
             post.added = timezone.now()
-
             post.save()
-            return redirect('theses:main')
+            return redirect('/theses')
     else:
-        if request.user.is_staff:
-            form = ThesisForm()
-        else:
-            form = ThesisForm(default_advisor=True, initial={"advisor": request.user.employee})
+        form = ThesisForm(request.user)
 
     return render(request, 'theses/new_thesis.html', {'thesis_form': form})

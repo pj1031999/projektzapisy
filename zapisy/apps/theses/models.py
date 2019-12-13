@@ -43,7 +43,7 @@ class Thesis(models.Model):
         related_name='thesis_supporting_advisor'
     )
     kind = models.SmallIntegerField(choices=ThesisKind.choices())
-    status = models.SmallIntegerField(choices=ThesisStatus.choices())
+    status = models.SmallIntegerField(choices=ThesisStatus.choices(), blank=True, null=True)
     # How long the assigned student(s) has/have to complete their work on this thesis
     # Note that this is only a convenience field for the users, the system
     # does not enforce this in any way

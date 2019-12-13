@@ -1,14 +1,14 @@
 from django.contrib import admin
 from django import forms
 
-from apps.theses.forms import ThesisForm, RemarkForm
+from apps.theses.forms import ThesisFormAdmin, RemarkForm
 from apps.theses.models import Thesis, Remark
 
 
 class ThesisAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['advisor', 'supporting_advisor']
+    autocomplete_fields = []
     list_display = ('title', 'kind', 'status', 'added')
-    form = ThesisForm
+    form = ThesisFormAdmin
 
 
 class RemarkAdmin(admin.ModelAdmin):

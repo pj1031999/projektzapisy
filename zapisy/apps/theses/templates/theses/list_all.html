@@ -16,11 +16,19 @@
 </script>
 
 <div id="theses-react-root">
-	{% if board_member %}
-		<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
-	{% endif %}
-	<p class="row justify-content-center">
-		        <h1>Prace dyplomowe</h1>
+	<p class="row">
+		        <div class="container">
+					<div class="row">
+						<div class="col">
+							<h1>Prace dyplomowe</h1>
+						</div>
+						<div class="col text-right">
+						{% if user.employee %}
+							<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
+						{% endif %}
+						</div>
+					</div>
+				</div>
 				{% if theses %}
 					<table class="table table-hover">
 						<thead style="text-align: center">
@@ -53,7 +61,7 @@
 										{% endif %}
 									</td>
 									<td style="text-align: left">
-										{{ thesis.title }} 
+										{{ thesis.title }}
 										{% if not thesis.has_been_accepted %}
 										<em class="text-muted">({{ thesis.get_status_display }})</em>
 										{% endif %}

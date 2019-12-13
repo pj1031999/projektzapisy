@@ -13,6 +13,9 @@
 
 {% block all-content %}
 <div id="thesis-root">
+    <h1 class="d-inline-block">
+            Dodawanie nowej pracy dyplomowej
+    </h1>
     <form method="POST" class="post-form">
         {% csrf_token %}
         {% crispy thesis_form %}
