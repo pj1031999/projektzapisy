@@ -15,8 +15,9 @@
    var a = "{{someDjangoVariable}}";
 </script>
 
-<div id="thesis-filter"></div>
-{% render_bundle 'filter-widget' %}
+<div id="thesis-filter">
+	{% render_bundle 'theses-filter-widget' %}
+</div>
 
 <div id="theses-react-root">
 	{% if board_member %}
@@ -56,7 +57,7 @@
 										{% endif %}
 									</td>
 									<td style="text-align: left">
-										{{ thesis.title }} 
+										{{ thesis.title }}
 										{% if not thesis.has_been_accepted %}
 											<em class="text-muted">({{ thesis.get_status_display }})</em>
 										{% endif %}
