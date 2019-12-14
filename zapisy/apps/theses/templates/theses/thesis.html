@@ -11,7 +11,6 @@
 
 {% block all-content %}
 <div id="thesis-root">
-<a href="{% url 'theses:edit_thesis' thesis.id %}" class="btn btn-primary" role="button">Edytuj</a>
 <div class="d-flex justify-content-between align-items-center">
         <h1 class="d-inline-block">
             {{ thesis.title }}
@@ -75,8 +74,15 @@
     </tbody>
     </table>
     <h2>Opis pracy dyplomowej</h2>
-    {{ thesis.description }}
+    {% if thesis.description %}
+        {{ thesis.description }}
+    {% else %}
+        Brak opisu pracy dyplomowej.
+    {% endif %}
     {% if board_member %}
+    <hr/>
+    <h2 class="mt-4">Głosowanie</h2>
+        Nikt jeszcze nie głosował w tej trudnej sprawie.
     <h2 class="mt-4">Uwagi</h2>
         {% for remark in thesis.rejection_reasons.all %}
         <h5>- {{ remark.author }}:</h5>
