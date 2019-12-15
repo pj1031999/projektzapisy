@@ -63,7 +63,7 @@ def edit_thesis(request, id):
     else:
         form = EditThesisForm(request.user, instance=thesis)
 
-    return render(request, 'theses/edit_thesis.html', {'thesis_form': form})
+    return render(request, 'theses/thesis_form.html', {'thesis_form': form})
 
 
 @login_required
@@ -73,6 +73,7 @@ def new_thesis(request):
         Show form for create new thesis
     """
 
+    new_thesis = True
     if request.method == "POST":
         form = ThesisForm(request.user, request.POST)
         # check whether it's valid:
@@ -86,4 +87,4 @@ def new_thesis(request):
     else:
         form = ThesisForm(request.user)
 
-    return render(request, 'theses/new_thesis.html', {'thesis_form': form})
+    return render(request, 'theses/thesis_form.html', {'thesis_form': form, 'new_thesis': new_thesis})
