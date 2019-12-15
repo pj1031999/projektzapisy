@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% load render_bundle from webpack_loader %}
 
+{% load crispy_forms_tags %}
+
 {% block main-subtitle %}System prac dyplomowych{% endblock %}
 
 {% block theses_active %} class="active"{% endblock %}
@@ -75,11 +77,20 @@
     </table>
     <h2>Opis pracy dyplomowej</h2>
     {{ thesis.description }}
-    {% if board_member %}
-    <h2 class="mt-4">Uwagi</h2>
-        {% for remark in thesis.rejection_reasons.all %}
-        <h5>- {{ remark.author }}:</h5>
-        <p>{{ remark.text }}</p>
+    {% if can_see_remarks %}
+        <h2 class="mt-4">Uwagi</h2>
+        {% if board_member %}
+            <h4>Edytuj swoją uwagę</h4>
+            <form method="POST" class="post-form">
+                {% csrf_token %}
+                {% crispy remark_form %}
+            </form>
+            <br/>
+        {% endif %}
+        {% for remark in remarks %}
+            <span class="badge badge-secondary">{{ remark.modified }}</span>
+            <h5 class="font-weight-bold">{{ remark.author }}</h5>
+            <p>{{ remark.text }}</p>
         {% endfor %}
     {% endif %}
 </div>

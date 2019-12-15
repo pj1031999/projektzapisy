@@ -12,6 +12,7 @@ MAX_REJECTION_REASON_LENGTH = 500
 
 
 class Remark(models.Model):
+    modified = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
         Employee, on_delete=models.CASCADE, related_name="remark_author")
     text = models.TextField(blank=True)
@@ -56,7 +57,7 @@ class Thesis(models.Model):
 
     # The "official" rejection reason, filled out by board member
     # models.ManyToManyField(Remark, verbose_name=("rejection_reasons"))
-    rejection_reasons = models.ManyToManyField(Remark, blank=True)
+    remarks = models.ManyToManyField(Remark, blank=True)
 
     class Meta:
         verbose_name = "praca dyplomowa"

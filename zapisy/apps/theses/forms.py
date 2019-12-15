@@ -1,6 +1,6 @@
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column, Field
+from crispy_forms.layout import Submit, Layout, Row, Column
 from .models import Thesis, Remark, MAX_THESIS_TITLE_LEN
 from .enums import ThesisKind, ThesisStatus
 from apps.users.models import Employee, Student
@@ -9,6 +9,12 @@ from apps.users.models import Employee, Student
 class ThesisFormAdmin(forms.ModelForm):
     class Meta:
         model = Thesis
+        fields = '__all__'
+
+
+class RemarkFormAdmin(forms.ModelForm):
+    class Meta:
+        model = Remark
         fields = '__all__'
 
 
@@ -63,8 +69,6 @@ class ThesisForm(ThesisFormBase):
             'description'
         )
         self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
-        self.helper.form_method = 'POST'
-
 
 
 class EditThesisForm(ThesisFormBase):
@@ -90,7 +94,6 @@ class EditThesisForm(ThesisFormBase):
             'description'
         )
         self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
-        self.helper.form_method = 'POST'
 
     def clean_students(self):
         students = self.cleaned_data['students']
@@ -102,4 +105,13 @@ class EditThesisForm(ThesisFormBase):
 class RemarkForm(forms.ModelForm):
     class Meta:
         model = Remark
-        fields = '__all__'
+        fields = ['text']
+
+    text = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': '5'}))
+
+    def __init__(self, *args, **kwargs):
+        super(RemarkForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.form_method = 'POST'
+        self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
