@@ -55,9 +55,9 @@ def view_thesis(request, id):
     thesis = get_object_or_404(Thesis, id=id)
     thesiskind = {int(i): i.display for i in ThesisKind}
     board_member = is_theses_board_member(request.user)
-    can_see_remarks = board_member or request.user.is_staff \
-                      or request.user == thesis.advisor \
-                      or request.user == thesis.supporting_advisor
+    can_see_remarks = (board_member or request.user.is_staff or
+                       request.user == thesis.advisor or
+                       request.user == thesis.supporting_advisor)
     remarks = None
 
     if board_member:
@@ -70,8 +70,9 @@ def view_thesis(request, id):
     if board_member:
         try:
             remark = thesis.remarks.get(author=request.user.employee)
-        except:
+        except Remark.DoesNotExist:
             remark = None
+
         #edit existing remark
         if remark:
             if request.method == "POST":

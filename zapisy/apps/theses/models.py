@@ -60,7 +60,6 @@ class Thesis(models.Model):
     modified = models.DateTimeField(auto_now_add=True)
 
     # The "official" rejection reason, filled out by board member
-    # models.ManyToManyField(Remark, verbose_name=("rejection_reasons"))
     remarks = models.ManyToManyField(Remark, blank=True)
 
     class Meta:
@@ -74,11 +73,11 @@ class Thesis(models.Model):
         return ThesisStatus(self.status).display
 
     def can_see_thesis(self, user):
-        return ((self.status != ThesisStatus.BEING_EVALUATED and self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS)
-                or is_theses_board_member(user)
-                or user == (self.advisor.user if self.advisor != None else None)
-                or user == (self.supporting_advisor.user if self.supporting_advisor != None else None)
-                or user.is_staff)
+        return ((self.status != ThesisStatus.BEING_EVALUATED and self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS) or
+                is_theses_board_member(user) or
+                (self.advisor is not None and user == self.advisor.user) or
+                (self.supporting_advisor is not None and user == self.supporting_advisor.user) or
+                user.is_staff)
 
     @property
     def is_reserved(self):

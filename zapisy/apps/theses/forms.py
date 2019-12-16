@@ -70,6 +70,7 @@ class ThesisForm(ThesisFormBase):
         )
         self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
 
+
 class EditThesisForm(ThesisFormBase):
     students = forms.ModelMultipleChoiceField(queryset=Student.objects.all(), required=False,
                                               widget=forms.SelectMultiple(attrs={'size': '10'}))
