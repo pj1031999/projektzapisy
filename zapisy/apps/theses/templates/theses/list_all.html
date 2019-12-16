@@ -22,7 +22,7 @@
         <h1 class="d-inline-block">
             Prace dyplomowe
         </h1>
-		{% if board_member %}
+		{% if user.employee %}
 			<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
 		{% endif %}
 	</div>
