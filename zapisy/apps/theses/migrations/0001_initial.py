@@ -3,6 +3,19 @@
 import apps.theses.enums
 from django.db import migrations, models
 import django.db.models.deletion
+from ..users import THESIS_BOARD_GROUP_NAME
+
+
+def create_group(apps, schema_editor):
+    Group = apps.get_model("auth", "Group")
+    db_alias = schema_editor.connection.alias
+    Group.objects.using(db_alias).create(name=THESIS_BOARD_GROUP_NAME)
+
+
+def remove_group(apps, schema_editor):
+    Group = apps.get_model("auth", "Group")
+    db_alias = schema_editor.connection.alias
+    Group.objects.using(db_alias).filter(name=THESIS_BOARD_GROUP_NAME).delete()
 
 
 class Migration(migrations.Migration):
@@ -17,10 +30,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Remark',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('modified', models.DateTimeField(auto_now_add=True)),
                 ('text', models.TextField(blank=True)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='remark_author', to='users.Employee')),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                             related_name='remark_author', to='users.Employee')),
             ],
             options={
                 'verbose_name': 'uwaga',
@@ -32,20 +47,27 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(primary_key=True, serialize=False)),
                 ('title', models.CharField(max_length=300, unique=True)),
-                ('kind', models.SmallIntegerField(choices=[(apps.theses.enums.ThesisKind(0), 'mgr'), (apps.theses.enums.ThesisKind(1), 'inż'), (apps.theses.enums.ThesisKind(2), 'lic'), (apps.theses.enums.ThesisKind(3), 'isim'), (apps.theses.enums.ThesisKind(4), 'lic+inż'), (apps.theses.enums.ThesisKind(5), 'lic+inż+isim')])),
-                ('status', models.SmallIntegerField(blank=True, choices=[(apps.theses.enums.ThesisStatus(1), 'weryfikowana przez komisję'), (apps.theses.enums.ThesisStatus(2), 'zwrócona do poprawek'), (apps.theses.enums.ThesisStatus(3), 'zaakceptowana'), (apps.theses.enums.ThesisStatus(4), 'w realizacji'), (apps.theses.enums.ThesisStatus(5), 'obroniona')], null=True)),
+                ('kind', models.SmallIntegerField(choices=[(apps.theses.enums.ThesisKind(0), 'mgr'), (apps.theses.enums.ThesisKind(1), 'inż'), (apps.theses.enums.ThesisKind(
+                    2), 'lic'), (apps.theses.enums.ThesisKind(3), 'isim'), (apps.theses.enums.ThesisKind(4), 'lic+inż'), (apps.theses.enums.ThesisKind(5), 'lic+inż+isim')])),
+                ('status', models.SmallIntegerField(blank=True, choices=[(apps.theses.enums.ThesisStatus(1), 'weryfikowana przez komisję'), (apps.theses.enums.ThesisStatus(2), 'zwrócona do poprawek'), (
+                    apps.theses.enums.ThesisStatus(3), 'zaakceptowana'), (apps.theses.enums.ThesisStatus(4), 'w realizacji'), (apps.theses.enums.ThesisStatus(5), 'obroniona')], null=True)),
                 ('reserved_until', models.DateField(blank=True, null=True)),
                 ('description', models.TextField(blank=True)),
                 ('added', models.DateTimeField(auto_now_add=True)),
                 ('modified', models.DateTimeField(auto_now_add=True)),
-                ('advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_advisor', to='users.Employee')),
-                ('remarks', models.ManyToManyField(blank=True, to='theses.Remark')),
-                ('students', models.ManyToManyField(blank=True, to='users.Student')),
-                ('supporting_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_supporting_advisor', to='users.Employee')),
+                ('advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
+                                              related_name='thesis_advisor', to='users.Employee')),
+                ('remarks', models.ManyToManyField(
+                    blank=True, to='theses.Remark')),
+                ('students', models.ManyToManyField(
+                    blank=True, to='users.Student')),
+                ('supporting_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT,
+                                                         related_name='thesis_supporting_advisor', to='users.Employee')),
             ],
             options={
                 'verbose_name': 'praca dyplomowa',
                 'verbose_name_plural': 'prace dyplomowe',
             },
         ),
+        migrations.RunPython(create_group, remove_group)
     ]
