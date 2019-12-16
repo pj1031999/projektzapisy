@@ -70,7 +70,6 @@ class ThesisForm(ThesisFormBase):
         )
         self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
 
-
 class EditThesisForm(ThesisFormBase):
     students = forms.ModelMultipleChoiceField(queryset=Student.objects.all(), required=False,
                                               widget=forms.SelectMultiple(attrs={'size': '10'}))
@@ -98,7 +97,8 @@ class EditThesisForm(ThesisFormBase):
     def clean_students(self):
         students = self.cleaned_data['students']
         if len(students) > 2:
-            raise forms.ValidationError("Możesz przypisać maksymalnie 2 studentów")
+            raise forms.ValidationError(
+                "Możesz przypisać maksymalnie 2 studentów")
         return students
 
 
