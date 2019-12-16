@@ -62,9 +62,9 @@ class ThesisForm(ThesisFormBase):
             ),
             'description'
         )
-        self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
+        self.helper.add_input(
+            Submit('submit', 'Dodaj', css_class='btn-primary'))
         self.helper.form_method = 'POST'
-
 
 
 class EditThesisForm(ThesisFormBase):
@@ -89,13 +89,15 @@ class EditThesisForm(ThesisFormBase):
             'students',
             'description'
         )
-        self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
+        self.helper.add_input(
+            Submit('submit', 'Edytuj', css_class='btn-primary'))
         self.helper.form_method = 'POST'
 
     def clean_students(self):
         students = self.cleaned_data['students']
         if len(students) > 2:
-            raise forms.ValidationError("Możesz przypisać maksymalnie 2 studentów")
+            raise forms.ValidationError(
+                "Możesz przypisać maksymalnie 2 studentów")
         return students
 
 
