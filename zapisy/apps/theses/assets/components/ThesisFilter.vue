@@ -2,10 +2,10 @@
 import Vue from "vue";
 import Component from "vue-class-component";
 
-import TextFilter from "@/enrollment/timetable/assets/components/filters/TextFilter.vue";
-// import LabelsFilter from "@/enrollment/timetable/assets/components/filters/LabelsFilter.vue";
-import SelectFilter from "@/enrollment/timetable/assets/components/filters/SelectFilter.vue";
-import CheckFilter from "@/enrollment/timetable/assets/components/filters/CheckFilter.vue";
+import TextFilter from "./filters/TextFilter.vue";
+import SelectFilter from "./filters/SelectFilter.vue";
+import CheckFilter from "./filters/CheckFilter.vue";
+
 export default Vue.extend({
   components: {
     TextFilter,
@@ -14,25 +14,17 @@ export default Vue.extend({
   },
   data: function() {
     return {
-      allEffects: {},
-      allTags: {},
-      allOwners: [] as [number, string][],
-      allSemesters: [] as [string, string][],
-      allStatuses: [] as [string, string][],
-      allTypes: {},
-
-      // The filters are going to be collapsed by default.
-      collapsed: true
+      allKinds: {}
     };
   },
   created: function() {
-    this.allTypes = [
-      ["ISIM", "ISIM"],
-      ["inż", "Inżynierska"],
+    this.allKinds = [
       ["mgr", "Magisterska"],
-      ["lic", "Licencajcka"],
-      ["lic+inż", "Lic+inż"],
-      ["lic+inż+isim", "Lic+inż+isim"]
+      ["inż", "Inżynierska"],
+      ["lic", "Licencjacka"],
+      ["isim", "ISIM"],
+      ["lic+inż", "Licencjat+inżynierska"],
+      ["lic+inż+isim", "Licencjat+inżynierska+ISIM"]
     ];
   }
 });
@@ -40,50 +32,36 @@ export default Vue.extend({
 
 <template>
   <div class="card bg-light">
-    <div class="card-body" v-bind:class="{ collapsed: collapsed }">
-      <TextFilter filterKey="name-filter" property="name" placeholder="Nazwa pracy dyplomowej" />
-
-      <SelectFilter
-        filterKey="type-filter"
-        property="thesisType"
-        :options="allTypes"
-        placeholder="Rodzaj przedmiotu"
-      />
-
-      <CheckFilter
-        filterKey="available-filter"
-        property="showAvailable"
-        label="Pokaż tylko niezarezerwowane prace"
-      />
-    </div>
-    <div class="card-footer p-1 text-center">
-      <a href="#" @click.prevent="collapsed = !collapsed">zwiń / rozwiń</a>
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md">
+          <TextFilter
+            filterKey="name-filter"
+            property="title"
+            placeholder="Nazwa pracy dyplomowej"
+          />
+        </div>
+        <div class="col-md">
+          <SelectFilter
+            filterKey="type-filter"
+            property="kind"
+            :options="allKinds"
+            placeholder="Typ pracy dyplomowej"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md">
+          <CheckFilter
+            filterKey="available-filter"
+            property="is_available"
+            label="Pokaż tylko dostępne prace"
+          />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.collapsed {
-  overflow-y: hidden;
-  height: 120px;
-
-  // Blurs over the bottom of filter card.
-  &:after {
-    position: absolute;
-    display: block;
-    // Height of the card footer.
-    bottom: 28px;
-    left: 0;
-    height: 50%;
-    width: 100%;
-    content: "";
-    // Bootstrap light colour.
-    background: linear-gradient(
-      to top,
-      rgba(248, 249, 250, 1) 0%,
-      rgba(248, 249, 250, 0) 100%
-    );
-    pointer-events: none; /* so the text is still selectable */
-  }
-}
 </style>

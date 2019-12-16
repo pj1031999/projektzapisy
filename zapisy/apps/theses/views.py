@@ -1,3 +1,5 @@
+import json
+
 from django.conf import settings
 from django.urls import reverse
 from django.db.models import Q
@@ -11,15 +13,34 @@ from apps.theses.users import is_theses_board_member
 from apps.theses.forms import ThesisForm
 from apps.users.models import BaseUser, Employee
 
+
 @login_required
 def list_all(request):
     theses = Thesis.objects.all()
     board_member = is_theses_board_member(request.user)
 
-    filtered_theses = [thesis for thesis in theses if thesis.can_see_thesis(request.user)]
+    visible_theses = [
+        thesis for thesis in theses if thesis.can_see_thesis(request.user)]
+
+    thesis_list = []
+    for p in visible_theses:
+        title = p.title
+        is_available = not p.is_reserved
+        kind = p.get_kind_display()
+        status = p.get_status_display()
+        has_been_accepted = p.has_been_accepted
+        advisor = p.advisor.__str__()
+        url = reverse('theses:selected_thesis', None, [str(p.id)])
+
+        record = {"id": p.id, "title": title, "is_available": is_available, "kind": kind,
+                  "status": status, "has_been_accepted": has_been_accepted, "url": url,
+                  "advisor": advisor}
+
+        thesis_list.append(record)
 
     return render(request, 'theses/list_all.html', {
-        'theses': filtered_theses,
+        'theses_json': json.dumps(thesis_list),
+        'theses': visible_theses,
         'board_member': board_member,
     })
 
@@ -51,7 +72,7 @@ def edit_thesis(request, id):
     board_member = is_theses_board_member(request.user)
 
     return render(request, 'theses/thesis_form.html', {'thesis': thesis, 'thesiskind': thesiskind,
-                                                  'board_member': board_member})
+                                                       'board_member': board_member})
 
 
 @login_required
@@ -74,6 +95,7 @@ def new_thesis(request):
         if request.user.is_staff:
             form = ThesisForm()
         else:
-            form = ThesisForm(default_advisor=True, initial={"advisor": request.user.employee})
+            form = ThesisForm(default_advisor=True, initial={
+                              "advisor": request.user.employee})
 
     return render(request, 'theses/new_thesis.html', {'thesis_form': form})

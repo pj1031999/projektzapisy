@@ -1,7 +1,5 @@
 export default {
   bundles: {
-    "filter-widget": [
-      "filter-widget.js",
-    ],
-  },
+    "theses-widget": ["theses-widget.js"]
+  }
 };
