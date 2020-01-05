@@ -25,3 +25,11 @@ class RSAKeys(models.Model):
         signature = PKCS1_v1_5.new(key).sign(ticket_hash)
         sign_as_int = int.from_bytes(signature, 'big')
         return sign_as_int
+
+    def verify_ticket(self, signed_data, data):
+        key = RSA.importKey(self.public_key)
+        signature = PKCS1_v1_5.new(key)
+        data_hash = SHA256.new(data)
+        if signature.verify(data_hash, signed_data):
+            return True
+        return False
