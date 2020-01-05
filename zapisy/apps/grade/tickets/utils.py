@@ -1,6 +1,4 @@
-from apps.grade.poll.models import Poll
-from apps.users.models import Student
-
-
-def student_entitled_to_poll(student: Student, poll: Poll):
-    return poll.is_student_entitled_to_poll(student)
+# from apps.grade.poll.models.poll import Poll
+# from apps.users.models import Student
+# from apps.grade.tickets.model.rsa_keys import RSAKeys
+# from django.db import models

@@ -4,9 +4,10 @@ from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_v1_5
 
 
-class RSAkeys(models.Model):
-    poll = models.ForeignKey('poll.Poll',
-                             verbose_name='ankieta', on_delete=models.CASCADE)
+class RSAKeys(models.Model):
+    poll = models.OneToOneField('poll.Poll',
+                                verbose_name='ankieta',
+                                on_delete=models.CASCADE)
     private_key = models.TextField(verbose_name='klucz prywatny')
     public_key = models.TextField(verbose_name='klucz publiczny')
 

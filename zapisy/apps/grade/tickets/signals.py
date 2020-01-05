@@ -1,12 +1,12 @@
 from Crypto.PublicKey import RSA
-from apps.grade.poll.models import Poll
-from apps.grade.tickets.models import RSAKeys
+from apps.grade.poll.models.poll import Poll
+from apps.grade.tickets.models.rsa_keys import RSAKeys
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 
 @receiver(post_save, sender=Poll)
-def receive_function(sender, instance, created, **kwargs):
+def save_keys_on_poll_created(sender, instance, created, **kwargs):
     if created:
         keys = generate_key()
         save_keys(instance, keys)
