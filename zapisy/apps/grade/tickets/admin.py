@@ -1,3 +1,6 @@
-# from django.contrib import admin
+from django.contrib import admin
+from apps.grade.tickets.models.rsa_keys import RSAKeys
+from apps.grade.tickets.models.used_ticket import UsedTicket
 
-# Register your models here.
+admin.site.register(RSAKeys)
+admin.site.register(UsedTicket)
