@@ -1,8 +1,9 @@
 from django import forms
 from crispy_forms.helper import FormHelper
-from crispy_forms.layout import Submit, Layout, Row, Column
-from .models import Thesis, Remark, MAX_THESIS_TITLE_LEN
-from .enums import ThesisKind, ThesisStatus
+from crispy_forms.layout import Submit, Layout, Row, Column, HTML, Field
+#from custom_crispy import RadioButtons
+from .models import Thesis, Remark, Vote, MAX_THESIS_TITLE_LEN, MAX_ASSIGNED_STUDENTS
+from .enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.users.models import Employee, Student
 
 
@@ -15,6 +16,12 @@ class ThesisFormAdmin(forms.ModelForm):
 class RemarkFormAdmin(forms.ModelForm):
     class Meta:
         model = Remark
+        fields = '__all__'
+
+
+class VoteFormAdmin(forms.ModelForm):
+    class Meta:
+        model = Vote
         fields = '__all__'
 
 
@@ -66,13 +73,13 @@ class ThesisForm(ThesisFormBase):
                 Column('reserved_until', css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
-            'description'
+            Field('description', css_class='form-group mt-3')
         )
         self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
 
 
 class EditThesisForm(ThesisFormBase):
-    students = forms.ModelMultipleChoiceField(queryset=Student.objects.all(), required=False,
+    students = forms.ModelMultipleChoiceField(queryset=Student.objects.all(), required=False, label="Przypisani studenci",
                                               widget=forms.SelectMultiple(attrs={'size': '10'}))
 
     def __init__(self, user, *args, **kwargs):
@@ -91,15 +98,16 @@ class EditThesisForm(ThesisFormBase):
                 css_class='form-row'
             ),
             'students',
+            HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'),
             'description'
         )
         self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
 
     def clean_students(self):
         students = self.cleaned_data['students']
-        if len(students) > 2:
+        if len(students) > MAX_ASSIGNED_STUDENTS:
             raise forms.ValidationError(
-                "Możesz przypisać maksymalnie 2 studentów")
+                "Możesz przypisać maksymalnie "+str(MAX_ASSIGNED_STUDENTS)+" studentów")
         return students
 
 
@@ -116,3 +124,19 @@ class RemarkForm(forms.ModelForm):
         self.helper.form_show_labels = False
         self.helper.form_method = 'POST'
         self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
+
+
+class VoteForm(forms.ModelForm):
+    class Meta:
+        model = Vote
+        fields = ['vote']
+
+    vote = forms.ChoiceField(choices=ThesisVote.choices(),
+                             widget=forms.RadioSelect(attrs={'onclick': 'this.form.submit();'}))
+
+    def __init__(self, *args, **kwargs):
+        super(VoteForm, self).__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_show_labels = False
+        self.helper.form_method = 'POST'
+

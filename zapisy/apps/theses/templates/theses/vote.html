@@ -15,12 +15,9 @@
 <div id="thesis-root">
     <form method="POST" class="post-form">
         <h1 class="d-inline-block">
-            {% if new_thesis %}
-                Dodawanie nowej pracy dyplomowej
-            {% else %}
-                Edycja pracy dyplomowej
-            {% endif %}
+            Oddanie głosu na pracę dyplomową
         </h1>
+    <form method="POST" class="post-form">
         {% csrf_token %}
         {% crispy thesis_form %}
     </form>

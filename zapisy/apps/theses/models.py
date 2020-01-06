@@ -3,12 +3,43 @@ from django.contrib.auth.models import User
 from django.db import models
 from datetime import datetime, timedelta
 from apps.users.models import Student, Employee
-from apps.theses.enums import ThesisKind, ThesisStatus
+from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from datetime import date
 from apps.theses.users import is_theses_board_member
+from apps.theses.validators import validate_num_required_votes, validate_master_rejecter
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
+MAX_ASSIGNED_STUDENTS = 2
+
+
+class ThesesSystemSettings(models.Model):
+    num_required_votes = models.SmallIntegerField(
+        verbose_name="Liczba głosów wymaganych do zaakceptowania",
+        validators=[validate_num_required_votes]
+    )
+    master_rejecter = models.ForeignKey(
+        Employee, null=True, on_delete=models.PROTECT,
+        verbose_name="Członek komisji odpowiedzialny za zwracanie prac do poprawek",
+        validators=[validate_master_rejecter]
+    )
+
+    def __str__(self):
+        return "Ustawienia systemu"
+
+    class Meta:
+        verbose_name = "ustawienia systemu prac dyplomowych"
+        verbose_name_plural = "ustawienia systemu prac dyplomowych"
+
+
+class Vote(models.Model):
+    owner = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="vote_owner")
+    vote = models.SmallIntegerField(choices=ThesisVote.choices())
+
+    class Meta:
+        verbose_name = "głos"
+        verbose_name_plural = "głosy"
 
 
 class Remark(models.Model):
@@ -61,6 +92,8 @@ class Thesis(models.Model):
 
     # The "official" rejection reason, filled out by board member
     remarks = models.ManyToManyField(Remark, blank=True)
+
+    votes = models.ManyToManyField(Vote, blank=True)
 
     class Meta:
         verbose_name = "praca dyplomowa"

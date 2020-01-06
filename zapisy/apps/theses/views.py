@@ -5,12 +5,13 @@ from django.urls import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib import messages
 from apps.users.decorators import employee_required
 from django.utils import timezone
-from apps.theses.models import Thesis, Remark
-from apps.theses.enums import ThesisKind, ThesisStatus
-from apps.theses.users import is_theses_board_member
+from apps.theses.models import Thesis, Remark, Vote
+from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
+from apps.theses.users import is_theses_board_member, get_theses_board
 from apps.theses.forms import ThesisForm, EditThesisForm, RemarkForm
 from apps.users.models import BaseUser, Employee
 
@@ -58,6 +59,19 @@ def view_thesis(request, id):
     can_see_remarks = (board_member or request.user.is_staff or
                        request.user == thesis.advisor or
                        request.user == thesis.supporting_advisor)
+    all_voters = get_theses_board()
+    votes = []
+    for vote in thesis.votes.all():
+        votes.append({'owner': vote.owner,
+                      'vote': vote.get_vote_display()})
+    print(votes)
+    for voter in all_voters:
+        try:
+            thesis.votes.get(owner=voter)
+        except Vote.DoesNotExist:
+            votes.append({'owner': voter,
+                          'vote': ThesisVote.NONE.display})
+
     remarks = None
 
     if board_member:
@@ -65,7 +79,7 @@ def view_thesis(request, id):
     elif can_see_remarks:
         remarks = thesis.remarks.all()
 
-    form = None
+    remarkform = None
 
     if board_member:
         try:
@@ -76,22 +90,22 @@ def view_thesis(request, id):
         #edit existing remark
         if remark:
             if request.method == "POST":
-                form = RemarkForm(request.POST, instance=remark)
-                if form.is_valid():
-                    post = form.save(commit=False)
+                remarkform = RemarkForm(request.POST, instance=remark)
+                if remarkform.is_valid():
+                    post = remarkform.save(commit=False)
                     post.modified = timezone.now()
                     post.save()
                     messages.success(request, 'Zapisano uwagę')
                     return redirect('theses:selected_thesis', id=id)
             else:
-                form = RemarkForm(instance=remark)
+                remarkform = RemarkForm(instance=remark)
 
         #create new remark and add to remarks in thesis
         else:
             if request.method == "POST":
-                form = RemarkForm(request.POST)
-                if form.is_valid():
-                    post = form.save(commit=False)
+                remarkform = RemarkForm(request.POST)
+                if remarkform.is_valid():
+                    post = remarkform.save(commit=False)
                     post.modified = timezone.now()
                     post.author = request.user.employee
                     post.save()
@@ -102,13 +116,14 @@ def view_thesis(request, id):
                     messages.success(request, 'Zapisano uwagę')
                     return redirect('theses:selected_thesis', id=id)
             else:
-                form = RemarkForm()
+                remarkform = RemarkForm()
 
     return render(request, 'theses/thesis.html', {'thesis': thesis, 'thesiskind': thesiskind,
                                                   'board_member': board_member,
                                                   'can_see_remarks': can_see_remarks,
                                                   'remarks': remarks,
-                                                  'remark_form': form})
+                                                  'remark_form': remarkform,
+                                                  'votes': votes})
 
 
 @login_required
