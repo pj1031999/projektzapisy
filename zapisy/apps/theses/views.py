@@ -30,11 +30,12 @@ def list_all(request):
         kind = p.get_kind_display()
         status = p.get_status_display()
         has_been_accepted = p.has_been_accepted
+        is_mine = p.is_mine(request.user)
         advisor = p.advisor.__str__()
         url = reverse('theses:selected_thesis', None, [str(p.id)])
 
         record = {"id": p.id, "title": title, "is_available": is_available, "kind": kind,
-                  "status": status, "has_been_accepted": has_been_accepted, "url": url,
+                  "status": status, "has_been_accepted": has_been_accepted, "is_mine": is_mine, "url": url,
                   "advisor": advisor}
 
         thesis_list.append(record)
@@ -73,7 +74,7 @@ def view_thesis(request, id):
         except Remark.DoesNotExist:
             remark = None
 
-        #edit existing remark
+        # edit existing remark
         if remark:
             if request.method == "POST":
                 form = RemarkForm(request.POST, instance=remark)
@@ -86,7 +87,7 @@ def view_thesis(request, id):
             else:
                 form = RemarkForm(instance=remark)
 
-        #create new remark and add to remarks in thesis
+        # create new remark and add to remarks in thesis
         else:
             if request.method == "POST":
                 form = RemarkForm(request.POST)
