@@ -131,12 +131,10 @@ class VoteForm(forms.ModelForm):
         model = Vote
         fields = ['vote']
 
-    vote = forms.ChoiceField(choices=ThesisVote.choices(),
-                             widget=forms.RadioSelect(attrs={'onclick': 'this.form.submit();'}))
-
     def __init__(self, *args, **kwargs):
         super(VoteForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_show_labels = False
         self.helper.form_method = 'POST'
+        self.helper.form_show_labels = False
+        self.helper.add_input(Submit('submit', 'Zapisz', css_class='btn-primary'))
 

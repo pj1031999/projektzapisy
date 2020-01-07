@@ -7,4 +7,5 @@ urlpatterns = [
     path("<int:id>", views.view_thesis, name="selected_thesis"),
     path('<int:id>/edit', views.edit_thesis, name='edit_thesis'),
     path("new", views.new_thesis, name="new_thesis"),
+    path('<int:id>/vote', views.vote_for_thesis, name="vote_thesis"),
 ]

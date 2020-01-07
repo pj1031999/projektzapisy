@@ -1,6 +1,7 @@
 import json
 
 from django.conf import settings
+from django.http import Http404
 from django.urls import reverse
 from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
@@ -12,7 +13,7 @@ from django.utils import timezone
 from apps.theses.models import Thesis, Remark, Vote
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.theses.users import is_theses_board_member, get_theses_board
-from apps.theses.forms import ThesisForm, EditThesisForm, RemarkForm
+from apps.theses.forms import ThesisForm, EditThesisForm, RemarkForm, VoteForm
 from apps.users.models import BaseUser, Employee
 
 
@@ -159,7 +160,6 @@ def new_thesis(request):
         Show form for create new thesis
     """
 
-    new_thesis = True
     if request.method == "POST":
         form = ThesisForm(request.user, request.POST)
         # check whether it's valid:
@@ -173,4 +173,47 @@ def new_thesis(request):
     else:
         form = ThesisForm(request.user)
 
-    return render(request, 'theses/thesis_form.html', {'thesis_form': form, 'new_thesis': new_thesis})
+    return render(request, 'theses/thesis_form.html', {'thesis_form': form, 'new_thesis': True})
+
+
+@login_required
+@employee_required
+def vote_for_thesis(request, id):
+    """
+        Show vote form for selected thesis
+    """
+
+    if not is_theses_board_member(request.user):
+        raise Http404
+
+    thesis = get_object_or_404(Thesis, id=id)
+
+    try:
+        vote = thesis.votes.get(owner=request.user.employee)
+    except Vote.DoesNotExist:
+        vote = None
+
+    if request.method == "POST":
+        if vote:
+            form = VoteForm(request.POST, instance=vote)
+        else:
+            form = VoteForm(request.POST)
+
+        if form.is_valid():
+            post = form.save(commit=False)
+            if not vote:
+                post.owner = request.user.employee
+            post.save()
+
+            if not vote:
+                new_vote = Vote.objects.get(pk=post.pk)
+                thesis.votes.add(new_vote)
+
+            messages.success(request, 'Zapisano głos')
+            return redirect('theses:selected_thesis', id=id)
+    elif vote:
+        form = VoteForm(instance=vote)
+    else:
+        form = VoteForm()
+
+    return render(request, 'theses/vote.html', {'vote_form': form, 'thesis': thesis})

@@ -80,7 +80,7 @@
     {% if can_see_remarks %}
         <h2 class="mt-4">Głosy</h2>
         {% if board_member %}
-
+            <p><a href="{% url 'theses:vote_thesis' thesis.id %}">Oddaj głos na tę pracę</a></p>
         {% endif %}
         {% for vote in votes %}
             <button type="button"

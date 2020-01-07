@@ -13,13 +13,12 @@
 
 {% block all-content %}
 <div id="thesis-root">
-    <form method="POST" class="post-form">
-        <h1 class="d-inline-block">
-            Oddanie głosu na pracę dyplomową
-        </h1>
+    <h1 class="d-inline-block">
+        Oddanie głosu na pracę dyplomową
+    </h1>
     <form method="POST" class="post-form">
         {% csrf_token %}
-        {% crispy thesis_form %}
+        {% crispy vote_form %}
     </form>
 </div>
 {% endblock %}
