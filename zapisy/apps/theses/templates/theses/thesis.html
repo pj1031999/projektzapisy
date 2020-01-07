@@ -88,9 +88,13 @@
             <br/>
         {% endif %}
         {% for remark in remarks %}
-            <span class="badge badge-secondary">{{ remark.modified }}</span>
-            <h5 class="font-weight-bold">{{ remark.author }}</h5>
+        <div class="mb-2">
+            <h5 class="d-inline-block">
+                {{ remark.author }}
+                <small class="text-muted">{{ remark.modified }}</small>
+            </h5>
             <p>{{ remark.text }}</p>
+        </div>
         {% endfor %}
     {% endif %}
 </div>

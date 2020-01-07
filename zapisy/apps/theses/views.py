@@ -57,8 +57,8 @@ def view_thesis(request, id):
     thesiskind = {int(i): i.display for i in ThesisKind}
     board_member = is_theses_board_member(request.user)
     can_see_remarks = (board_member or request.user.is_staff or
-                       request.user == thesis.advisor or
-                       request.user == thesis.supporting_advisor)
+                       request.user == thesis.advisor.user or
+                       request.user == thesis.supporting_advisor.user)
     remarks = None
 
     if board_member:

@@ -68,7 +68,8 @@ class ThesisForm(ThesisFormBase):
             ),
             'description'
         )
-        self.helper.add_input(Submit('submit', 'Dodaj', css_class='btn-primary'))
+        self.helper.add_input(
+            Submit('submit', 'Dodaj', css_class='btn-primary'))
 
 
 class EditThesisForm(ThesisFormBase):
@@ -93,7 +94,8 @@ class EditThesisForm(ThesisFormBase):
             'students',
             'description'
         )
-        self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
+        self.helper.add_input(
+            Submit('submit', 'Edytuj', css_class='btn-primary'))
 
     def clean_students(self):
         students = self.cleaned_data['students']
@@ -108,11 +110,13 @@ class RemarkForm(forms.ModelForm):
         model = Remark
         fields = ['text']
 
-    text = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': '5'}))
+    text = forms.CharField(
+        required=False, widget=forms.Textarea(attrs={'rows': '5'}))
 
     def __init__(self, *args, **kwargs):
         super(RemarkForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.form_show_labels = False
         self.helper.form_method = 'POST'
-        self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
+        self.helper.add_input(
+            Submit('submit', 'Edytuj', css_class='btn-primary'))
