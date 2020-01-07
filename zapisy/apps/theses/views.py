@@ -1,19 +1,20 @@
 import json
 
 from django.conf import settings
-from django.http import Http404
-from django.urls import reverse
-from django.db.models import Q
-from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.contrib import messages
-from apps.users.decorators import employee_required
+from django.db.models import Q
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
-from apps.theses.models import Thesis, Remark, Vote
+
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
-from apps.theses.users import is_theses_board_member, get_theses_board
-from apps.theses.forms import ThesisForm, EditThesisForm, RemarkForm, VoteForm
+from apps.theses.forms import EditThesisForm, RemarkForm, ThesisForm, VoteForm
+from apps.theses.models import Remark, Thesis, Vote, get_theses_system_settings
+from apps.theses.users import get_theses_board, is_theses_board_member
+from apps.users.decorators import employee_required
 from apps.users.models import BaseUser, Employee
 
 
@@ -208,6 +209,11 @@ def vote_for_thesis(request, id):
             if not vote:
                 new_vote = Vote.objects.get(pk=post.pk)
                 thesis.votes.add(new_vote)
+
+            #check number of votes and change thesis status
+            settings = get_theses_system_settings()
+            if settings:
+                settings.change_status(thesis)
 
             messages.success(request, 'Zapisano głos')
             return redirect('theses:selected_thesis', id=id)

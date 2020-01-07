@@ -24,12 +24,23 @@ class ThesesSystemSettings(models.Model):
         validators=[validate_master_rejecter]
     )
 
+    def change_status(self, thesis):
+        if thesis.get_accepted_votes() >= self.num_required_votes:
+            thesis.status = ThesisStatus.ACCEPTED
+            thesis.save()
+        print("HELLO")
+
     def __str__(self):
         return "Ustawienia systemu"
 
     class Meta:
         verbose_name = "ustawienia systemu prac dyplomowych"
         verbose_name_plural = "ustawienia systemu prac dyplomowych"
+
+
+def get_theses_system_settings():
+    s = ThesesSystemSettings.objects.all()
+    return None if s is None else s[0]
 
 
 class Vote(models.Model):
@@ -57,19 +68,10 @@ class Thesis(models.Model):
     """
         Thesis model
     """
-    #objects = models.Manager()
-    #rest_objects = APIManager()
 
-    # def __init__(self, *args, **kwargs):
-    #   super().__init__(*args, **kwargs)
-    # Save the status so that, when saving, we can determine whether or not it changed
-    # See https://stackoverflow.com/a/1793323
-    # If pk is None, we are creating this model, so don't save the status
-    #self.__original_status = self.status if self.pk is not None else None
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
-    # the related_name's below are necessary because we have multiple foreign keys pointing
-    # to the same model and Django isn't smart enough to generate unique reverse accessors
+
     advisor = models.ForeignKey(
         Employee, on_delete=models.PROTECT, blank=True, null=True,
         related_name='thesis_advisor'
@@ -79,7 +81,8 @@ class Thesis(models.Model):
         related_name='thesis_supporting_advisor'
     )
     kind = models.SmallIntegerField(choices=ThesisKind.choices())
-    status = models.SmallIntegerField(choices=ThesisStatus.choices(), blank=True, null=True)
+    status = models.SmallIntegerField(
+        choices=ThesisStatus.choices(), blank=True, null=True)
     # How long the assigned student(s) has/have to complete their work on this thesis
     # Note that this is only a convenience field for the users, the system
     # does not enforce this in any way
@@ -111,6 +114,9 @@ class Thesis(models.Model):
                 (self.advisor is not None and user == self.advisor.user) or
                 (self.supporting_advisor is not None and user == self.supporting_advisor.user) or
                 user.is_staff)
+
+    def get_accepted_votes(self):
+        return len(self.votes.filter(vote=ThesisVote.ACCEPTED))
 
     @property
     def is_reserved(self):
