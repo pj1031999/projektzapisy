@@ -68,7 +68,6 @@ class Thesis(models.Model):
     """
         Thesis model
     """
-
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
 
@@ -123,6 +122,11 @@ class Thesis(models.Model):
     def get_accepted_votes(self):
         return len(self.votes.filter(vote=ThesisVote.ACCEPTED))
 
+    def is_mine(self, user):
+        return ((self.advisor is not None and user == self.advisor.user) or
+                (self.supporting_advisor is not None and user == self.supporting_advisor.user) or
+                (self.students is not None and self.students.filter(user=user).exists()))
+
     @property
     def is_reserved(self):
         return self.reserved_until and date.today() <= self.reserved_until
@@ -130,3 +134,22 @@ class Thesis(models.Model):
     @property
     def has_been_accepted(self):
         return self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS and self.status != ThesisStatus.BEING_EVALUATED
+
+
+class ThesesSystemSettings(models.Model):
+    num_required_votes = models.SmallIntegerField(
+        verbose_name="Liczba głosów wymaganych do zaakceptowania",
+        validators=[validate_num_required_votes]
+    )
+    master_rejecter = models.ForeignKey(
+        Employee, null=True, on_delete=models.PROTECT,
+        verbose_name="Członek komisji odpowiedzialny za zwracanie prac do poprawek",
+        validators=[validate_master_rejecter]
+    )
+
+    def __str__(self):
+        return "Ustawienia systemu"
+
+    class Meta:
+        verbose_name = "ustawienia systemu prac dyplomowych"
+        verbose_name_plural = "ustawienia systemu prac dyplomowych"

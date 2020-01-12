@@ -34,16 +34,19 @@ export default Vue.extend({
   <div class="card bg-light">
     <div class="card-body">
       <div class="row">
-        <div class="col-md">
+        <div class="col-lg">
           <TextFilter
-            filterKey="name-filter"
+            filterKey="title-filter"
             property="title"
             placeholder="Nazwa pracy dyplomowej"
           />
         </div>
-        <div class="col-md">
+        <div class="col-lg">
+          <TextFilter filterKey="advisor-filter" property="advisor" placeholder="Promotor" />
+        </div>
+        <div class="col-lg">
           <SelectFilter
-            filterKey="type-filter"
+            filterKey="kind-filter"
             property="kind"
             :options="allKinds"
             placeholder="Typ pracy dyplomowej"
@@ -51,13 +54,17 @@ export default Vue.extend({
         </div>
       </div>
       <div class="row">
-        <div class="col-md">
+        <div class="col-lg">
           <CheckFilter
             filterKey="available-filter"
             property="is_available"
             label="Pokaż tylko dostępne prace"
           />
         </div>
+        <div class="col-lg">
+          <CheckFilter filterKey="mine-filter" property="is_mine" label="Pokaż tylko moje" />
+        </div>
+        <div class="col-lg"></div>
       </div>
     </div>
   </div>
