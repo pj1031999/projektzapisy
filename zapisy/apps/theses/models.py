@@ -29,7 +29,6 @@ class ThesesSystemSettings(models.Model):
         if thesis.get_accepted_votes() >= self.num_required_votes:
             thesis.status = ThesisStatus.ACCEPTED
             thesis.save()
-        print("HELLO")
 
     def __str__(self):
         return "Ustawienia systemu"
@@ -103,12 +102,10 @@ class Thesis(models.Model):
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
 
-
     def delete(self, *args, **kwargs):
         self.remarks.all().delete()
         self.votes.all().delete()
         super().delete(*args, **kwargs)
-
 
     def get_kind_display(self):
         return ThesisKind(self.kind).display

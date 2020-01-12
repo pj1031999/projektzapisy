@@ -66,7 +66,6 @@ def view_thesis(request, id):
     for vote in thesis.votes.all():
         votes.append({'owner': vote.owner,
                       'vote': vote.get_vote_display()})
-    print(votes)
     for voter in all_voters:
         try:
             thesis.votes.get(owner=voter)
@@ -212,9 +211,9 @@ def vote_for_thesis(request, id):
                 thesis.votes.add(new_vote)
 
             #check number of votes and change thesis status
-            settings = get_theses_system_settings()
-            if settings:
-                settings.change_status(thesis)
+            settings_instance = get_theses_system_settings()
+            if settings_instance:
+                settings_instance.change_status(thesis)
 
             messages.success(request, 'Zapisano głos')
             return redirect('theses:selected_thesis', id=id)

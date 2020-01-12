@@ -102,7 +102,6 @@ class EditThesisForm(ThesisFormBase):
                 css_class='form-row'
             )
 
-
         self.helper.layout = Layout(
             'title',
             Row(
@@ -124,7 +123,7 @@ class EditThesisForm(ThesisFormBase):
         students = self.cleaned_data['students']
         if len(students) > MAX_ASSIGNED_STUDENTS:
             raise forms.ValidationError(
-                "Możesz przypisać maksymalnie "+str(MAX_ASSIGNED_STUDENTS)+" studentów")
+                "Możesz przypisać maksymalnie " + str(MAX_ASSIGNED_STUDENTS) + " studentów")
         return students
 
 
@@ -154,4 +153,3 @@ class VoteForm(forms.ModelForm):
         self.helper.form_method = 'POST'
         self.helper.form_show_labels = False
         self.helper.add_input(Submit('submit', 'Zapisz', css_class='btn-primary'))
-
