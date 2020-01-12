@@ -143,7 +143,8 @@ def edit_thesis(request, id):
         if form.is_valid():
             post = form.save(commit=False)
             post.modified = timezone.now()
-            post.status = thesis_status
+            if not request.user.is_staff:
+                post.status = thesis_status
             post.save()
             form.save_m2m()
             messages.success(request, 'Zapisano zmiany')

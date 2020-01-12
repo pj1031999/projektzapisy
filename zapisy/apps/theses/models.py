@@ -1,12 +1,13 @@
+from datetime import date, datetime, timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
-from datetime import datetime, timedelta
-from apps.users.models import Student, Employee
+
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
-from datetime import date
 from apps.theses.users import is_theses_board_member
-from apps.theses.validators import validate_num_required_votes, validate_master_rejecter
+from apps.theses.validators import validate_master_rejecter, validate_num_required_votes
+from apps.users.models import Employee, Student
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
@@ -101,6 +102,13 @@ class Thesis(models.Model):
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
+
+
+    def delete(self, *args, **kwargs):
+        self.remarks.all().delete()
+        self.votes.all().delete()
+        super().delete(*args, **kwargs)
+
 
     def get_kind_display(self):
         return ThesisKind(self.kind).display

@@ -1,7 +1,6 @@
 from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout, Row, Column, HTML, Field
-#from custom_crispy import RadioButtons
 from .models import Thesis, Remark, Vote, MAX_THESIS_TITLE_LEN, MAX_ASSIGNED_STUDENTS
 from .enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.users.models import Employee, Student
@@ -81,9 +80,29 @@ class ThesisForm(ThesisFormBase):
 class EditThesisForm(ThesisFormBase):
     students = forms.ModelMultipleChoiceField(queryset=Student.objects.all(), required=False, label="Przypisani studenci",
                                               widget=forms.SelectMultiple(attrs={'size': '10'}))
+    votes = forms.ModelMultipleChoiceField(queryset=Vote.objects.all(), required=False)
+    remarks = forms.ModelMultipleChoiceField(queryset=Remark.objects.all(), required=False)
+    status = forms.ChoiceField(choices=ThesisStatus.choices(), label="Status")
 
     def __init__(self, user, *args, **kwargs):
         super(EditThesisForm, self).__init__(user, *args, **kwargs)
+
+        if user.is_staff:
+            special_row = Row(
+                Column('kind', css_class='form-group col-md-2'),
+                Column('reserved_until', css_class='form-group col-md-4'),
+                Column('status', css_class='form-group col-md-6'),
+                css_class='form-row'
+            )
+        else:
+            self.fields['status'].required = False
+            special_row = Row(
+                Column('kind', css_class='form-group col-md-6'),
+                Column('reserved_until', css_class='form-group col-md-6'),
+                css_class='form-row'
+            )
+
+
         self.helper.layout = Layout(
             'title',
             Row(
@@ -92,14 +111,12 @@ class EditThesisForm(ThesisFormBase):
                        css_class='form-group col-md-6 mb-0'),
                 css_class='form-row'
             ),
-            Row(
-                Column('kind', css_class='form-group col-md-6 mb-0'),
-                Column('reserved_until', css_class='form-group col-md-6 mb-0'),
-                css_class='form-row'
-            ),
+            special_row,
             'students',
             HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'),
-            'description'
+            'description',
+            Field('votes', type="hidden"),
+            Field('remarks', type="hidden")
         )
         self.helper.add_input(Submit('submit', 'Edytuj', css_class='btn-primary'))
 
