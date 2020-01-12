@@ -25,22 +25,12 @@ class ThesesSystemSettings(models.Model):
         validators=[validate_master_rejecter]
     )
 
-    def change_status(self, thesis):
-        if thesis.get_accepted_votes() >= self.num_required_votes:
-            thesis.status = ThesisStatus.ACCEPTED
-            thesis.save()
-
     def __str__(self):
         return "Ustawienia systemu"
 
     class Meta:
         verbose_name = "ustawienia systemu prac dyplomowych"
         verbose_name_plural = "ustawienia systemu prac dyplomowych"
-
-
-def get_theses_system_settings():
-    s = ThesesSystemSettings.objects.all()
-    return None if s is None else s[0]
 
 
 class Vote(models.Model):
@@ -124,8 +114,10 @@ class Thesis(models.Model):
 
     def is_mine(self, user):
         return ((self.advisor is not None and user == self.advisor.user) or
-                (self.supporting_advisor is not None and user == self.supporting_advisor.user) or
-                (self.students is not None and self.students.filter(user=user).exists()))
+                (self.supporting_advisor is not None and user == self.supporting_advisor.user))
+
+    def is_student_assigned(self, user):
+        return self.students is not None and self.students.filter(user=user).exists()
 
     @property
     def is_reserved(self):

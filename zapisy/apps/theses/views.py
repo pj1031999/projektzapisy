@@ -12,8 +12,9 @@ from django.utils import timezone
 
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.theses.forms import EditThesisForm, RemarkForm, ThesisForm, VoteForm
-from apps.theses.models import Remark, Thesis, Vote, get_theses_system_settings
+from apps.theses.models import Remark, Thesis, Vote
 from apps.theses.users import get_theses_board, is_theses_board_member
+from apps.theses.system_settings import change_status
 from apps.users.decorators import employee_required
 from apps.users.models import BaseUser, Employee
 
@@ -59,9 +60,7 @@ def view_thesis(request, id):
     thesis = get_object_or_404(Thesis, id=id)
     thesiskind = {int(i): i.display for i in ThesisKind}
     board_member = is_theses_board_member(request.user)
-    can_see_remarks = (board_member or request.user.is_staff or
-                       request.user == thesis.advisor or
-                       request.user == thesis.supporting_advisor)
+    can_see_remarks = (board_member or request.user.is_staff or thesis.is_mine(request.user))
     all_voters = get_theses_board()
     votes = []
     for vote in thesis.votes.all():
@@ -212,9 +211,7 @@ def vote_for_thesis(request, id):
                 thesis.votes.add(new_vote)
 
             #check number of votes and change thesis status
-            settings_instance = get_theses_system_settings()
-            if settings_instance:
-                settings_instance.change_status(thesis)
+            change_status(thesis)
 
             messages.success(request, 'Zapisano głos')
             return redirect('theses:selected_thesis', id=id)

@@ -1,13 +1,13 @@
 """Permits interaction with the theses system settings
 implemented as a single instance of models.ThesesSystemSettings
 """
-from . import models
-
+from .models import ThesesSystemSettings
+from .enums import ThesisStatus
 
 def _get_settings():
     # There should only be one such object created in migrations
     # Deleting it/adding new ones is disabled in the admin, see admin.py
-    return models.ThesesSystemSettings.objects.get()
+    return ThesesSystemSettings.objects.get()
 
 
 def get_num_required_votes():
@@ -20,3 +20,9 @@ def get_num_required_votes():
 def get_master_rejecter():
     """Get the special board member responsible for rejecting theses"""
     return _get_settings().master_rejecter
+
+
+def change_status(thesis):
+    if thesis.get_accepted_votes() >= get_num_required_votes():
+        thesis.status = ThesisStatus.ACCEPTED
+        thesis.save()
