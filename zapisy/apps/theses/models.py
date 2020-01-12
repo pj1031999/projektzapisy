@@ -6,6 +6,7 @@ from apps.users.models import Student, Employee
 from apps.theses.enums import ThesisKind, ThesisStatus
 from datetime import date
 from apps.theses.users import is_theses_board_member
+from .validators import validate_num_required_votes, validate_master_rejecter
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
@@ -92,3 +93,22 @@ class Thesis(models.Model):
     @property
     def has_been_accepted(self):
         return self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS and self.status != ThesisStatus.BEING_EVALUATED
+
+
+class ThesesSystemSettings(models.Model):
+    num_required_votes = models.SmallIntegerField(
+        verbose_name="Liczba głosów wymaganych do zaakceptowania",
+        validators=[validate_num_required_votes]
+    )
+    master_rejecter = models.ForeignKey(
+        Employee, null=True, on_delete=models.PROTECT,
+        verbose_name="Członek komisji odpowiedzialny za zwracanie prac do poprawek",
+        validators=[validate_master_rejecter]
+    )
+
+    def __str__(self):
+        return "Ustawienia systemu"
+
+    class Meta:
+        verbose_name = "ustawienia systemu prac dyplomowych"
+        verbose_name_plural = "ustawienia systemu prac dyplomowych"

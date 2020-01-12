@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 
 from apps.theses.forms import ThesisFormAdmin, RemarkFormAdmin
-from apps.theses.models import Thesis, Remark
+from apps.theses.models import Thesis, Remark, ThesesSystemSettings
 
 
 class ThesisAdmin(admin.ModelAdmin):
@@ -16,5 +16,19 @@ class RemarkAdmin(admin.ModelAdmin):
     form = RemarkFormAdmin
 
 
+class ThesesSystemSettingsAdmin(admin.ModelAdmin):
+    """Exactly one instance of ThesesSystemSettings is created
+    when applying migrations, and users should only be permitted
+    to modify that one instance, not create new ones or delete existing ones
+    """
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 admin.site.register(Thesis, ThesisAdmin)
 admin.site.register(Remark, RemarkAdmin)
+admin.site.register(ThesesSystemSettings, ThesesSystemSettingsAdmin)
