@@ -60,7 +60,9 @@ def view_thesis(request, id):
     thesis = get_object_or_404(Thesis, id=id)
     thesiskind = {int(i): i.display for i in ThesisKind}
     board_member = is_theses_board_member(request.user)
-    can_see_remarks = (board_member or request.user.is_staff or thesis.is_mine(request.user))
+    can_see_remarks = (
+        board_member or request.user.is_staff or thesis.is_mine(request.user))
+    not_has_been_accepted = not thesis.has_been_accepted
     all_voters = get_theses_board()
     votes = []
     for vote in thesis.votes.all():
@@ -122,6 +124,7 @@ def view_thesis(request, id):
     return render(request, 'theses/thesis.html', {'thesis': thesis, 'thesiskind': thesiskind,
                                                   'board_member': board_member,
                                                   'can_see_remarks': can_see_remarks,
+                                                  'not_has_been_accepted': not_has_been_accepted,
                                                   'remarks': remarks,
                                                   'remark_form': remarkform,
                                                   'votes': votes})
@@ -210,7 +213,7 @@ def vote_for_thesis(request, id):
                 new_vote = Vote.objects.get(pk=post.pk)
                 thesis.votes.add(new_vote)
 
-            #check number of votes and change thesis status
+            # check number of votes and change thesis status
             change_status(thesis)
 
             messages.success(request, 'Zapisano głos')

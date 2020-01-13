@@ -80,7 +80,9 @@
     {% if can_see_remarks %}
         <h2 class="mt-4">Głosy</h2>
         {% if board_member %}
-            <p><a href="{% url 'theses:vote_thesis' thesis.id %}">Oddaj głos na tę pracę</a></p>
+            {% if not_has_been_accepted %}
+                <p><a href="{% url 'theses:vote_thesis' thesis.id %}">Oddaj głos na tę pracę</a></p>
+            {% endif %}
         {% endif %}
         {% for vote in votes %}
             <button type="button"
@@ -98,22 +100,28 @@
         {% endfor %}
         <h2 class="mt-4">Uwagi</h2>
         {% if board_member %}
-            <h4>Edytuj swoją uwagę</h4>
-            <form method="POST" class="post-form">
-                {% csrf_token %}
-                {% crispy remark_form %}
-            </form>
-            <br/>
+            {% if not_has_been_accepted %}
+                <h4>Edytuj swoją uwagę</h4>
+                <form method="POST" class="post-form">
+                    {% csrf_token %}
+                    {% crispy remark_form %}
+                </form>
+                <br/>
+            {% endif %}
         {% endif %}
-        {% for remark in remarks %}
-        <div class="mb-2">
-            <h5 class="d-inline-block">
-                {{ remark.author }}
-                <small class="text-muted">{{ remark.modified }}</small>
-            </h5>
-            <p>{{ remark.text }}</p>
-        </div>
-        {% endfor %}
+        {% if remarks %}
+            {% for remark in remarks %}
+            <div class="mb-2">
+                <h5 class="d-inline-block">
+                    {{ remark.author }}
+                    <small class="text-muted">{{ remark.modified }}</small>
+                </h5>
+                <p>{{ remark.text }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            Brak uwag.
+        {% endif %}
     {% endif %}
 </div>
 {% endblock %}
