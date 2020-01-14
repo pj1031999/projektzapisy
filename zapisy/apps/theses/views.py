@@ -58,7 +58,6 @@ def view_thesis(request, id):
     """
 
     thesis = get_object_or_404(Thesis, id=id)
-    thesiskind = {int(i): i.display for i in ThesisKind}
     board_member = is_theses_board_member(request.user)
     can_see_remarks = (
         board_member or request.user.is_staff or thesis.is_mine(request.user))
@@ -77,7 +76,7 @@ def view_thesis(request, id):
 
     remarks = None
 
-    if board_member:
+    if board_member and not_has_been_accepted:
         remarks = thesis.remarks.exclude(author=request.user.employee)
     elif can_see_remarks:
         remarks = thesis.remarks.all()
@@ -121,7 +120,7 @@ def view_thesis(request, id):
             else:
                 remarkform = RemarkForm()
 
-    return render(request, 'theses/thesis.html', {'thesis': thesis, 'thesiskind': thesiskind,
+    return render(request, 'theses/thesis.html', {'thesis': thesis,
                                                   'board_member': board_member,
                                                   'can_see_remarks': can_see_remarks,
                                                   'not_has_been_accepted': not_has_been_accepted,
