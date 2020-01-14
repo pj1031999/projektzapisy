@@ -34,7 +34,8 @@ def list_all(request):
         kind = p.get_kind_display()
         status = p.get_status_display()
         has_been_accepted = p.has_been_accepted
-        is_mine = p.is_mine(request.user)
+        is_mine = p.is_mine(request.user) or p.is_student_assigned(
+            request.user) or p.is_supporting_advisor_assigned(request.user)
         advisor = p.advisor.__str__()
         url = reverse('theses:selected_thesis', None, [str(p.id)])
 
@@ -61,12 +62,23 @@ def view_thesis(request, id):
     board_member = is_theses_board_member(request.user)
     can_see_remarks = (
         board_member or request.user.is_staff or thesis.is_mine(request.user))
+    can_edit_thesis = (request.user.is_staff or thesis.is_mine(request.user))
     not_has_been_accepted = not thesis.has_been_accepted
+
+    students = []
+    for student in thesis.students.all():
+        students.append(student.__str__())
+
     all_voters = get_theses_board()
     votes = []
     for vote in thesis.votes.all():
-        votes.append({'owner': vote.owner,
-                      'vote': vote.get_vote_display()})
+        if not vote.is_mine(request.user):
+            votes.append({'owner': vote.owner,
+                          'vote': vote.get_vote_display()})
+        else:
+            votes.insert(0, {'owner': vote.owner,
+                             'vote': vote.get_vote_display()})
+
     for voter in all_voters:
         try:
             thesis.votes.get(owner=voter)
@@ -121,8 +133,10 @@ def view_thesis(request, id):
                 remarkform = RemarkForm()
 
     return render(request, 'theses/thesis.html', {'thesis': thesis,
+                                                  'students': students,
                                                   'board_member': board_member,
                                                   'can_see_remarks': can_see_remarks,
+                                                  'can_edit_thesis': can_edit_thesis,
                                                   'not_has_been_accepted': not_has_been_accepted,
                                                   'remarks': remarks,
                                                   'remark_form': remarkform,

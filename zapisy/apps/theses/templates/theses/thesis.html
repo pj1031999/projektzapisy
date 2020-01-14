@@ -17,7 +17,7 @@
         <h1 class="d-inline-block">
             {{ thesis.title }}
         </h1>
-        {% if user.is_staff or thesis.advisor == request.user.employee %}
+        {% if can_edit_thesis %}
             <a class="btn btn-sm btn-outline-info float-right align-bottom" href="{% url 'theses:edit_thesis' thesis.id %}">Edytuj</a>
         {% endif %}
     </div>
@@ -57,6 +57,18 @@
             </td>
         </tr>
         <tr>
+            <th scope="row">Studenci</th>
+            <td>
+                {% if students %}
+                    {% for student in students %}
+                        {{ student }}&nbsp;
+                    {% endfor %}
+                {% else %}
+                    Brak
+                {% endif %}
+            </td>
+        </tr>
+        <tr>
             <th scope="row">Zarezerwowana do</th>
             <td>{% if thesis.reserved_until %}
                     {{ thesis.reserved_until }}
@@ -78,25 +90,55 @@
     <h2>Opis pracy dyplomowej</h2>
     {{ thesis.description }}
     {% if can_see_remarks %}
-        <h2 class="mt-4">Głosy</h2>
-        {% if board_member %}
-            {% if not_has_been_accepted %}
-                <p><a href="{% url 'theses:vote_thesis' thesis.id %}">Oddaj głos na tę pracę</a></p>
-            {% endif %}
-        {% endif %}
+        <div class="d-flex justflex-row mt-4">
+            <h2 class="mr-4 d-inline-block">Głosy</h2>
+        </div>
         {% for vote in votes %}
-            <button type="button"
-                {% if vote.vote == "zaakceptowana" %}
-                    class="btn mb-3 btn-success"
-                {% elif vote.vote == "odrzucona" %}
-                    class="btn mb-3 btn-danger"
-                {% else %}
-                    class="btn mb-3 btn-primary"
-                {% endif %}
-            style="cursor: default;" disabled>
-                    <h5 class="card-title">{{ vote.owner }}</h5>
-                    <span>{{ vote.vote }}</span>
-            </button>
+            {% if vote.owner == request.user.employee %}
+                <a 
+                    {% if vote.vote == "zaakceptowana"%}
+                        class="btn mb-3 btn-success"
+                    {% elif vote.vote == "odrzucona" %}
+                        class="btn mb-3 btn-danger"
+                    {% elif vote.vote == "brak głosu" %}
+                        class="btn mb-3 btn-primary"
+                    {% endif %}
+                    {% if not_has_been_accepted %}
+                        href="{% url 'theses:vote_thesis' thesis.id %}"
+                    {% else %}
+                        href="#0"
+                        style="cursor: default"
+                    {% endif %}
+                >
+                    <h5 class="card-title">Mój głos</h5>
+                    <p class="p-0 m-0">{{ vote.vote }}</p>
+                    <small class="p-0 m-0">
+                    {% if not_has_been_accepted %}
+                        {% if vote.vote == "brak głosu" %}
+                            (Oddaj głos)
+                        {% else %}
+                            (Zmień głos)
+                        {% endif %}
+                    {% else %}
+                        &nbsp;
+                    {% endif %}
+                    </small>
+                </a>
+            {% else %}
+                <button style="cursor: default" disabled
+                    {% if vote.vote == "zaakceptowana"%}
+                        class="btn mb-3 btn-outline-success"
+                    {% elif vote.vote == "odrzucona" %}
+                        class="btn mb-3 btn-outline-danger"
+                    {% elif vote.vote == "brak głosu" %}
+                        class="btn mb-3 btn-outline-primary"
+                    {% endif %}
+                >
+                        <h5 class="card-title">{{ vote.owner }}</h5>
+                        <p class="p-0 m-0">{{ vote.vote }}</p>
+                        <small class="p-0 m-0">&nbsp;</small>
+                </button>
+            {% endif %}
         {% endfor %}
         <h2 class="mt-4">Uwagi</h2>
         {% if board_member %}

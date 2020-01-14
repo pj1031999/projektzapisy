@@ -38,6 +38,9 @@ class Vote(models.Model):
         Employee, on_delete=models.CASCADE, related_name="vote_owner")
     vote = models.SmallIntegerField(choices=ThesisVote.choices())
 
+    def is_mine(self, user):
+        return ((self.owner is not None and user == self.owner.user))
+
     class Meta:
         verbose_name = "głos"
         verbose_name_plural = "głosy"
@@ -113,11 +116,13 @@ class Thesis(models.Model):
         return len(self.votes.filter(vote=ThesisVote.ACCEPTED))
 
     def is_mine(self, user):
-        return ((self.advisor is not None and user == self.advisor.user) or
-                (self.supporting_advisor is not None and user == self.supporting_advisor.user))
+        return self.advisor is not None and user == self.advisor.user
 
     def is_student_assigned(self, user):
         return self.students is not None and self.students.filter(user=user).exists()
+
+    def is_supporting_advisor_assigned(self, user):
+        return self.supporting_advisor is not None and user == self.supporting_advisor.user
 
     @property
     def is_reserved(self):
