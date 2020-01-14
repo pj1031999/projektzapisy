@@ -38,9 +38,6 @@ class Vote(models.Model):
         Employee, on_delete=models.CASCADE, related_name="vote_owner")
     vote = models.SmallIntegerField(choices=ThesisVote.choices())
 
-    def is_mine(self, user):
-        return ((self.owner is not None and user == self.owner.user))
-
     class Meta:
         verbose_name = "głos"
         verbose_name_plural = "głosy"

@@ -72,12 +72,8 @@ def view_thesis(request, id):
     all_voters = get_theses_board()
     votes = []
     for vote in thesis.votes.all():
-        if not vote.is_mine(request.user):
-            votes.append({'owner': vote.owner,
-                          'vote': vote.get_vote_display()})
-        else:
-            votes.insert(0, {'owner': vote.owner,
-                             'vote': vote.get_vote_display()})
+        votes.append({'owner': vote.owner,
+                      'vote': vote.get_vote_display()})
 
     for voter in all_voters:
         try:
@@ -85,6 +81,11 @@ def view_thesis(request, id):
         except Vote.DoesNotExist:
             votes.append({'owner': voter,
                           'vote': ThesisVote.NONE.display})
+
+    for vote in votes:
+        if vote['owner'].user == request.user:
+            votes.remove(vote)
+            votes.insert(0, vote)
 
     remarks = None
 
