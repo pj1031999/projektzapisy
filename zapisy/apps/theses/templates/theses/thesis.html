@@ -88,58 +88,53 @@
     </tbody>
     </table>
     <h2>Opis pracy dyplomowej</h2>
-    {{ thesis.description }}
+    {% if thesis.description %}
+        {{ thesis.description }}
+    {% else %}
+        Brak opisu.
+    {% endif %}
     {% if can_see_remarks %}
-        <div class="d-flex justflex-row mt-4">
-            <h2 class="mr-4 d-inline-block">Głosy</h2>
+    <h2 class="mt-4">Głosowanie</h2>
+    <div class="d-inline-block w-auto">
+        <div class="d-inline-block mb-4 w-100 text-center">
+            <div>
+                <a class="btn btn-success" href="{% url 'theses:vote_thesis' thesis.id %}">Zaakceptuj</a>
+                <a class="btn btn-danger" href="{% url 'theses:vote_thesis' thesis.id %}">Odrzuć</a>
+                <a class="btn btn-primary" href="{% url 'theses:vote_thesis' thesis.id %}">Cofnij głos</a>
+            </div>
         </div>
+        </br>
         {% for vote in votes %}
             {% if vote.owner == request.user.employee %}
-                <a 
+                <div 
                     {% if vote.vote == "zaakceptowana"%}
-                        class="btn mb-3 btn-success"
+                        class="d-inline-block mb-3 p-2 border rounded border-success bg-success text-white text-center"
                     {% elif vote.vote == "odrzucona" %}
-                        class="btn mb-3 btn-danger"
+                        class="d-inline-block mb-3 p-2 border rounded border-danger bg-danger text-white text-center"
                     {% elif vote.vote == "brak głosu" %}
-                        class="btn mb-3 btn-primary"
-                    {% endif %}
-                    {% if not_has_been_accepted %}
-                        href="{% url 'theses:vote_thesis' thesis.id %}"
-                    {% else %}
-                        href="#0"
-                        style="cursor: default"
+                        class="d-inline-block mb-3 p-2 border rounded border-primary bg-primary text-white text-center"
                     {% endif %}
                 >
                     <h5 class="card-title">Mój głos</h5>
                     <p class="p-0 m-0">{{ vote.vote }}</p>
-                    <small class="p-0 m-0">
-                    {% if not_has_been_accepted %}
-                        {% if vote.vote == "brak głosu" %}
-                            (Oddaj głos)
-                        {% else %}
-                            (Zmień głos)
-                        {% endif %}
-                    {% else %}
-                        &nbsp;
-                    {% endif %}
-                    </small>
-                </a>
+                </div>
             {% else %}
-                <button style="cursor: default" disabled
+                <div 
                     {% if vote.vote == "zaakceptowana"%}
-                        class="btn mb-3 btn-outline-success"
+                        class="d-inline-block mb-3 p-2 border rounded border-success text-success text-center"
                     {% elif vote.vote == "odrzucona" %}
-                        class="btn mb-3 btn-outline-danger"
+                        class="d-inline-block mb-3 p-2 border rounded border-danger text-danger text-center"
                     {% elif vote.vote == "brak głosu" %}
-                        class="btn mb-3 btn-outline-primary"
+                        class="d-inline-block mb-3 p-2 border rounded border-primary text-primary text-center"
                     {% endif %}
                 >
                         <h5 class="card-title">{{ vote.owner }}</h5>
                         <p class="p-0 m-0">{{ vote.vote }}</p>
-                        <small class="p-0 m-0">&nbsp;</small>
-                </button>
+                </div>
             {% endif %}
         {% endfor %}
+    </div>
+
         <h2 class="mt-4">Uwagi</h2>
         {% if board_member %}
             {% if not_has_been_accepted %}
@@ -165,5 +160,6 @@
             Brak uwag.
         {% endif %}
     {% endif %}
+
 </div>
 {% endblock %}

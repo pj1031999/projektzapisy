@@ -4,6 +4,7 @@ implemented as a single instance of models.ThesesSystemSettings
 from .models import ThesesSystemSettings
 from .enums import ThesisStatus
 
+
 def _get_settings():
     # There should only be one such object created in migrations
     # Deleting it/adding new ones is disabled in the admin, see admin.py
