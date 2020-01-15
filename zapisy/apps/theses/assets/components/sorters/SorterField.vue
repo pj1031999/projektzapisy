@@ -35,7 +35,7 @@ export default Vue.extend({
     sort: function() {
       if (this.order == 2) {
         this.changeSorting({
-          k: "",
+          k: "modified",
           f: false
         });
         this.order = 0;

@@ -9,6 +9,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from operator import itemgetter
 
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.theses.forms import EditThesisForm, RemarkForm, ThesisForm, VoteForm
@@ -41,13 +42,12 @@ def list_all(request):
 
         record = {"id": p.id, "title": title, "is_available": is_available, "kind": kind,
                   "status": status, "has_been_accepted": has_been_accepted, "is_mine": is_mine, "url": url,
-                  "advisor": advisor}
+                  "advisor": advisor, "modified": p.modified.timestamp()}
 
         thesis_list.append(record)
 
     return render(request, 'theses/list_all.html', {
         'theses_json': json.dumps(thesis_list),
-        'theses': visible_theses,
         'board_member': board_member,
     })
 

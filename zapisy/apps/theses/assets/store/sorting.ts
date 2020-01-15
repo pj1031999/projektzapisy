@@ -7,7 +7,7 @@ interface State {
   order: boolean;
 }
 const state: State = {
-  property: "",
+  property: "modified",
   order: false
 };
 
@@ -17,15 +17,21 @@ const getters = {
     a: ThesisInfo,
     b: ThesisInfo
   ) => {
-    let propGetter = property(state.property) as (
-      c: ThesisInfo
-    ) => string;
-    return state.order
-      ? propGetter(a).localeCompare(propGetter(b))
-      : propGetter(b).localeCompare(propGetter(a));
-  },
-  isEmpty: (state: State) => {
-    return state.property == "";
+    if (state.property == "modified") {
+      let propGetter = property(state.property) as (
+        c: ThesisInfo
+      ) => number;
+      return state.order
+        ? propGetter(a) < propGetter(b)
+        : propGetter(b) > propGetter(a);
+    } else {
+      let propGetter = property(state.property) as (
+        c: ThesisInfo
+      ) => string;
+      return state.order
+        ? propGetter(a).localeCompare(propGetter(b))
+        : propGetter(b).localeCompare(propGetter(a));
+    }
   },
   getProperty: (state: State) => {
     return state.property;

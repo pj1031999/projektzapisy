@@ -34,8 +34,7 @@ export default class ThesesList extends Vue {
 
   mounted() {
     this.visibleTheses = this.theses;
-
-    console.log(this.theses);
+    this.visibleTheses = this.theses.sort(this.compare);
 
     this.$store.subscribe((mutation, state) => {
       switch (mutation.type) {
@@ -45,9 +44,7 @@ export default class ThesesList extends Vue {
           break;
         case "sorting/changeSorting":
           this.visibleTheses = this.theses.filter(this.tester);
-          if (!this.isEmpty) {
-            this.visibleTheses.sort(this.compare);
-          }
+          this.visibleTheses.sort(this.compare);
           break;
       }
     });

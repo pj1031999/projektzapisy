@@ -7,6 +7,7 @@ export interface ThesisInfo {
   is_available: boolean;
   kind: string;
   status: string;
+  modified: number;
   has_been_accepted: boolean;
   advisor: string;
   url: string;
