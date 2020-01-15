@@ -71,13 +71,13 @@ def view_thesis(request, id):
 
     all_voters = get_theses_board()
     votes = []
-    for vote in thesis.votes.all():
+    for vote in thesis.thesis_votes.all():
         votes.append({'owner': vote.owner,
                       'vote': vote.get_vote_display()})
 
     for voter in all_voters:
         try:
-            thesis.votes.get(owner=voter)
+            thesis.thesis_votes.get(owner=voter)
         except Vote.DoesNotExist:
             votes.append({'owner': voter,
                           'vote': ThesisVote.NONE.display})
@@ -90,16 +90,16 @@ def view_thesis(request, id):
     remarks = None
 
     if board_member and not_has_been_accepted:
-        remarks = thesis.remark_thesis.all().exclude(
+        remarks = thesis.thesis_remarks.all().exclude(
             author=request.user.employee)
     elif can_see_remarks:
-        remarks = thesis.remark_thesis.all()
+        remarks = thesis.thesis_remarks.all()
 
     remarkform = None
 
     if board_member:
         try:
-            remark = thesis.remark_thesis.all().get(author=request.user.employee)
+            remark = thesis.thesis_remarks.all().get(author=request.user.employee)
         except Remark.DoesNotExist:
             remark = None
 
@@ -207,7 +207,7 @@ def vote_for_thesis(request, id):
     thesis = get_object_or_404(Thesis, id=id)
 
     try:
-        vote = thesis.votes.get(owner=request.user.employee)
+        vote = thesis.thesis_votes.get(owner=request.user.employee)
     except Vote.DoesNotExist:
         vote = None
 
@@ -221,11 +221,8 @@ def vote_for_thesis(request, id):
             post = form.save(commit=False)
             if not vote:
                 post.owner = request.user.employee
+                post.thesis = thesis
             post.save()
-
-            if not vote:
-                new_vote = Vote.objects.get(pk=post.pk)
-                thesis.votes.add(new_vote)
 
             # check number of votes and change thesis status
             change_status(thesis)

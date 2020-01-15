@@ -33,16 +33,6 @@ class ThesesSystemSettings(models.Model):
         verbose_name_plural = "ustawienia systemu prac dyplomowych"
 
 
-class Vote(models.Model):
-    owner = models.ForeignKey(
-        Employee, on_delete=models.CASCADE, related_name="vote_owner")
-    vote = models.SmallIntegerField(choices=ThesisVote.choices())
-
-    class Meta:
-        verbose_name = "głos"
-        verbose_name_plural = "głosy"
-
-
 class Thesis(models.Model):
     """
         Thesis model
@@ -71,15 +61,13 @@ class Thesis(models.Model):
     # A thesis is _modified_ when its status changes
     modified = models.DateTimeField(auto_now_add=True)
 
-    votes = models.ManyToManyField(Vote, blank=True)
-
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
 
     def delete(self, *args, **kwargs):
-        self.remarks.all().delete()
-        self.votes.all().delete()
+        self.thesis_remarks.all().delete()
+        self.thesis_votes.all().delete()
         super().delete(*args, **kwargs)
 
     def get_kind_display(self):
@@ -96,7 +84,7 @@ class Thesis(models.Model):
                 user.is_staff)
 
     def get_accepted_votes(self):
-        return len(self.votes.filter(vote=ThesisVote.ACCEPTED))
+        return len(self.thesis_votes.filter(vote=ThesisVote.ACCEPTED))
 
     def is_mine(self, user):
         return self.advisor is not None and user == self.advisor.user
@@ -122,8 +110,20 @@ class Remark(models.Model):
         Employee, on_delete=models.CASCADE, related_name="remark_author")
     text = models.TextField(blank=True)
     thesis = models.ForeignKey(
-        Thesis, on_delete=models.CASCADE, blank=True, related_name="remark_thesis")
+        Thesis, on_delete=models.CASCADE, blank=True, related_name="thesis_remarks")
 
     class Meta:
         verbose_name = "uwaga"
         verbose_name_plural = "uwagi"
+
+
+class Vote(models.Model):
+    owner = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="vote_owner")
+    vote = models.SmallIntegerField(choices=ThesisVote.choices())
+    thesis = models.ForeignKey(
+        Thesis, on_delete=models.CASCADE, blank=True, related_name="thesis_votes")
+
+    class Meta:
+        verbose_name = "głos"
+        verbose_name_plural = "głosy"
