@@ -43,17 +43,6 @@ class Vote(models.Model):
         verbose_name_plural = "głosy"
 
 
-class Remark(models.Model):
-    modified = models.DateTimeField(auto_now_add=True)
-    author = models.ForeignKey(
-        Employee, on_delete=models.CASCADE, related_name="remark_author")
-    text = models.TextField(blank=True)
-
-    class Meta:
-        verbose_name = "uwaga"
-        verbose_name_plural = "uwagi"
-
-
 class Thesis(models.Model):
     """
         Thesis model
@@ -81,9 +70,6 @@ class Thesis(models.Model):
     added = models.DateTimeField(auto_now_add=True)
     # A thesis is _modified_ when its status changes
     modified = models.DateTimeField(auto_now_add=True)
-
-    # The "official" rejection reason, filled out by board member
-    remarks = models.ManyToManyField(Remark, blank=True)
 
     votes = models.ManyToManyField(Vote, blank=True)
 
@@ -128,3 +114,16 @@ class Thesis(models.Model):
     @property
     def has_been_accepted(self):
         return self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS and self.status != ThesisStatus.BEING_EVALUATED
+
+
+class Remark(models.Model):
+    modified = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(
+        Employee, on_delete=models.CASCADE, related_name="remark_author")
+    text = models.TextField(blank=True)
+    thesis = models.ForeignKey(
+        Thesis, on_delete=models.CASCADE, blank=True, related_name="remark_thesis")
+
+    class Meta:
+        verbose_name = "uwaga"
+        verbose_name_plural = "uwagi"

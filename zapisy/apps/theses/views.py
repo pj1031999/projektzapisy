@@ -90,15 +90,16 @@ def view_thesis(request, id):
     remarks = None
 
     if board_member and not_has_been_accepted:
-        remarks = thesis.remarks.exclude(author=request.user.employee)
+        remarks = thesis.remark_thesis.all().exclude(
+            author=request.user.employee)
     elif can_see_remarks:
-        remarks = thesis.remarks.all()
+        remarks = thesis.remark_thesis.all()
 
     remarkform = None
 
     if board_member:
         try:
-            remark = thesis.remarks.get(author=request.user.employee)
+            remark = thesis.remark_thesis.all().get(author=request.user.employee)
         except Remark.DoesNotExist:
             remark = None
 
@@ -109,6 +110,7 @@ def view_thesis(request, id):
                 if remarkform.is_valid():
                     post = remarkform.save(commit=False)
                     post.modified = timezone.now()
+                    post.thesis = thesis
                     post.save()
                     messages.success(request, 'Zapisano uwagę')
                     return redirect('theses:selected_thesis', id=id)
@@ -123,10 +125,8 @@ def view_thesis(request, id):
                     post = remarkform.save(commit=False)
                     post.modified = timezone.now()
                     post.author = request.user.employee
+                    post.thesis = thesis
                     post.save()
-
-                    new_remark = Remark.objects.get(pk=post.pk)
-                    thesis.remarks.add(new_remark)
 
                     messages.success(request, 'Zapisano uwagę')
                     return redirect('theses:selected_thesis', id=id)

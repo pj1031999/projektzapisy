@@ -41,7 +41,6 @@ def remove_system_settings(apps, schema_editor):
     ThesesSystemSettings.objects.using(db_alias).all().delete()
 
 
-
 class Migration(migrations.Migration):
 
     initial = True
@@ -52,67 +51,19 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Remark',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('modified', models.DateTimeField(auto_now_add=True)),
-                ('text', models.TextField(blank=True)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='remark_author', to='users.Employee')),
-            ],
-            options={
-                'verbose_name': 'uwaga',
-                'verbose_name_plural': 'uwagi',
-            },
-        ),
-        migrations.CreateModel(
             name='ThesesSystemSettings',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('num_required_votes', models.SmallIntegerField(validators=[apps.theses.validators.validate_num_required_votes], verbose_name='Liczba głosów wymaganych do zaakceptowania')),
-                ('master_rejecter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='users.Employee', validators=[apps.theses.validators.validate_master_rejecter], verbose_name='Członek komisji odpowiedzialny za zwracanie prac do poprawek')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('num_required_votes', models.SmallIntegerField(validators=[
+                 apps.theses.validators.validate_num_required_votes], verbose_name='Liczba głosów wymaganych do zaakceptowania')),
+                ('master_rejecter', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='users.Employee', validators=[
+                 apps.theses.validators.validate_master_rejecter], verbose_name='Członek komisji odpowiedzialny za zwracanie prac do poprawek')),
             ],
             options={
                 'verbose_name': 'ustawienia systemu prac dyplomowych',
                 'verbose_name_plural': 'ustawienia systemu prac dyplomowych',
             },
-        ),
-        migrations.CreateModel(
-            name='Thesis',
-            fields=[
-                ('id', models.AutoField(primary_key=True, serialize=False)),
-                ('title', models.CharField(max_length=300, unique=True)),
-                ('kind', models.SmallIntegerField(choices=[(apps.theses.enums.ThesisKind(0), 'mgr'), (apps.theses.enums.ThesisKind(1), 'inż'), (apps.theses.enums.ThesisKind(2), 'lic'), (apps.theses.enums.ThesisKind(3), 'isim'), (apps.theses.enums.ThesisKind(4), 'lic+inż'), (apps.theses.enums.ThesisKind(5), 'lic+inż+isim')])),
-                ('status', models.SmallIntegerField(blank=True, choices=[(apps.theses.enums.ThesisStatus(1), 'weryfikowana przez komisję'), (apps.theses.enums.ThesisStatus(2), 'zwrócona do poprawek'), (apps.theses.enums.ThesisStatus(3), 'zaakceptowana'), (apps.theses.enums.ThesisStatus(4), 'w realizacji'), (apps.theses.enums.ThesisStatus(5), 'obroniona')], null=True)),
-                ('reserved_until', models.DateField(blank=True, null=True)),
-                ('description', models.TextField(blank=True)),
-                ('added', models.DateTimeField(auto_now_add=True)),
-                ('modified', models.DateTimeField(auto_now_add=True)),
-                ('advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_advisor', to='users.Employee')),
-                ('remarks', models.ManyToManyField(blank=True, to='theses.Remark')),
-                ('students', models.ManyToManyField(blank=True, to='users.Student')),
-                ('supporting_advisor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='thesis_supporting_advisor', to='users.Employee')),
-            ],
-            options={
-                'verbose_name': 'praca dyplomowa',
-                'verbose_name_plural': 'prace dyplomowe',
-            },
-        ),
-        migrations.CreateModel(
-            name='Vote',
-            fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('vote', models.SmallIntegerField(choices=[(apps.theses.enums.ThesisVote(1), 'brak głosu'), (apps.theses.enums.ThesisVote(2), 'odrzucona'), (apps.theses.enums.ThesisVote(3), 'zaakceptowana')])),
-                ('owner', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='vote_owner', to='users.Employee')),
-            ],
-            options={
-                'verbose_name': 'głos',
-                'verbose_name_plural': 'głosy',
-            },
-        ),
-        migrations.AddField(
-            model_name='thesis',
-            name='votes',
-            field=models.ManyToManyField(blank=True, to='theses.Vote'),
         ),
         migrations.RunPython(create_group, remove_group),
         migrations.RunPython(create_thesis_settings, remove_system_settings)
