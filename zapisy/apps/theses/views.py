@@ -72,10 +72,11 @@ def view_thesis(request, id):
     can_see_remarks = (
         board_member or request.user.is_staff or thesis.is_mine(request.user))
     can_edit_thesis = (request.user.is_staff or thesis.is_mine(request.user))
+    can_download_declarations = (request.user.is_staff or
+                                 thesis.is_mine(request.user) or
+                                 thesis.is_student_assigned(request.user) or
+                                 thesis.is_supporting_advisor_assigned(request.user))
     not_has_been_accepted = not thesis.has_been_accepted
-
-    if not_has_been_accepted and not request.user.is_staff and not thesis.is_mine(request.user) and not thesis.is_supporting_advisor_assigned(request.user):
-        raise PermissionDenied
 
     students = []
     for student in thesis.students.all():
@@ -150,6 +151,7 @@ def view_thesis(request, id):
                                                   'board_member': board_member,
                                                   'can_see_remarks': can_see_remarks,
                                                   'can_edit_thesis': can_edit_thesis,
+                                                  'can_download_declarations': can_download_declarations,
                                                   'not_has_been_accepted': not_has_been_accepted,
                                                   'remarks': remarks,
                                                   'remark_form': remarkform,

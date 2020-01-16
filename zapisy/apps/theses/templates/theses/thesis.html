@@ -17,12 +17,16 @@
         <h1 class="d-inline-block">
             {{ thesis.title }}
         </h1>
+        <div>
         {% if can_edit_thesis %}
-            <a class="btn btn-sm btn-outline-info float-right align-bottom" href="{% url 'theses:edit_thesis' thesis.id %}">Edytuj</a>
+            <a class="btn btn-sm btn-outline-info float-right align-bottom ml-3" href="{% url 'theses:edit_thesis' thesis.id %}">Edytuj</a>
         {% endif %}
-        {% for student in students %}
-            <a href="{% url 'theses:gen_pdf' thesis.id student.id %}" target="_blank" class="btn btn-sm btn-success">Generate Pdf</a>
-        {% endfor %}
+        {% if can_download_declarations %}
+            {% for student in students %}
+                <a href="{% url 'theses:gen_pdf' thesis.id student.id %}" target="_blank" class="btn btn-sm btn-success ml-3">Deklaracja {{ student.name }}</a>
+            {% endfor %}
+        {% endif %}
+        </div>
     </div>
     <table class="table table-bordered table-md-responsive d-print-none" id="table-info">
     <colgroup>
