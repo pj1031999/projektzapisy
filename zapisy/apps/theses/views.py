@@ -1,4 +1,7 @@
 import json
+import tempfile
+import os
+
 
 from django.conf import settings
 from django.contrib import messages
@@ -10,6 +13,12 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from operator import itemgetter
+from django.http import HttpResponse
+from django.template import Context
+from django.template.loader import get_template
+from django.core.exceptions import PermissionDenied
+from xhtml2pdf import pisa
+
 
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.theses.forms import EditThesisForm, RemarkForm, ThesisForm, VoteForm
@@ -17,7 +26,7 @@ from apps.theses.models import Remark, Thesis, Vote
 from apps.theses.users import get_theses_board, is_theses_board_member
 from apps.theses.system_settings import change_status
 from apps.users.decorators import employee_required
-from apps.users.models import BaseUser, Employee
+from apps.users.models import BaseUser, Employee, Student
 
 
 @login_required
@@ -65,9 +74,12 @@ def view_thesis(request, id):
     can_edit_thesis = (request.user.is_staff or thesis.is_mine(request.user))
     not_has_been_accepted = not thesis.has_been_accepted
 
+    if not_has_been_accepted and not request.user.is_staff and not thesis.is_mine(request.user) and not thesis.is_supporting_advisor_assigned(request.user):
+        raise PermissionDenied
+
     students = []
     for student in thesis.students.all():
-        students.append(student.__str__())
+        students.append({'name': student.__str__(), 'id': student.id})
 
     all_voters = get_theses_board()
     votes = []
@@ -142,6 +154,46 @@ def view_thesis(request, id):
                                                   'remarks': remarks,
                                                   'remark_form': remarkform,
                                                   'votes': votes})
+
+
+@login_required
+def gen_pdf(request, id, studentid):
+    thesis = get_object_or_404(Thesis, id=id)
+    try:
+        first_student = thesis.students.get(id=studentid)
+    except Student.DoesNotExist:
+        raise Http404("No Student matches the given query.")
+
+    if not request.user.is_staff and not thesis.is_mine(request.user) and not thesis.is_student_assigned(request.user) and not thesis.is_supporting_advisor_assigned(request.user):
+        raise PermissionDenied
+
+    first_student = {'name': first_student.__str__(
+    ), 'matricula': first_student.matricula}
+
+    students = []
+    for student in thesis.students.all():
+        if(student.id != studentid):
+            students.append({'name': student.__str__(),
+                             'matricula': student.matricula})
+
+    students_num = len(students) + 1
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="dokument.pdf"'
+
+    context = {'thesis': thesis, 'first_student': first_student,
+               'students': students,
+               'students_num': students_num}
+
+    template = get_template('theses/form_pdf.html')
+    html = template.render(context=context)
+
+    pdf = pisa.CreatePDF(html.encode('utf-8'),
+                         dest=response, encoding='utf-8')
+    if pdf.err:
+        return HttpResponse("We had some errors!")
+
+    return response
 
 
 @login_required
