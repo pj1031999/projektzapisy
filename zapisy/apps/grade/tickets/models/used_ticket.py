@@ -2,10 +2,11 @@ from django.db import models
 
 
 class UsedTicket(models.Model):
-    poll = models.ForeignKey('tickets.RSAKeys', verbose_name='ankieta',
+    poll = models.ForeignKey("poll.Poll",
+                             verbose_name=("ankieta"),
                              on_delete=models.CASCADE)
-    student = models.ForeignKey('users.Student', verbose_name="student",
-                                on_delete=models.CASCADE)
+    ticket = models.TextField(verbose_name='bilet')
+    signed_ticket = models.TextField(verbose_name='podpisany bilet')
 
     class Meta:
         verbose_name = 'wykorzystany bilet'
@@ -13,4 +14,10 @@ class UsedTicket(models.Model):
         app_label = 'tickets'
 
     def __str__(self):
-        return str(self.student) + " " + str(self.poll)
+        return str(self.student) + " " + str(self.keys)
+
+    @staticmethod
+    def was_ticket_used(poll, ticket, signed_ticket):
+        return UsedTicket.objects.filter(keys__poll=poll,
+                                         ticket=ticket,
+                                         signed_ticket=signed_ticket).exists()
