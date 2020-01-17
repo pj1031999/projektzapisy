@@ -22,14 +22,14 @@ class RSAKeys(models.Model):
     def sign_ticket(self, ticket):
         key = RSA.importKey(self.private_key)
         ticket_hash = SHA256.new(ticket)
-        signature = PKCS1_v1_5.new(key).sign(ticket_hash)
-        sign_as_int = int.from_bytes(signature, 'big')
+        signed_ticket = PKCS1_v1_5.new(key).sign(ticket_hash)
+        sign_as_int = int.from_bytes(signed_ticket, 'big')
         return sign_as_int
 
-    def verify_ticket(self, signed_data, data):
+    def verify_ticket(self, signed_ticket, ticket):
         key = RSA.importKey(self.public_key)
         signature = PKCS1_v1_5.new(key)
-        data_hash = SHA256.new(data)
-        if signature.verify(data_hash, signed_data):
+        ticket_hash = SHA256.new(bytes(ticket))
+        if signature.verify(ticket_hash, signed_ticket):
             return True
         return False
