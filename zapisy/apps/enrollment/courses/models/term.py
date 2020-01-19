@@ -20,12 +20,6 @@ class Term(models.Model):
         verbose_name='dzień tygodnia')
     start_time = models.TimeField(verbose_name='rozpoczęcie')
     end_time = models.TimeField(verbose_name='zakończenie')
-    classroom = models.ForeignKey(
-        'Classroom',
-        verbose_name='sala',
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE)
     group = models.ForeignKey(
         'Group',
         verbose_name='grupa',
@@ -47,39 +41,6 @@ class Term(models.Model):
         verbose_name_plural = 'terminy'
         ordering = ['dayOfWeek']
         app_label = 'courses'
-
-    @staticmethod
-    def get_all_in_semester(semester, student=None, employee=None):
-        filtered = Term.objects.filter(group__course__semester=semester).extra(
-            select={'classrooms_as_string': """
-                SELECT array_to_string(array(SELECT courses_classroom.number FROM courses_term_classrooms
-                    JOIN courses_classroom
-                    ON (courses_classroom.id = courses_term_classrooms.classroom_id)
-                WHERE courses_term.id=courses_term_classrooms.term_id),',')"""})
-
-        if student:
-            from apps.enrollment.records.models import Record
-            filtered = filtered.filter(
-                group__id__in=Record.get_student_enrolled_ids(
-                    student, semester))
-            """
-            inaczej można, powinno być jedno zapytanie mniej
-            filtered.extra(where='"courses_group"."id" in' + (Record.enrolled.\
-                        filter(student=student, group__course__semester=semester).\
-                        values('group__pk', flat=True)).query.__str__() )
-
-           """
-
-        if employee:
-            from apps.enrollment.records.models import Record
-            filtered = filtered.filter(group__teacher=employee)
-
-        return filtered.select_related('classroom', 'group', 'group__course',
-                                       'group__course__semester', 'group__course__entity',
-                                       'group__course__entity__type',
-                                       'group__teacher', 'group__teacher__user').\
-            prefetch_related('classrooms').\
-            order_by('dayOfWeek', 'start_time').all()
 
     def day_in_zero_base(self):
         return int(self.dayOfWeek) - 1
@@ -125,17 +86,6 @@ class Term(models.Model):
     @staticmethod
     def get_python_day_of_week(day_of_week):
         return [x[0] for x in common.DAYS_OF_WEEK].index(day_of_week)
-
-    @staticmethod
-    def get_groups_terms(groups_ids):
-        """
-        Optimized query returning terms as string for group ids.
-        """
-        return [{'group_id': x.group_id, 'term_as_string': "%s %s-%s (s.%s)" % (x.get_dayOfWeek_display_short(), x.start_time.strftime("%H:%M"), x.end_time.strftime("%H:%M"), x.classrooms_as_string)} for x in Term.objects.filter(group__in=groups_ids).extra(select={'classrooms_as_string': """
-                                    SELECT array_to_string(array(SELECT courses_classroom.number FROM courses_term_classrooms
-                                    JOIN courses_classroom
-                                    ON (courses_classroom.id = courses_term_classrooms.classroom_id)
-                                    WHERE courses_term.id=courses_term_classrooms.term_id),',')"""})]
 
     def numbers(self):
         if not self.id:

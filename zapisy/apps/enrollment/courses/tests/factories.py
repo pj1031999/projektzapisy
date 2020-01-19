@@ -3,10 +3,12 @@ from datetime import datetime
 import factory
 from factory.django import DjangoModelFactory
 
-from ..models.course import Course, CourseEntity, CourseDescription
+from ..models.course_instance import CourseInstance
 from ..models.group import Group
 from ..models.semester import ChangedDay, Semester
 from ..models.classroom import Classroom
+from ..models.course_information import CourseInformation
+from ..models.course_type import Type
 from zapisy import common
 from apps.users.tests.factories import EmployeeFactory
 from .semester_year_provider import SemesterYearProvider
@@ -56,32 +58,25 @@ class SemesterFactory(DjangoModelFactory):
             factory.LazyAttribute(lambda x: datetime(x.raw_year, 3, 1))
 
 
-class CourseEntityFactory(DjangoModelFactory):
+class CourseTypeFactory(DjangoModelFactory):
     class Meta:
-        model = CourseEntity
-
-    name = factory.Sequence(lambda n: 'course_{0}'.format(n))
-    ects = 5
-    suggested_for_first_year = False
+        model = Type
 
 
-class CourseDescriptionFactory(DjangoModelFactory):
+class CourseInformationFactory(DjangoModelFactory):
     class Meta:
-        model = CourseDescription
+        model = CourseInformation
 
-    author = factory.SubFactory(EmployeeFactory)
-    entity = factory.SubFactory(CourseEntityFactory)
-    lectures = 30
-    exercises = 30
-    laboratories = 30
+    owner = factory.SubFactory(EmployeeFactory)
+    course_type = factory.SubFactory(CourseTypeFactory)
+
+    name = factory.Iterator(["Szydełkowanie", "Gotowanie", "Prasowanie", "Mycie naczyń", "Pranie"])
 
 
-class CourseFactory(DjangoModelFactory):
+class CourseInstanceFactory(CourseInformationFactory):
     class Meta:
-        model = Course
+        model = CourseInstance
 
-    entity = factory.SubFactory(CourseEntityFactory)
-    information = factory.SubFactory(CourseDescriptionFactory)
     semester = factory.SubFactory(SemesterFactory)
 
 
@@ -89,7 +84,7 @@ class GroupFactory(DjangoModelFactory):
     class Meta:
         model = Group
 
-    course = factory.SubFactory(CourseFactory)
+    course = factory.SubFactory(CourseInstanceFactory)
     type = 2
     limit = 10
     teacher = factory.SubFactory(EmployeeFactory)

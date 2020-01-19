@@ -6,7 +6,7 @@ import urllib
 
 from typing import Any, Optional
 
-from django.contrib import auth, messages
+from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
@@ -24,20 +24,21 @@ from django.conf import settings
 from vobject import iCalendar
 import unidecode
 
-from apps.enrollment.courses.models import Group, Semester, StudentPointsView
+from apps.enrollment.courses.models import Group, Semester
 from apps.enrollment.records.models import Record, RecordStatus, GroupOpeningTimes, T0Times
 from apps.enrollment.timetable.views import build_group_list
 from apps.enrollment.utils import mailto
+from apps.notifications.views import create_form
 from apps.users.decorators import external_contractor_forbidden
 from apps.grade.ticket_create.models.student_graded import StudentGraded
-from apps.notifications.forms import NotificationFormset
-from apps.notifications.models import NotificationPreferences
+
 from apps.users.utils import prepare_ajax_students_list, prepare_ajax_employee_list
 from apps.users.models import Employee, Student, BaseUser, PersonalDataConsent
 from apps.users.forms import EmailChangeForm, ConsultationsChangeForm, EmailToAllStudentsForm
 from apps.users.exceptions import InvalidUserException
 from libs.ajax_messages import AjaxSuccessMessage
 from mailer.models import Message
+
 
 logger = logging.getLogger()
 
@@ -66,8 +67,8 @@ def student_profile(request: HttpRequest, user_id: int) -> HttpResponse:
     records = Record.objects.filter(
         student=student,
         group__course__semester=semester, status=RecordStatus.ENROLLED).select_related(
-            'group__teacher', 'group__teacher__user', 'group__course',
-            'group__course__entity').prefetch_related('group__term', 'group__term__classrooms')
+            'group__teacher', 'group__teacher__user', 'group__course').prefetch_related(
+                'group__term', 'group__term__classrooms')
     groups = [r.group for r in records]
 
     # Highlight groups shared with the viewer in green.
@@ -103,8 +104,7 @@ def employee_profile(request: HttpRequest, user_id: int) -> HttpResponse:
     semester = Semester.objects.get_next()
     groups = Group.objects.filter(
         course__semester_id=semester.pk, teacher=employee).select_related(
-            'teacher', 'teacher__user', 'course', 'course__entity').prefetch_related(
-                'term', 'term__classrooms')
+            'teacher', 'teacher__user', 'course').prefetch_related('term', 'term__classrooms')
     groups = list(groups)
 
     # Highlight groups shared with the viewer in green.
@@ -218,13 +218,9 @@ def my_profile(request):
     consultations).
     """
     semester = Semester.objects.get_next()
-    notifications = NotificationFormset(
-        queryset=NotificationPreferences.objects.create_and_get(request.user)
-    )
 
     data = {
         'semester': semester,
-        'notifications': notifications,
     }
 
     if BaseUser.is_employee(request.user):
@@ -238,11 +234,9 @@ def my_profile(request):
     if semester and BaseUser.is_student(request.user):
         student: Student = request.user.student
         groups_opening_times = GroupOpeningTimes.objects.filter(
-            student_id=student.pk, group__course__semester_id=semester.pk
-        ).select_related(
-            'group', 'group__course', 'group__course__entity', 'group__teacher',
-            'group__teacher__user'
-        ).prefetch_related('group__term', 'group__term__classrooms')
+            student_id=student.pk, group__course__semester_id=semester.pk).select_related(
+                'group', 'group__course', 'group__teacher',
+                'group__teacher__user').prefetch_related('group__term', 'group__term__classrooms')
         groups_times = []
         got: GroupOpeningTimes
         for got in groups_opening_times:
@@ -257,13 +251,18 @@ def my_profile(request):
         grade_info = StudentGraded.objects.filter(
             student=student).select_related('semester').order_by('-semester__records_opening')
         semesters_participated_in_grade = [x.semester for x in grade_info]
-        current_semester_ects = StudentPointsView.student_points_in_semester(student, semester)
+        current_semester_ects = Record.student_points_in_semester(student, semester)
         data.update({
             't0_time': t0_time,
             'groups_times': groups_times,
             'semesters_participated_in_grade': semesters_participated_in_grade,
             'current_semester_ects': current_semester_ects,
         })
+
+    notifications_form = create_form(request)
+    data.update({
+        'form': notifications_form,
+    })
 
     return render(request, 'users/my_profile.html', data)
 
@@ -403,7 +402,7 @@ def create_ical_file(request: HttpRequest) -> HttpResponse:
         records = Record.objects.filter(
             student_id=student.pk, group__course__semester_id=semester.pk,
             status=RecordStatus.ENROLLED
-        ).select_related('group', 'group__course', 'group__course__entity')
+        ).select_related('group', 'group__course')
         groups = [r.group for r in records]
     elif BaseUser.is_employee(user):
         groups = list(Group.objects.filter(course__semester=semester, teacher=user.employee))
