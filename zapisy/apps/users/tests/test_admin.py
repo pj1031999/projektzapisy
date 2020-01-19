@@ -25,7 +25,6 @@ class AdminTestCase(TestCase):
         "/fereol_admin/mailer/messagelog/",
         "/fereol_admin/mailer/message/",
         "/fereol_admin/news/news/",
-        "/fereol_admin/notifications/notificationpreferences/",
         "/fereol_admin/poll/poll/",
         "/fereol_admin/poll/schema/",
         "/fereol_admin/poll/submission/",
