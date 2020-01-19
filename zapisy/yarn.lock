@@ -136,10 +136,10 @@
   dependencies:
     "@types/sizzle" "*"
 
-"@types/js-cookie@^2.1.0":
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/@types/js-cookie/-/js-cookie-2.2.0.tgz#ae2eabaa4bc892ba553c664cca21e6ee5224e5b5"
-  integrity sha512-k0umv2jvUvl1/OdOgFwEIPF6qKllf2jEsrd5ka9aVQo2ilxaBb2vsh1AmAAZ3eqt54vNrdbGW5QPOKJBmCNS7g==
+"@types/js-cookie@^2.2.2":
+  version "2.2.4"
+  resolved "https://registry.yarnpkg.com/@types/js-cookie/-/js-cookie-2.2.4.tgz#f79720b4755aa197c2e15e982e2f438f5748e348"
+  integrity sha512-WTfSE1Eauak/Nrg6cA9FgPTFvVawejsai6zXoq0QYTQ3mxONeRtGhKxa7wMlUzWWmzrmTeV+rwLjHgsCntdrsA==
 
 "@types/js-yaml@^3.12.1":
   version "3.12.1"
@@ -1539,10 +1539,6 @@ body-parser@1.19.0:
     raw-body "2.4.0"
     type-is "~1.6.17"
 
-"bootstrap-sortable@git://github.com/drvic10k/bootstrap-sortable.git#ff650fd17cc2872f4031d355fa6382066d064e87":
-  version "1.11.2"
-  resolved "git://github.com/drvic10k/bootstrap-sortable.git#ff650fd17cc2872f4031d355fa6382066d064e87"
-
 bokehjs@^1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/bokehjs/-/bokehjs-1.2.0.tgz#99cbfa9351cf0fa67463835be610995e97172ca9"
@@ -1564,6 +1560,10 @@ bokehjs@^1.2.0:
     timezone "^1.0.22"
     tslib "^1.9.3"
     underscore.template "^0.1.7"
+
+"bootstrap-sortable@git://github.com/drvic10k/bootstrap-sortable.git#ff650fd17cc2872f4031d355fa6382066d064e87":
+  version "1.11.2"
+  resolved "git://github.com/drvic10k/bootstrap-sortable.git#ff650fd17cc2872f4031d355fa6382066d064e87"
 
 bootstrap@^4.3:
   version "4.3.1"
@@ -3973,6 +3973,16 @@ isstream@~0.1.2:
   resolved "https://registry.yarnpkg.com/isstream/-/isstream-0.1.2.tgz#47e63f7af55afa6f92e1500e690eb8b8529c099a"
   integrity sha1-R+Y/evVa+m+S4VAOaQ64uFKcCZo=
 
+jquery-ui@>=1.8.0:
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/jquery-ui/-/jquery-ui-1.12.1.tgz#bcb4045c8dd0539c134bc1488cdd3e768a7a9e51"
+  integrity sha1-vLQEXI3QU5wTS8FIjN0+dop6nlE=
+
+jquery@>=3.4.0:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
+  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
+
 jquery@^3.4.0:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.0.tgz#8de513fa0fa4b2c7d2e48a530e26f0596936efdf"
@@ -3982,11 +3992,6 @@ js-base64@^2.1.8, js-base64@^2.1.9:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/js-base64/-/js-base64-2.5.0.tgz#42255ba183ab67ce59a0dee640afdc00ab5ae93e"
   integrity sha512-wlEBIZ5LP8usDylWbDNhKPEFVFdI5hCHpnVoT/Ysvoi/PRhJENm/Rlh9TvjYB38HFfKZN7OzEbRjmjvLkFw11g==
-
-js-cookie@^2.2.0:
-  version "2.2.0"
-  resolved "https://registry.yarnpkg.com/js-cookie/-/js-cookie-2.2.0.tgz#1b2c279a6eece380a12168b92485265b35b1effb"
-  integrity sha1-Gywnmm7s44ChIWi5JIUmWzWx7/s=
 
 js-cookie@^2.2.0:
   version "2.2.0"
@@ -5160,6 +5165,10 @@ pify@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/pify/-/pify-4.0.1.tgz#4b2cd25c50d598735c50292224fd8c6df41e3231"
   integrity sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==
+
+"pikaday@https://github.com/bokeh/pikaday.git#6b7258e":
+  version "1.8.0"
+  resolved "https://github.com/bokeh/pikaday.git#6b7258eaff518c52b615a5286939aeb298cf0fb0"
 
 pinkie-promise@^2.0.0:
   version "2.0.1"
@@ -7235,7 +7244,7 @@ tslib@1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
   integrity sha512-f/qGG2tUkrISBlQZEjEqoZ3B2+npJjIf04H1wuAv9iA8i04Icp+61KRXxFdha22670NJopsZCIjhC3SnjPRKrQ==
 
-tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0:
+tslib@^1.8.0, tslib@^1.8.1, tslib@^1.9.0, tslib@^1.9.3:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.10.0.tgz#c3c19f95973fb0a62973fb09d90d961ee43e5c8a"
   integrity sha512-qOebF53frne81cf0S9B41ByenJ3/IuH8yJKngAX35CmiZySA0khhkovshKK+jGCaMnVomla7gVlIcc3EvKPbTQ==

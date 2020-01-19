@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 
-from apps.enrollment.courses.models.course import Course
+from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.enrollment.courses.models.group import Group
 from apps.enrollment.courses.models.semester import Semester
 from apps.grade.poll.models import Poll
@@ -43,11 +43,11 @@ class Command(BaseCommand):
 
         # Check whether poll exists for courses held in a selected semester
         self.stdout.write(f"\n{HEADER}Course/group polls")
-        courses = Course.objects.filter(semester=semester)
+        courses = CourseInstance.objects.filter(semester=semester)
 
         for course in courses:
             course_poll = Poll.objects.filter(course=course).count() > 0
-            if not course.exam or course_poll:
+            if not course.has_exam or course_poll:
                 self.stdout.write(f"{MARGIN}{course}")
                 skipped += 1
             else:

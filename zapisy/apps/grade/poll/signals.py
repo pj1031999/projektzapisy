@@ -12,7 +12,7 @@ from django.contrib.auth import user_logged_in
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from apps.enrollment.courses.models.course import Course
+from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.enrollment.courses.models.group import Group
 from apps.enrollment.courses.models.semester import Semester
 
@@ -26,8 +26,8 @@ def create_poll_for_group(sender: Group, instance: Group, created: bool, **kwarg
         new_poll.save()
 
 
-@receiver(post_save, sender=Course)
-def create_poll_for_course(sender: Course, instance: Course, created: bool, **kwargs):
+@receiver(post_save, sender=CourseInstance)
+def create_poll_for_course(sender: CourseInstance, instance: CourseInstance, created: bool, **kwargs):
     if created:
         new_poll = Poll(group=None, course=instance, semester=None)
         new_poll.save()

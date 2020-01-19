@@ -6,7 +6,7 @@ from choicesenum import ChoicesEnum
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
-from apps.enrollment.courses.models.course import Course
+from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.enrollment.courses.models.group import Group
 from apps.enrollment.courses.models.semester import Semester
 from apps.enrollment.records import models as records_models
@@ -51,7 +51,7 @@ class Poll(models.Model):
     objects = PollManager()
 
     group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
-    course = models.ForeignKey(Course, on_delete=models.SET_NULL, null=True)
+    course = models.ForeignKey(CourseInstance, on_delete=models.SET_NULL, null=True)
     semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True)
 
     class Meta:
@@ -172,7 +172,7 @@ class Poll(models.Model):
             semester = course.semester
 
             if semester == current_semester:
-                if course.exam:
+                if course.has_exam:
                     poll_for_course = Poll.objects.get(course=course)
                     if poll_for_course and poll_for_course not in polls:
                         polls.append(poll_for_course)
@@ -389,7 +389,7 @@ class Submission(models.Model):
         return submission
 
     @classmethod
-    def get_all_submissions_for_course(cls, course: Course) -> Set:
+    def get_all_submissions_for_course(cls, course: CourseInstance) -> Set:
         """Lists all submissions tied to a given course.
 
         Also includes all submissions for all groups of the selected
@@ -434,9 +434,9 @@ class Submission(models.Model):
 
         if BaseUser.is_employee(user) or user.is_superuser:
             if user.is_superuser:
-                courses = Course.objects.filter(semester=semester)
+                courses = CourseInstance.objects.filter(semester=semester)
             else:
-                courses = Course.objects.filter(
+                courses = CourseInstance.objects.filter(
                     entity__owner=user.employee, semester=semester
                 )
 

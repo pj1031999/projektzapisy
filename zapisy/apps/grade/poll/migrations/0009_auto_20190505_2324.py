@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
             name='Poll',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('course', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.Course')),
+                ('course', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.CourseInstance')),
                 ('group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.Group')),
                 ('semester', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='courses.Semester')),
             ],
