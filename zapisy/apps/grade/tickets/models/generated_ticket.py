@@ -2,7 +2,7 @@ from django.db import models
 
 
 class GeneratedTicket(models.Model):
-    keys = models.ForeignKey('tickets.RSAKeys', verbose_name='ankieta',
+    keys = models.ForeignKey('tickets.RSAKeys', verbose_name='klucz',
                              on_delete=models.CASCADE)
     student = models.ForeignKey('users.Student', verbose_name="student",
                                 on_delete=models.CASCADE)
@@ -19,3 +19,9 @@ class GeneratedTicket(models.Model):
     def student_generated_ticket(poll, student):
         return GeneratedTicket.objects.filter(keys__poll=poll,
                                               student=student).exists()
+
+    @staticmethod
+    def student_graded(student, semester):
+        return GeneratedTicket.object.filter(student=student,
+                                             keys__poll__semester=semester).\
+                                             exists()
