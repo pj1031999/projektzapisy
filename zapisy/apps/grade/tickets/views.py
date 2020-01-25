@@ -1,11 +1,51 @@
 import json
 from django.db import transaction
-from django.http import HttpResponseBadRequest, HttpResponse
+from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.contrib import messages
 from apps.users.decorators import student_required
 from apps.grade.poll.models.poll import Poll
+from apps.grade.poll.utils import get_grouped_polls
 from apps.grade.tickets.models.rsa_keys import RSAKeys
 from apps.grade.tickets.models.generated_ticket import GeneratedTicket
 from apps.grade.tickets.models.used_ticket import UsedTicket
+from apps.enrollment.courses.models.semester import Semester
+
+
+@student_required
+def get_poll_data(request):
+    """For each poll student is allowed to vote in, responds with its public key
+    and information, such as course name, teachers name.
+    """
+    students_polls = Poll.get_all_polls_for_student(request.user.student)
+    response_data = []
+    for poll in students_polls:
+        poll_data = {
+            'key': RSAKeys.objects.filter(poll=poll).first(),
+            'poll_info': poll.serialize_for_signing_protocol(),
+        }
+        response_data.append(poll_data)
+    return JsonResponse({
+        'poll_data': response_data,
+    })
+
+
+@student_required
+def tickets_generate(request):
+    grade = Semester.objects.filter(is_grade_active=True).exists()
+    if not grade:
+        messages.error(
+            request, "Ocena zajęć jest w tej chwili zamknięta; nie można pobrać biletów"
+        )
+        return render(
+            request, 'tickets/tickets_generate.html', {'is_grade_active': grade}
+        )
+    polls = get_grouped_polls(request.user.student)
+    data = {
+        'polls': polls,
+        'is_grade_active': grade,
+    }
+    return render(request, 'tickets/tickets_generate.html', data)
 
 
 @student_required
