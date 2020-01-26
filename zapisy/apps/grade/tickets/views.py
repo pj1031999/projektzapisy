@@ -20,8 +20,9 @@ def get_poll_data(request):
     students_polls = Poll.get_all_polls_for_student(request.user.student)
     response_data = []
     for poll in students_polls:
+        public_key = RSAKeys.objects.filter(poll=poll).values("public_key").first()
         poll_data = {
-            'key': RSAKeys.objects.filter(poll=poll).first(),
+            'key': public_key,
             'poll_info': poll.serialize_for_signing_protocol(),
         }
         response_data.append(poll_data)
