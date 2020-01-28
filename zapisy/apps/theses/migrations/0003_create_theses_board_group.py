@@ -4,7 +4,7 @@ users can then be added to this group using the admin interface.
 """
 
 from django.db import migrations
-from ..users import THESIS_BOARD_GROUP_NAME
+from apps.theses.users import THESIS_BOARD_GROUP_NAME
 
 
 def create_group(apps, schema_editor):
