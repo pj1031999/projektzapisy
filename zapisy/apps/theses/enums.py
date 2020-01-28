@@ -47,50 +47,7 @@ class ThesisTypeFilter(Enum):
     DEFAULT = EVERYTHING
 
 
-# Determines the thesis kinds that match given filter values
-# i.e. if the user asks for all engineer theses, we assume they want
-# all theses suitable for engineer degrees, so bachelors+engineers should
-# be returned as well
-ENGINEERS_KINDS = (
-    ThesisKind.ENGINEERS, ThesisKind.BACHELORS_ENGINEERS, ThesisKind.BACHELORS_ENGINEERS_ISIM
-)
-BACHELORS_KINDS = (
-    ThesisKind.BACHELORS, ThesisKind.BACHELORS_ENGINEERS, ThesisKind.BACHELORS_ENGINEERS_ISIM
-)
-BACHELORS_OR_ENGINEERS_KINDS = tuple(set(ENGINEERS_KINDS + BACHELORS_KINDS))
-ISIM_KINDS = (
-    ThesisKind.ISIM, ThesisKind.BACHELORS_ENGINEERS_ISIM
-)
-
-# Thesis with these statuses are not ready for "public consumption"
-# and so won't be shown to students
-NOT_READY_STATUSES = (
-    ThesisStatus.BEING_EVALUATED,
-    ThesisStatus.RETURNED_FOR_CORRECTIONS
-)
-
-
 class ThesisVote(ChoicesEnum):
     NONE = 1, "brak głosu"
     REJECTED = 2, "odrzucona"
     ACCEPTED = 3, "zaakceptowana"
-
-
-"""Voting for a thesis in one of these statuses is not permitted
-for regular board members
-"""
-UNVOTEABLE_STATUSES = (
-    ThesisStatus.ACCEPTED,
-    ThesisStatus.IN_PROGRESS,
-    ThesisStatus.DEFENDED
-)
-
-
-class ThesisUserType(Enum):
-    """Used only by serializers, to tell frontend client code
-    about various user types
-    """
-    STUDENT = 0
-    REGULAR_EMPLOYEE = 1
-    ADMIN = 2
-    NONE = 3
