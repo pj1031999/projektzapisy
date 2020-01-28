@@ -80,8 +80,6 @@ class ThesisForm(ThesisFormBase):
                 Column('status', css_class='form-group col-md-6'),
                 css_class='form-row'
             )
-            div_1 = Div('students',
-                        HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'))
         else:
             self.fields['status'].required = False
             row_1 = Row(
@@ -89,7 +87,6 @@ class ThesisForm(ThesisFormBase):
                 Column('reserved_until', css_class='form-group col-md-6'),
                 css_class='form-row'
             )
-            div_1 = None
 
         self.helper.layout = Layout(
             'title',
@@ -100,8 +97,9 @@ class ThesisForm(ThesisFormBase):
                 css_class='form-row'
             ),
             row_1,
-            div_1,
-            Field('description', css_class='form-group mt-3')
+            Div('students',
+                HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'), css_class='mb-3'),
+            'description',
         )
 
         self.helper.add_input(
@@ -136,8 +134,8 @@ class EditThesisForm(ThesisFormBase):
                 css_class='form-row'
             ),
             special_row,
-            'students',
-            HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'),
+            Div('students',
+                HTML('<small class="form-text text-muted ">Przytrzymaj wciśnięty klawisz „Ctrl” lub „Command” na Macu, aby zaznaczyć więcej niż jeden wybór.</small>'), css_class='mb-3'),
             'description',
         )
         if self.instance.is_returned and self.instance.is_mine(user):
