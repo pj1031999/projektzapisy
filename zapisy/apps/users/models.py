@@ -228,10 +228,6 @@ class Student(BaseUser):
         return '%s, semestr %s' % (self.program, semestr)
     get_type_of_studies.short_description = 'Studia'
 
-    def participated_in_last_grades(self) -> int:
-        from apps.grade.ticket_create.models.student_graded import StudentGraded
-        return StudentGraded.objects.filter(student=self, semester__in=[45, 239]).count()
-
     @classmethod
     def get_active_students(cls) -> QuerySet:
         return cls.objects.filter(status=0)
