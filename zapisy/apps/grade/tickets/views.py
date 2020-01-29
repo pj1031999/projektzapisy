@@ -20,9 +20,9 @@ def get_poll_data(request):
     students_polls = Poll.get_all_polls_for_student(request.user.student)
     response_data = []
     for poll in students_polls:
-        public_key = RSAKeys.objects.filter(poll=poll).values("public_key").first()
+        key = RSAKeys.objects.get(poll=poll)
         poll_data = {
-            'key': public_key,
+            'key': key.serialize_for_signing_protocol(),
             'poll_info': poll.serialize_for_signing_protocol(),
         }
         response_data.append(poll_data)
@@ -33,13 +33,18 @@ def get_poll_data(request):
 
 @student_required
 def tickets_generate(request):
+    """Check if grade is active and render tickets_generate.
+    Get all polls student is entitled to.
+    """
     grade = Semester.objects.filter(is_grade_active=True).exists()
     if not grade:
         messages.error(
-            request, "Ocena zajęć jest w tej chwili zamknięta; nie można pobrać biletów"
+            request,
+            "Ocena zajęć jest w tej chwili zamknięta; nie można pobrać biletów"
         )
         return render(
-            request, 'tickets/tickets_generate.html', {'is_grade_active': grade}
+            request,
+            'tickets/tickets_generate.html', {'is_grade_active': grade}
         )
     polls = get_grouped_polls(request.user.student)
     data = {
