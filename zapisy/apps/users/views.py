@@ -249,7 +249,7 @@ def my_profile(request):
         except T0Times.DoesNotExist:
             t0_time = None
         semesters = Semester.objects.all()
-        grade_info = [semester for semester in semesters 
+        grade_info = [semester for semester in semesters
                       if GeneratedTicket.student_graded(request.user.student, semester)]
         semesters_participated_in_grade = [x for x in grade_info]
         current_semester_ects = Record.student_points_in_semester(student, semester)

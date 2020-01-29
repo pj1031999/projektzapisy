@@ -24,7 +24,7 @@ class GeneratedTicket(models.Model):
     @staticmethod
     def student_graded(student, semester):
         return GeneratedTicket.objects.\
-                filter(Q(keys__poll_semester=semester) |
-                       Q(keys__poll_course__semester=semester) |
-                       Q(keys__poll_group__course__semester=semester),
-                       student=student).exists()
+            filter(Q(keys__poll__semester=semester) |
+                   Q(keys__poll__course__semester=semester) |
+                   Q(keys__poll__group__course__semester=semester),
+                   student=student).exists()

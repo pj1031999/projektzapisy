@@ -71,8 +71,8 @@ class T0Times(models.Model):
             # For each student_id we want to know, how many times he has
             # generated grading tickets in the last two semesters.
             semesters = Semester.objects.filter(id__in=[
-                        semester.first_grade_semester,
-                        semester.second_grade_semester])
+                semester.first_grade_semester,
+                semester.second_grade_semester])
             students = Student.get_active_students()
             generated_tickets: Dict[int, int] = dict()
             for student in students:
