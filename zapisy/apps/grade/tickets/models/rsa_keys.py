@@ -19,6 +19,15 @@ class RSAKeys(models.Model):
     def __str__(self):
         return f'Klucze RSA: {self.poll}'
 
+    def serialize_for_signing_protocol(self):
+        """Extracts public parts of the key,
+        needed for ticket signing protocol"""
+        key = RSA.importKey(self.private_key)
+        return {
+            'n': str(key.n),
+            'e': str(key.e),
+        }
+
     def sign_ticket(self, ticket):
         key = RSA.importKey(self.private_key)
         ticket_hash = SHA256.new(ticket)
