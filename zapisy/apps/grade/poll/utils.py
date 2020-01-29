@@ -138,18 +138,28 @@ class PollSummarizedResultsEntry:
         radio fields."""
         if self.field_type == 'radio':
             return self._choices
+        if self.field_type == 'checkbox':
+            return self._choices
         return []
 
     def add_answer(self, answer):
         """Adds an answer to the container.
 
-        If the field_type of the entry is set to `radio`, the answer
-        will be counted if and only if it is present in the set of
-        predefined choices.
+        If the field_type of the entry is set to `radio`, the answer will be
+        counted if and only if it is present in the set of predefined choices.
+        If the field_tyoe of the entry is set to `checkbox`, each answer will be
+        counted separately.
         """
+        if not answer:
+            return
         if self.field_type == 'radio' and answer in self._choices:
             choice_index = self._choices.index(answer)
             self._choices_occurences[choice_index] += 1
+        if self.field_type == 'checkbox':
+            # Multiple-choice question will have a list of selected answers.
+            for a in answer:
+                choice_index = self._choices.index(a)
+                self._choices_occurences[choice_index] += 1
         self._answers.append(answer)
 
     @property
@@ -181,7 +191,6 @@ class PollSummarizedResultsEntry:
             plot.hbar(y='choices', right='values', source=source, height=0.8)
             plot.x_range.start = 0
             plot.axis.minor_tick_line_color = None
-            plot.xaxis.ticker = list(range(max(self._choices_occurences) + 1))
 
             self._components = bokeh.embed.components(plot)
 

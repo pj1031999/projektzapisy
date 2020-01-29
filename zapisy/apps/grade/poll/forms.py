@@ -76,6 +76,15 @@ class SubmissionEntryForm(forms.ModelForm):
                 widget=forms.RadioSelect(choices=choices, attrs=attrs),
                 required=True,
             )
+        elif field["type"] == "checkbox" and "choices" in field:
+            attrs = {"disabled": "disabled"} if not active else {}
+            choices = tuple(zip(field["choices"], field["choices"]))
+            form_field = forms.ChoiceField(
+                choices=choices,
+                label=field["question"],
+                widget=forms.CheckboxSelectMultiple(choices=choices, attrs=attrs),
+                required=True,
+            )
         else:
             form_field = forms.CharField(label=field["question"], required=False)
 

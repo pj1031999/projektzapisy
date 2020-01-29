@@ -37,7 +37,7 @@ If someone has any idea how the webpack loader can be forced to correctly suppor
     <div class="card mb-3">
       <div class="card-body">
         <h5 class="card-title">{{ entry.question }}</h5>
-        {% if entry.field_type == "radio" %}
+        {% if entry.field_type == "radio" or entry.field_type == "checkbox" %}
         {{ entry.plot.1 | safe }}
         {{ entry.plot.0 | safe }}
         {% else %}
@@ -74,7 +74,6 @@ If someone has any idea how the webpack loader can be forced to correctly suppor
         {% if semester.id == selected_semester.id  %}selected{% endif %}>{{ semester }}</option>
       {% endfor %}
     </select>
-    {% cache 500 sidebar request.user.pk %}
     <div class="accordion" id="course-sections">
       {% for group_name, entries in polls.items %}
       {% with index=iterator|next %}
@@ -121,7 +120,6 @@ If someone has any idea how the webpack loader can be forced to correctly suppor
       </div>
       {% endfor %}
     </div>
-    {% endcache %}
   </div>
 </div>
 {% endblock %}
