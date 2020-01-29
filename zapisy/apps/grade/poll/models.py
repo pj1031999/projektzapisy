@@ -50,9 +50,9 @@ class Poll(models.Model):
     """
     objects = PollManager()
 
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True)
-    course = models.ForeignKey(CourseInstance, on_delete=models.SET_NULL, null=True)
-    semester = models.ForeignKey(Semester, on_delete=models.SET_NULL, null=True)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, null=True)
+    course = models.ForeignKey(CourseInstance, on_delete=models.CASCADE, null=True)
+    semester = models.ForeignKey(Semester, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = 'ankieta'
