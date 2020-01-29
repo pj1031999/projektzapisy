@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 
 
 class GeneratedTicket(models.Model):
@@ -22,6 +23,8 @@ class GeneratedTicket(models.Model):
 
     @staticmethod
     def student_graded(student, semester):
-        return GeneratedTicket.object.filter(student=student,
-                                             keys__poll__semester=semester).\
-                                             exists()
+        return GeneratedTicket.objects.\
+                filter(Q(keys__poll_semester=semester) |
+                       Q(keys__poll_course__semester=semester) |
+                       Q(keys__poll_group__course__semester=semester),
+                       student=student).exists()
