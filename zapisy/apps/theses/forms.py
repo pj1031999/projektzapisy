@@ -258,6 +258,9 @@ class RejecterForm(forms.ModelForm):
         if status == ThesisStatus.ACCEPTED:
             self.helper.add_input(
                 Submit('submit', 'Zaakceptuj', css_class='btn btn-sm btn-success'))
-        else:
+        elif status == ThesisStatus.RETURNED_FOR_CORRECTIONS:
             self.helper.add_input(
                 Submit('submit', 'Zwróć do poprawek', css_class='btn btn-sm btn-danger'))
+        else:
+            self.helper.add_input(
+                Submit('submit', 'Zwróć do głosowania', css_class='btn btn-sm'))

@@ -81,7 +81,7 @@ def view_thesis(request, id):
     can_edit_thesis = (request.user.is_staff or thesis.is_mine(request.user))
     save_and_verify = thesis.is_mine(request.user) and thesis.is_returned
     can_vote = thesis.is_voting_active and board_member
-    show_master_rejecter = is_master_rejecter(request.user) and can_vote
+    show_master_rejecter = is_master_rejecter(request.user) and (thesis.is_voting_active or thesis.is_returned)
     can_download_declarations = (request.user.is_staff or
                                  thesis.is_mine(request.user) or
                                  thesis.is_student_assigned(request.user) or
@@ -114,8 +114,13 @@ def view_thesis(request, id):
     vote_form_none = VoteForm(vote=ThesisVote.NONE)
 
     rejecter_accepted = RejecterForm(status=ThesisStatus.ACCEPTED)
-    rejecter_rejected = RejecterForm(
-        status=ThesisStatus.RETURNED_FOR_CORRECTIONS)
+    if thesis.is_voting_active:
+        rejecter_rejected = RejecterForm(
+            status=ThesisStatus.RETURNED_FOR_CORRECTIONS)
+    else:
+        rejecter_rejected = RejecterForm(
+            status=ThesisStatus.BEING_EVALUATED
+        )
 
     remarks = None
 
