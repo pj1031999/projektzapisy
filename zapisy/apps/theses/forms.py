@@ -103,7 +103,7 @@ class ThesisForm(ThesisFormBase):
         )
 
         self.helper.add_input(
-            Submit('submit', 'Dodaj', css_class='btn-primary'))
+            Submit('submit', 'Zapisz', css_class='btn-primary'))
 
 
 class EditThesisForm(ThesisFormBase):
@@ -140,10 +140,10 @@ class EditThesisForm(ThesisFormBase):
         )
         if self.instance.is_returned and self.instance.is_mine(user):
             self.helper.add_input(
-                Submit('submit', 'Edytuj i prześlij do komisji', css_class='btn-primary'))
+                Submit('submit', 'Zapisz i prześlij do komisji', css_class='btn-primary'))
         else:
             self.helper.add_input(
-                Submit('submit', 'Edytuj', css_class='btn-primary'))
+                Submit('submit', 'Zapisz', css_class='btn-primary'))
 
 
 class RemarkForm(forms.ModelForm):
@@ -170,7 +170,7 @@ class RemarkForm(forms.ModelForm):
         self.helper.form_show_labels = False
         self.helper.form_method = 'POST'
         self.helper.add_input(
-            Submit('submit', 'Edytuj', css_class='btn-primary'))
+            Submit('submit', 'Zapisz', css_class='btn-primary'))
 
     def save(self, commit=True):
         instance = super().save(commit=False)

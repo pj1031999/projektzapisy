@@ -129,7 +129,7 @@
     <h2 class="mt-4">Głosowanie</h2>
     <div class="d-inline-block w-auto">
         {% if can_vote %}
-        <div class="d-inline-block mb-3 w-100 text-center">
+        <div class="d-inline-block mt-2 mb-2 w-100">
             <div class="d-inline-block">
                 <form action="{% url 'theses:vote_thesis' thesis.id %}" method="POST" class="post-form">
                     {% csrf_token %}
