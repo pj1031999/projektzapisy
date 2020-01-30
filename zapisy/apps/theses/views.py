@@ -121,11 +121,13 @@ def view_thesis(request, id):
 
     if board_member and not_has_been_accepted:
         remarks = thesis.thesis_remarks.all().exclude(
-            author=request.user.employee)
+            author=request.user.employee).exclude(text="")
     elif can_see_remarks:
-        remarks = thesis.thesis_remarks.all()
+        remarks = thesis.thesis_remarks.all().exclude(text="")
 
     remarkform = RemarkForm(thesis=thesis, user=request.user)
+
+    remarks_exist = not_has_been_accepted or remarks
 
     return render(request, 'theses/thesis.html', {'thesis': thesis,
                                                   'students': students,
@@ -139,6 +141,7 @@ def view_thesis(request, id):
                                                   'not_has_been_accepted': not_has_been_accepted,
                                                   'remarks': remarks,
                                                   'remark_form': remarkform,
+                                                  'remarks_exist': remarks_exist,
                                                   'votes': votes,
                                                   'vote_form_accepted': vote_form_accepted,
                                                   'vote_form_rejected': vote_form_rejected,
