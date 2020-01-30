@@ -96,6 +96,10 @@ class Thesis(models.Model):
         return self.supporting_advisor is not None and user == self.supporting_advisor.user
 
     @property
+    def has_no_students_assigned(self):
+        return self.students is not None and not self.students.exists()
+
+    @property
     def is_reserved(self):
         return self.reserved_until and date.today() <= self.reserved_until
 

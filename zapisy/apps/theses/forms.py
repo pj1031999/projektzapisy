@@ -230,11 +230,12 @@ class VoteForm(forms.ModelForm):
         if getattr(instance, 'thesis', None) is None:
             instance.thesis = self.thesis
         thesis = instance.thesis
-        if commit:
-            instance.save()
 
         # check number of votes and change thesis status
-        change_status(thesis)
+        change_status(thesis, instance.vote)
+
+        if commit:
+            instance.save()
 
         return instance
 

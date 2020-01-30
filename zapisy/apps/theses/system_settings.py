@@ -2,7 +2,7 @@
 implemented as a single instance of models.ThesesSystemSettings
 """
 from . import models
-from apps.theses.enums import ThesisStatus
+from apps.theses.enums import ThesisStatus, ThesisVote
 
 
 def _get_settings():
@@ -23,7 +23,10 @@ def get_master_rejecter():
     return _get_settings().master_rejecter
 
 
-def change_status(thesis):
-    if thesis.get_accepted_votes() >= get_num_required_votes():
-        thesis.status = ThesisStatus.ACCEPTED
+def change_status(thesis, vote):
+    if vote == ThesisVote.ACCEPTED and thesis.get_accepted_votes() >= get_num_required_votes() - 1:
+        if thesis.has_no_students_assigned:
+            thesis.status = ThesisStatus.ACCEPTED
+        else:
+            thesis.status = ThesisStatus.IN_PROGRESS
         thesis.save()
