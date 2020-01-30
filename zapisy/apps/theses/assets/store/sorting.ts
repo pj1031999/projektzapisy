@@ -22,8 +22,8 @@ const getters = {
         c: ThesisInfo
       ) => number;
       return state.order
-        ? propGetter(a) < propGetter(b)
-        : propGetter(b) > propGetter(a);
+        ? propGetter(a) - propGetter(b)
+        : propGetter(b) - propGetter(a);
     } else {
       let propGetter = property(state.property) as (
         c: ThesisInfo
