@@ -24,6 +24,10 @@ from apps.users.models import BaseUser, Employee, Student
 
 @login_required
 def list_all(request):
+    """
+        Display list of all visible for user theses
+    """
+
     theses = Thesis.objects.all()
     board_member = is_theses_board_member(request.user)
 
@@ -154,6 +158,10 @@ def view_thesis(request, id):
 
 @login_required
 def gen_form(request, id, studentid):
+    """
+        Display form to print for specific student assigned to a thesis
+    """
+
     thesis = get_object_or_404(Thesis, id=id)
     try:
         first_student = thesis.students.get(id=studentid)
@@ -301,6 +309,9 @@ def vote_for_thesis(request, id):
 @login_required
 @employee_required
 def rejecter_decision(request, id):
+    """
+        Change status of selected thesis
+    """
 
     if not is_master_rejecter(request.user):
         raise PermissionDenied
@@ -323,6 +334,9 @@ def rejecter_decision(request, id):
 @login_required
 @employee_required
 def delete_thesis(request, id):
+    """
+        Delete selected thesis
+    """
 
     thesis = get_object_or_404(Thesis, id=id)
 
