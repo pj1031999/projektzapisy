@@ -12,10 +12,6 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.http import HttpResponse
-from django.template import Context
-from django.template.loader import get_template
-from xhtml2pdf import pisa
 
 
 from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
@@ -81,7 +77,8 @@ def view_thesis(request, id):
     can_edit_thesis = (request.user.is_staff or thesis.is_mine(request.user))
     save_and_verify = thesis.is_mine(request.user) and thesis.is_returned
     can_vote = thesis.is_voting_active and board_member
-    show_master_rejecter = is_master_rejecter(request.user) and (thesis.is_voting_active or thesis.is_returned)
+    show_master_rejecter = is_master_rejecter(request.user) and (
+        thesis.is_voting_active or thesis.is_returned)
     can_download_declarations = (request.user.is_staff or
                                  thesis.is_mine(request.user) or
                                  thesis.is_student_assigned(request.user) or
@@ -156,7 +153,7 @@ def view_thesis(request, id):
 
 
 @login_required
-def gen_pdf(request, id, studentid):
+def gen_form(request, id, studentid):
     thesis = get_object_or_404(Thesis, id=id)
     try:
         first_student = thesis.students.get(id=studentid)
@@ -179,22 +176,9 @@ def gen_pdf(request, id, studentid):
 
     students_num = len(students) + 1
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'attachment; filename="dokument.pdf"'
-
-    context = {'thesis': thesis, 'first_student': first_student,
-               'students': students,
-               'students_num': students_num}
-
-    template = get_template('theses/form_pdf.html')
-    html = template.render(context=context)
-
-    pdf = pisa.CreatePDF(html.encode('utf-8'),
-                         dest=response, encoding='utf-8')
-    if pdf.err:
-        return HttpResponse("We had some errors!")
-
-    return response
+    return render(request, 'theses/form_pdf.html', {'thesis': thesis, 'first_student': first_student,
+                                                    'students': students,
+                                                    'students_num': students_num})
 
 
 @login_required

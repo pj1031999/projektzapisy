@@ -9,7 +9,7 @@ urlpatterns = [
     path("new", views.new_thesis, name="new_thesis"),
     path('<int:id>/vote', views.vote_for_thesis, name="vote_thesis"),
     path('<int:id>/remark', views.edit_remark, name="remark_thesis"),
-    path('<int:id>/form/<int:studentid>', views.gen_pdf, name="gen_pdf"),
+    path('<int:id>/form/<int:studentid>', views.gen_form, name="gen_form"),
     path('<int:id>/rejecter', views.rejecter_decision, name="rejecter_thesis"),
     path('<int:id>/delete', views.delete_thesis, name="delete_thesis"),
 ]

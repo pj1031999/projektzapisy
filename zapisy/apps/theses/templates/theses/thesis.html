@@ -121,7 +121,7 @@
         {% if students %}
             <h5 class="mt-4">Deklaracje do pobrania</h5>
             {% for student in students %}
-                <a href="{% url 'theses:gen_pdf' thesis.id student.id %}" class="btn btn-link">Deklaracja {{ student.name }}</a></br>
+                <a href="{% url 'theses:gen_form' thesis.id student.id %}" class="btn btn-link">Deklaracja {{ student.name }}</a></br>
             {% endfor %}
         {% endif %}
     {% endif %}
