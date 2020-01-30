@@ -26,6 +26,10 @@ export default Vue.extend({
       ["lic+inż", "Licencjat+inżynierska"],
       ["lic+inż+isim", "Licencjat+inżynierska+ISIM"]
     ];
+    this.allStatuses = [
+      [0, "W trakcie weryfikacji"],
+      [1, "Zaakceptowane"]
+    ];
   }
 });
 </script>

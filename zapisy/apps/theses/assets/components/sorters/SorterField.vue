@@ -8,7 +8,6 @@ export default Vue.extend({
   props: {
     // Property of a thesis on which we are filtering.
     property: String,
-    style: String,
     label: String
   },
   data: () => {
@@ -52,7 +51,7 @@ export default Vue.extend({
 </script>
 
 <template>
-  <th v-bind:style="style +  '; cursor: pointer;'" v-on:click="sort()">
+  <th style="cursor: pointer;" v-on:click="sort()">
     {{ label }}
     <span v-if="order==1">&darr;</span>
     <span v-if="order==2">&uarr;</span>
