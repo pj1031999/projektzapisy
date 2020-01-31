@@ -80,16 +80,17 @@ class RSAKeys(models.Model):
         return valid_polls, error_polls, used_polls
 
     def sign_ticket(self, ticket):
+        ticket = int(ticket.encode())
         key = RSA.importKey(self.private_key)
-        ticket_hash = SHA256.new(ticket)
-        signed_ticket = PKCS1_v1_5.new(key).sign(ticket_hash)
-        sign_as_int = int.from_bytes(signed_ticket, 'big')
-        return sign_as_int
+        if ticket >= key.n or ticket <= 0:
+            raise ValueError("Ticket value not in valid range")
+        signed = pow(ticket, key.d, key.n)
+        return signed
 
     def verify_ticket(self, signed_ticket, ticket):
-        key = RSA.importKey(self.public_key)
-        signature = PKCS1_v1_5.new(key)
-        ticket_hash = SHA256.new(bytes(ticket))
-        if signature.verify(ticket_hash, signed_ticket):
-            return True
-        return False
+        pk = RSA.importKey(self.private_key)
+        signature_pow_e = pow(signed_ticket, pk.e, pk.n)
+        ticket_hash = SHA256.new(str(ticket).encode()).hexdigest()
+        ticket_hash_as_int = int(ticket_hash, 16)
+
+        return ticket_hash_as_int == signature_pow_e
