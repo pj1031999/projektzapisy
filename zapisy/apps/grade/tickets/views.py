@@ -4,7 +4,7 @@ from django.http import HttpResponseBadRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.contrib import messages
 from apps.users.decorators import student_required
-from apps.grade.poll.models.poll import Poll
+from apps.grade.poll.models import Poll
 from apps.grade.poll.utils import get_grouped_polls
 from apps.grade.tickets.models.rsa_keys import RSAKeys
 from apps.grade.tickets.models.generated_ticket import GeneratedTicket
@@ -56,36 +56,51 @@ def tickets_generate(request):
 
 @student_required
 @transaction.atomic
-def sign_the_ticket(request):
-    """Signs the ticket send by student and returns poll id,
-    ticket and signed ticket contained in JSON.
+def sign_tickets(request):
+    """Signs the ticket send by student and returns list of signing_requests:
+    ticket and signed ticket and poll contained in JSON.
     Creates GeneratedTicket object after signing the ticket.
-    Receives ticket and poll_id from POST request (keys: 'ticket' and 'poll')
+    Receives ticket and poll_id from json.
     """
-    ticket_dict = {}
-    ticket_dict["ticket"] = request.POST.get("ticket", "")
-    ticket_dict["poll_id"] = request.POST.get("poll", "")
-    poll = Poll.objects.get(id=ticket_dict["poll_id"])
-    err_msg = None
+    try:
+        signing_requests = json.loads(request.body.decode('utf-8'))
+    except json.decoder.JSONDecodeError:
+        return HttpResponseBadRequest("Couldn't parse json")
 
-    if not poll.is_student_entitled_to_poll(request.user.student):
-        err_msg = "Student nie jest upoważniony do tej ankiety"
-    elif GeneratedTicket.student_generated_ticket(poll, request.user.student):
-        err_msg = "Student już stworzył bilet dla tej ankiety"
+    matched_requests = []
+    student_polls = {
+        poll.pk: poll for poll in Poll.get_all_polls_for_student(request.user.student)
+    }
 
-    if err_msg:
-        return HttpResponseBadRequest(err_msg)
+    for req in signing_requests['signing_requests']:
+        poll = student_polls[req['id']]
+        matched_requests.append((req, poll))
 
-    keys = RSAKeys.objects.filter(poll=poll).select_for_update().get()
-    ticket_dict["signed_ticket"] = keys.sign_ticket(ticket_dict["ticket"])
+    response = []
+    for signing_request, poll in matched_requests:
+        err_msg = None
+        if not poll.is_student_entitled_to_poll(request.user.student):
+            err_msg = "Student nie jest upoważniony do tej ankiety"
+        elif GeneratedTicket.student_generated_ticket(poll, request.user.student):
+            err_msg = "Student już stworzył bilet dla tej ankiety"
+        if err_msg:
+            return {
+                'status': 'ERROR',
+                'message': err_msg,
+                'id': signing_request['id'],
+            }
+        keys = RSAKeys.objects.filter(poll=poll).select_for_update().get()
+        signed_ticket = keys.sign_ticket(signing_request['ticket'])
+        generated_ticket = GeneratedTicket(keys=keys, student=request.user.student)
+        generated_ticket.save()
+        signing_response = {
+            'status': 'OK',
+            'id': signing_request['id'],
+            'signature': str(signed_ticket),
+        }
+        response.append(signing_response)
 
-    generated_ticket = GeneratedTicket(keys=keys,
-                                       student=request.user.student)
-    generated_ticket.save()
-
-    response = json.dumps(ticket_dict)
-
-    return HttpResponse(response)
+    return JsonResponse(response, safe=False)
 
 
 def verify_signed_ticket(request):
