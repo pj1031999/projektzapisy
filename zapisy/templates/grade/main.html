@@ -15,7 +15,7 @@
 
 {% block all-content %}
 <div id="mainPage-container">
-  {% render_bundle "ticket_create-katex" %}
+  {% render_bundle "tickets-katex" %}
   {% if is_grade_active %}
   {% if not user.employee and not user.is_superuser %}
   <div class="alert alert-info" role="alert">
@@ -39,7 +39,7 @@
     <p>
       Anonimowość zapewniona jest dzięki protokołowi ślepych podpisów. Klucze można pobrać w serwisie po zalogowaniu lub
       używając <a style="display: inline; font-size: 100%; color: #0069d6; font-variant: normal; text-shadow: none;"
-        href="{% static "ticket_create/grade-client.py" %}">przykładowego klienta</a>. W komentarzach zawarte są
+        href="{% static "tickets/grade-client.py" %}">przykładowego klienta</a>. W komentarzach zawarte są
       szczegóły implementacyjne.
     </p>
     <h3>Cały proces jest przeprowadzony w następujący sposób:</h3>
