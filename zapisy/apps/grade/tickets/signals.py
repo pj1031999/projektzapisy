@@ -1,5 +1,5 @@
 from Crypto.PublicKey import RSA
-from apps.grade.poll.models.poll import Poll
+from apps.grade.poll.models import Poll
 from apps.grade.tickets.models.rsa_keys import RSAKeys
 from django.db.models.signals import post_save
 from django.dispatch import receiver

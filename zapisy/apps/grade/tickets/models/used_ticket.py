@@ -14,10 +14,10 @@ class UsedTicket(models.Model):
         app_label = 'tickets'
 
     def __str__(self):
-        return str(self.student) + " " + str(self.keys)
+        return str(self.student) + " " + str(self.poll)
 
     @staticmethod
     def was_ticket_used(poll, ticket, signed_ticket):
-        return UsedTicket.objects.filter(keys__poll=poll,
+        return UsedTicket.objects.filter(poll=poll,
                                          ticket=ticket,
                                          signed_ticket=signed_ticket).exists()
