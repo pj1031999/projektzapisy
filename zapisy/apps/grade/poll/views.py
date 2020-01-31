@@ -18,7 +18,7 @@ from apps.grade.poll.utils import (
     group_submissions,
     group_submissions_with_statuses,
 )
-from apps.grade.ticket_create.models import SigningKey
+from apps.grade.tickets.models.rsa_keys import RSAKeys
 from apps.users.models import BaseUser
 
 
@@ -50,7 +50,7 @@ class TicketsEntry(TemplateView):
         if form.is_valid():
             tickets = form.cleaned_data['tickets']
             try:
-                correct_polls, failed_polls = SigningKey.parse_raw_tickets(tickets)
+                correct_polls, failed_polls, used_polls = RSAKeys.parse_raw_tickets(tickets)
             except json.JSONDecodeError:
                 messages.error(
                     request, "Wprowadzone klucze nie są w poprawnym formacie."
@@ -73,7 +73,16 @@ class TicketsEntry(TemplateView):
                     "<br>".join(failed_polls)
                 )
 
-            self.request.session['grade_poll_submissions'] = entries
+            if used_polls:
+                used_polls = map(lambda x: f"- {x}", used_polls)
+                messages.error(
+                    request,
+                    "Wzięto już udział w poniższych ankietach:<br>" +
+                    "<br>".join(used_polls)
+                )
+
+            if entries != []:
+                self.request.session['grade_poll_submissions'] = entries
 
         return redirect('grade-poll-submissions')
 
