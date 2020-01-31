@@ -14,7 +14,7 @@ class UsedTicket(models.Model):
         app_label = 'tickets'
 
     def __str__(self):
-        return str(self.student) + " " + str(self.poll)
+        return "Wykorzystany bilet dla" + " " + str(self.poll)
 
     @staticmethod
     def was_ticket_used(poll, ticket, signed_ticket):
