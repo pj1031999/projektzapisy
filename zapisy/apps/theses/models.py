@@ -16,13 +16,13 @@ MAX_ASSIGNED_STUDENTS = 2
 
 class ThesesSystemSettings(models.Model):
     """
-        Represents thesis system settings. 
+        Represents thesis system settings.
 
-        Stores information about required votes to automatically accept 
+        Stores information about required votes to automatically accept
         thesis and master rejecter of theses board.
 
         There is only one instance of this object. It is created during
-        migrations. 
+        migrations.
     """
     num_required_votes = models.SmallIntegerField(
         verbose_name="Liczba głosów wymaganych do zaakceptowania",
@@ -144,7 +144,7 @@ class Remark(models.Model):
     """
         Represents a remark in theses system.
 
-        Remarks are text notes that theses board member can add to any 
+        Remarks are text notes that theses board member can add to any
         evaluated or rejected thesis. Remarks can be seen by board members
         and thesis advisors.
     """
