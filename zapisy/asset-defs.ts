@@ -15,6 +15,8 @@ export default {
             "common/index.scss",
             "common/cookieconsent/display-cookieconsent.ts",
             "common/icons-library.ts",
+			"common/hammer.min.js",
+			"common/hammer.ts",
         ],
         "fullcalendar": [
             "common/fullcalendar.ts"

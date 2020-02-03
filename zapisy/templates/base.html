@@ -229,11 +229,20 @@
                             wrapper.classList.toggle("active");
                         }
                     </script>
+                    <script>
+                        var myElement = document.getElementById('sidebar-wrapper');
+                        var mc = new Hammer(myElement);
+                        mc.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+                        // listen to events...
+                        mc.on("panright", function(ev) {
+                                ClickSidebar();
+                        });
+                    </script>
                     <button type="button" id="sidebarCollapse" class="btn btn-light btn-sm float-right" onclick="ClickSidebar()">
                         ← <i class="fa fa-bars"></i>
                     </button>
                     <div id="sidebar">
-                        <span id="sidebar-close" onclick="ClickSidebar()">→</span>
                         {% block sidebar %}
                         {% endblock %}
                     </div>
