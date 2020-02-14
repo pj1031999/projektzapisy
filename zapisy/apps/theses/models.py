@@ -87,12 +87,6 @@ class Thesis(models.Model):
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
 
-    def get_kind_display(self):
-        return ThesisKind(self.kind).display
-
-    def get_status_display(self):
-        return ThesisStatus(self.status).display
-
     def can_see_thesis(self, user):
         return ((self.status != ThesisStatus.BEING_EVALUATED and self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS) or
                 is_theses_board_member(user) or

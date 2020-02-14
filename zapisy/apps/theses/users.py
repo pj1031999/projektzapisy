@@ -24,4 +24,4 @@ def is_theses_board_member(user: User) -> bool:
 
 def is_master_rejecter(user: User) -> bool:
     """Is the specified user a master rejecter of theses board?"""
-    return get_master_rejecter() == user.employee if user.employee else False
+    return get_master_rejecter() == user.employee if BaseUser.is_employee(user) else False

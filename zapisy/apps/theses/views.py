@@ -87,14 +87,14 @@ def view_thesis(request, id):
 
     all_voters = get_theses_board()
     votes = []
+    voters = []
     for vote in thesis.thesis_votes.all():
+        voters.append(vote.owner)
         votes.append({'owner': vote.owner,
                       'vote': vote.get_vote_display()})
 
     for voter in all_voters:
-        try:
-            thesis.thesis_votes.get(owner=voter)
-        except Vote.DoesNotExist:
+        if voter not in voters:
             votes.append({'owner': voter,
                           'vote': ThesisVote.NONE.display})
 
@@ -117,14 +117,14 @@ def view_thesis(request, id):
         )
 
     remarks = None
+    remarkform = None
 
     if board_member and not_has_been_accepted:
         remarks = thesis.thesis_remarks.all().exclude(
             author=request.user.employee).exclude(text="")
+        remarkform = RemarkForm(thesis=thesis, user=request.user)
     elif can_see_remarks:
         remarks = thesis.thesis_remarks.all().exclude(text="")
-
-    remarkform = RemarkForm(thesis=thesis, user=request.user)
 
     remarks_exist = not_has_been_accepted or remarks
 
