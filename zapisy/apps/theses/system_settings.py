@@ -6,9 +6,7 @@ from apps.theses.enums import ThesisStatus, ThesisVote
 
 
 def _get_settings():
-    """
-        Get only existing instance of theses system settings object
-    """
+    """Get only existing instance of theses system settings object"""
     # There should only be one such object created in migrations
     # Deleting it/adding new ones is disabled in the admin, see admin.py
     return models.ThesesSystemSettings.objects.get()
@@ -16,8 +14,7 @@ def _get_settings():
 
 def get_num_required_votes():
     """How many theses board members need to vote "yes" before a thesis
-    is considered accepted
-    """
+    is considered accepted"""
     return _get_settings().num_required_votes
 
 

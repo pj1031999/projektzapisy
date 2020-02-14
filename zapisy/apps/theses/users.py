@@ -14,7 +14,7 @@ def get_theses_board():
 
 def get_num_board_members() -> int:
     """Return the number of theses board members"""
-    return len(get_theses_board())
+    return get_theses_board().count()
 
 
 def is_theses_board_member(user: User) -> bool:

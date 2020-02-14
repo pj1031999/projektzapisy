@@ -4,8 +4,8 @@ users can then be added to this group using the admin interface.
 """
 
 from django.db import migrations
-from apps.theses.users import THESIS_BOARD_GROUP_NAME
 
+THESIS_BOARD_GROUP_NAME = "Komisja prac dyplomowych"
 
 def create_group(apps, schema_editor):
     Group = apps.get_model("auth", "Group")

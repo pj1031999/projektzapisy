@@ -15,14 +15,13 @@ MAX_ASSIGNED_STUDENTS = 2
 
 
 class ThesesSystemSettings(models.Model):
-    """
-        Represents thesis system settings.
+    """Represents thesis system settings.
 
-        Stores information about required votes to automatically accept
-        thesis and master rejecter of theses board.
+    Stores information about required votes to automatically accept
+    thesis and master rejecter of theses board.
 
-        There is only one instance of this object. It is created during
-        migrations.
+    There is only one instance of this object. It is created during
+    migrations.
     """
     num_required_votes = models.SmallIntegerField(
         verbose_name="Liczba głosów wymaganych do zaakceptowania",
@@ -43,23 +42,22 @@ class ThesesSystemSettings(models.Model):
 
 
 class Thesis(models.Model):
-    """
-        Represents a thesis in the theses system.
+    """Represents a thesis in the theses system.
 
-        A Thesis instance can represent a thesis in many different
-        configurations (an idea submitted by an employee, a work in progress
-        by a student, or a thesis defended years ago). This is accomplished
-        through various possible combinations of mainly the 'status' and 'students'
-        fields, as described in more detail below.
+    A Thesis instance can represent a thesis in many different
+    configurations (an idea submitted by an employee, a work in progress
+    by a student, or a thesis defended years ago). This is accomplished
+    through various possible combinations of mainly the 'status' and 'students'
+    fields, as described in more detail below.
 
-        A thesis is first added typically by a regular university employee;
-        they are then automatically assigned as the advisor.
+    A thesis is first added typically by a regular university employee;
+    they are then automatically assigned as the advisor.
 
-        Before the thesis can be seen by all employees and students, the theses board
-        must first determine whether it is suitable; this is facilitated by the
-        voting logic. If the thesis is accepted as submitted,
-        its status is then automatically changed to either 'in progress' if the advisor
-        has assigned a student, or 'accepted' otherwise.
+    Before the thesis can be seen by all employees and students, the theses board
+    must first determine whether it is suitable; this is facilitated by the
+    voting logic. If the thesis is accepted as submitted,
+    its status is then automatically changed to either 'in progress' if the advisor
+    has assigned a student, or 'accepted' otherwise.
     """
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
@@ -88,11 +86,6 @@ class Thesis(models.Model):
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
-
-    def delete(self, *args, **kwargs):
-        self.thesis_remarks.all().delete()
-        self.thesis_votes.all().delete()
-        super().delete(*args, **kwargs)
 
     def get_kind_display(self):
         return ThesisKind(self.kind).display
@@ -141,12 +134,11 @@ class Thesis(models.Model):
 
 
 class Remark(models.Model):
-    """
-        Represents a remark in theses system.
+    """Represents a remark in theses system.
 
-        Remarks are text notes that theses board member can add to any
-        evaluated or rejected thesis. Remarks can be seen by board members
-        and thesis advisors.
+    Remarks are text notes that theses board member can add to any
+    evaluated or rejected thesis. Remarks can be seen by board members
+    and thesis advisors.
     """
     modified = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(
@@ -161,15 +153,14 @@ class Remark(models.Model):
 
 
 class Vote(models.Model):
-    """
-        Represents vote in theses system.
+    """Represents vote in theses system.
 
-        Votes are used in thesis voting logic system. Any board member
-        can cast a vote when thesis has __being_evaluated__ status.
-        Particular vote can have three possible values: __accept__,
-        __reject__ and __none__.
+    Votes are used in thesis voting logic system. Any board member
+    can cast a vote when thesis has __being_evaluated__ status.
+    Particular vote can have three possible values: __accept__,
+    __reject__ and __none__.
 
-        Votes can be seen by all board members and thesis advisor.
+    Votes can be seen by all board members and thesis advisor.
     """
     owner = models.ForeignKey(
         Employee, on_delete=models.CASCADE, related_name="vote_owner")

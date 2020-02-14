@@ -24,15 +24,12 @@ from apps.users.models import BaseUser, Employee, Student
 
 @login_required
 def list_all(request):
-    """
-        Display list of all visible for user theses
-    """
+    """Display list of all visible theses"""
 
     theses = Thesis.objects.all()
     board_member = is_theses_board_member(request.user)
 
-    visible_theses = [
-        thesis for thesis in theses if thesis.can_see_thesis(request.user)]
+    visible_theses = filter(lambda t: t.can_see_thesis(request.user), theses)
 
     thesis_list = []
     for p in visible_theses:
@@ -60,9 +57,7 @@ def list_all(request):
 
 @login_required
 def view_thesis(request, id):
-    """
-        Show subpage for one thesis
-    """
+    """Show subpage for one thesis"""
 
     thesis = get_object_or_404(Thesis, id=id)
     not_has_been_accepted = not thesis.has_been_accepted
@@ -88,9 +83,7 @@ def view_thesis(request, id):
                                  thesis.is_student_assigned(request.user) or
                                  thesis.is_supporting_advisor_assigned(request.user))
 
-    students = []
-    for student in thesis.students.all():
-        students.append({'name': student.__str__(), 'id': student.id})
+    students = thesis.students.all()
 
     all_voters = get_theses_board()
     votes = []
@@ -158,9 +151,7 @@ def view_thesis(request, id):
 
 @login_required
 def gen_form(request, id, studentid):
-    """
-        Display form to print for specific student assigned to a thesis
-    """
+    """Display form to print for specific student assigned to a thesis"""
 
     thesis = get_object_or_404(Thesis, id=id)
     try:
@@ -192,9 +183,8 @@ def gen_form(request, id, studentid):
 @login_required
 @employee_required
 def edit_thesis(request, id):
-    """
-        Show form for edit selected thesis
-    """
+    """Show form for edit selected thesis"""
+
     thesis = get_object_or_404(Thesis, id=id)
 
     if not request.user.is_staff and not thesis.is_mine(request.user):
@@ -218,8 +208,6 @@ def edit_thesis(request, id):
                 else:
                     post.status = ThesisStatus.ACCEPTED.value
 
-            print(request.POST.getlist('students'))
-
             post.save()
             form.save_m2m()
             messages.success(request, 'Zapisano zmiany')
@@ -233,9 +221,7 @@ def edit_thesis(request, id):
 @login_required
 @employee_required
 def new_thesis(request):
-    """
-        Show form for create new thesis
-    """
+    """Show form for create new thesis"""
 
     if request.method == "POST":
         form = ThesisForm(request.user, request.POST)
@@ -250,7 +236,7 @@ def new_thesis(request):
             post.save()
             form.save_m2m()
             messages.success(request, 'Dodano nową pracę')
-            return redirect('/theses')
+            return redirect('theses:main')
     else:
         form = ThesisForm(request.user)
 
@@ -260,9 +246,8 @@ def new_thesis(request):
 @login_required
 @employee_required
 def edit_remark(request, id):
-    """
-        Edit remark for selected thesis
-    """
+    """Edit remark for selected thesis"""
+
     if not is_theses_board_member(request.user):
         raise PermissionDenied
 
@@ -284,9 +269,7 @@ def edit_remark(request, id):
 @login_required
 @employee_required
 def vote_for_thesis(request, id):
-    """
-        Vote for selected thesis
-    """
+    """Vote for selected thesis"""
 
     if not is_theses_board_member(request.user):
         raise PermissionDenied
@@ -309,9 +292,7 @@ def vote_for_thesis(request, id):
 @login_required
 @employee_required
 def rejecter_decision(request, id):
-    """
-        Change status of selected thesis
-    """
+    """Change status of selected thesis"""
 
     if not is_master_rejecter(request.user):
         raise PermissionDenied
@@ -334,9 +315,7 @@ def rejecter_decision(request, id):
 @login_required
 @employee_required
 def delete_thesis(request, id):
-    """
-        Delete selected thesis
-    """
+    """Delete selected thesis"""
 
     thesis = get_object_or_404(Thesis, id=id)
 
