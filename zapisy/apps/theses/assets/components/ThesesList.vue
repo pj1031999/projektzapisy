@@ -49,53 +49,101 @@ export default class ThesesList extends Vue {
       }
     });
   }
-
-  row_click(url) {
-    window.location.href = url;
-  }
 }
 </script>
 
+<style scoped>
+#theses-list {
+  display: block;
+  width: 100%;
+  text-align: center;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#list-header {
+  font-weight: bold;
+}
+.is-available-col {
+  width: 10%;
+}
+
+.title-col {
+  width: 55%;
+}
+
+.kind-col {
+  width: 15%;
+}
+
+.advisor-col {
+  width: 20%;
+}
+
+.list-row-out:link {
+  text-decoration: none;
+  color: black;
+}
+
+/* visited link */
+.list-row-out:visited {
+  color: black;
+}
+
+/* mouse over link */
+.list-row-out:hover {
+  color: black;
+  background-color: gray;
+}
+
+/* selected link */
+.list-row-out:active {
+  color: black;
+}
+
+.list-row-in {
+  display: block;
+  border-top: 1px solid #dee2e6;
+}
+
+.list-row-in:hover {
+  background-color: rgb(236, 236, 236);
+}
+</style>
+
 <template>
   <div>
-    <table
-      class="table table-hover"
-      style="-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
-    >
-      <thead style="text-align: center">
-        <tr>
-          <th style="width: 5%">Rezerwacja</th>
-          <SorterField style="width: 65%" property="title" label="Tytuł" />
-          <SorterField style="width: 10%" property="kind" label="Typ" />
-          <SorterField style="width: 20%" property="advisor" label="Promotor" />
-        </tr>
-      </thead>
-      <tbody style="text-align: center">
-        <tr
-          v-for="t of visibleTheses"
-          :key="t.id"
-          style="cursor: pointer"
-          v-on:click="row_click(t.url)"
-        >
-          <td>
-            <div class="form-check">
-              <input
-                type="checkbox"
-                class="form-check-input"
-                disabled
-                v-bind:checked="!t.is_available"
-              />
+    <div id="theses-list">
+      <div id="list-header" class="p-2 d-flex flex-row">
+        <div class="p-2 is-available-col">Rezerwacja</div>
+        <SorterField class="p-2 title-col" property="title" label="Tytuł" />
+        <SorterField class="p-2 kind-col" property="kind" label="Typ" />
+        <SorterField class="p-2 advisor-col" property="advisor" label="Promotor" />
+      </div>
+      <div id="list-body">
+        <a class="list-row-out" v-for="t of visibleTheses" :key="t.id" :href="t.url">
+          <div class="p-2 d-flex flex-row list-row-in">
+            <div class="p-2 is-available-col">
+              <div class="form-check">
+                <input
+                  type="checkbox"
+                  class="form-check-input"
+                  disabled
+                  v-bind:checked="!t.is_available"
+                />
+              </div>
             </div>
-          </td>
-          <td style="text-align: left">
-            {{ t.title }}
-            <em v-if="!t.has_been_accepted" class="text-muted">({{ t.status }})</em>
-          </td>
-          <td>{{ t.kind }}</td>
-          <td>{{ t.advisor }}</td>
-        </tr>
-      </tbody>
-    </table>
+            <div class="p-2 title-col text-left">
+              {{ t.title }}
+              <em v-if="!t.has_been_accepted" class="text-muted">({{ t.status }})</em>
+            </div>
+            <div class="p-2 kind-col">{{ t.kind }}</div>
+            <div class="p-2 advisor-col">{{ t.advisor }}</div>
+          </div>
+        </a>
+      </div>
+    </div>
     <div v-if="!visibleTheses.length" class="text-center">
       <em class="text-muted">Brak prac dyplomowych.</em>
     </div>
