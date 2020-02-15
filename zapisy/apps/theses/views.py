@@ -50,7 +50,7 @@ def list_all(request):
         thesis_list.append(record)
 
     return render(request, 'theses/list_all.html', {
-        'theses_json': json.dumps(thesis_list),
+        'theses_json': thesis_list,
         'board_member': board_member,
     })
 
