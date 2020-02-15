@@ -13,25 +13,23 @@
 
 {{ theses_json|json_script:"theses-data" }}
 
-<div id="theses-react-root">
-	<div class="d-flex justify-content-between align-items-center">
-        <h1 class="d-inline-block">
-            Prace dyplomowe
-        </h1>
-		{% if user.employee %}
-			<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
-		{% endif %}
-	</div>
-
-	<p class="row justify-content-center">
-	
-	<div id="theses-filter"></div>
-
-	<p class="row justify-content-center">
-		
-	<div id="theses-list"></div>
-	
+<div class="d-flex justify-content-between align-items-center">
+    <h1 class="d-inline-block">
+        Prace dyplomowe
+    </h1>
+	{% if user.employee %}
+		<a href="{% url 'theses:new_thesis' %}" class="btn btn-primary" role="button">Nowa praca dyplomowa</a>
+	{% endif %}
 </div>
+
+<p class="row justify-content-center">
+	
+<div id="theses-filter"></div>
+
+<p class="row justify-content-center">
+		
+<div id="theses-list"></div>
+	
 </div>
 {% endblock %}
 
