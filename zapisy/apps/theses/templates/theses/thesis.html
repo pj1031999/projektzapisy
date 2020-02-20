@@ -7,8 +7,10 @@
 
 {% block theses_active %} class="active"{% endblock %}
 
-
-{% block uwr_logo %}
+{% block bread %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item"><a class="breadcrumb-item" href="{% url 'theses:main' %}">Prace dyplomowe</a></li>
+    <li class="breadcrumb-item active">{{ thesis.title }}</li>
 {% endblock %}
 
 {% block all-content %}
@@ -83,13 +85,11 @@
         <tr>
             <th scope="row">Studenci</th>
             <td>
-                {% if students %}
-                    {% for student in students %}
-                        {{ student }}&nbsp;
-                    {% endfor %}
-                {% else %}
+                {% for student in students %}
+                    {{ student }}&nbsp;
+                {% empty %}
                     Brak
-                {% endif %}
+                {% endfor %}
             </td>
         </tr>
         <tr>

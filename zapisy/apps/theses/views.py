@@ -31,7 +31,7 @@ def list_all(request):
 
     visible_theses = filter(lambda t: t.can_see_thesis(request.user), theses)
 
-    thesis_list = []
+    theses_list = []
     for p in visible_theses:
         title = p.title
         is_available = not p.is_reserved
@@ -47,10 +47,10 @@ def list_all(request):
                   "status": status, "has_been_accepted": has_been_accepted, "is_mine": is_mine, "url": url,
                   "advisor": advisor, "modified": p.modified.timestamp()}
 
-        thesis_list.append(record)
+        theses_list.append(record)
 
     return render(request, 'theses/list_all.html', {
-        'theses_json': thesis_list,
+        'theses_list': theses_list,
         'board_member': board_member,
     })
 

@@ -116,7 +116,7 @@ export default class ThesesList extends Vue {
   <div>
     <div id="theses-list">
       <div id="list-header" class="p-2 d-flex flex-row">
-        <div class="p-2 is-available-col">Rezerwacja</div>
+        <div class="p-2 is-available-col" style="cursor: default">Rezerwacja</div>
         <SorterField class="p-2 title-col" property="title" label="Tytuł" />
         <SorterField class="p-2 kind-col" property="kind" label="Typ" />
         <SorterField class="p-2 advisor-col" property="advisor" label="Promotor" />
