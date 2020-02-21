@@ -94,6 +94,11 @@ class Thesis(models.Model):
                 (self.supporting_advisor is not None and user == self.supporting_advisor.user) or
                 user.is_staff)
 
+    @staticmethod
+    def get_visible_theses(user):
+        theses = Thesis.objects.all()
+        return filter(lambda t: t.can_see_thesis(user), theses)
+
     def get_accepted_votes(self):
         return len(self.thesis_votes.filter(vote=ThesisVote.ACCEPTED))
 
