@@ -39,11 +39,12 @@ def list_all(request):
         is_mine = p.is_mine(request.user) or p.is_student_assigned(
             request.user) or p.is_supporting_advisor_assigned(request.user)
         advisor = p.advisor.__str__()
+        advisor_last_name = p.advisor.user.last_name if p.advisor else p.advisor.__str__()
         url = reverse('theses:selected_thesis', None, [str(p.id)])
 
         record = {"id": p.id, "title": title, "is_available": is_available, "kind": kind,
                   "status": status, "has_been_accepted": has_been_accepted, "is_mine": is_mine, "url": url,
-                  "advisor": advisor, "modified": p.modified.timestamp()}
+                  "advisor": advisor, "advisor_last_name": advisor_last_name, "modified": p.modified.timestamp()}
 
         theses_list.append(record)
 

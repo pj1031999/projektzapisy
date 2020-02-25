@@ -10,6 +10,7 @@ export interface ThesisInfo {
   modified: number;
   has_been_accepted: boolean;
   advisor: string;
+  advisor_last_name: string;
   url: string;
 }
 

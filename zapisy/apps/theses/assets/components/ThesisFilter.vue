@@ -46,7 +46,11 @@ export default Vue.extend({
           />
         </div>
         <div class="col-lg">
-          <TextFilter filterKey="advisor-filter" property="advisor" placeholder="Promotor" />
+          <TextFilter
+            filterKey="advisor-filter"
+            property="advisor"
+            placeholder="Promotor"
+          />
         </div>
         <div class="col-lg">
           <SelectFilter
@@ -66,7 +70,11 @@ export default Vue.extend({
           />
         </div>
         <div class="col-lg">
-          <CheckFilter filterKey="mine-filter" property="is_mine" label="Pokaż tylko moje" />
+          <CheckFilter
+            filterKey="mine-filter"
+            property="is_mine"
+            label="Pokaż tylko moje"
+          />
         </div>
         <div class="col-lg"></div>
       </div>
