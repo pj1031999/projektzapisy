@@ -10,7 +10,6 @@ def migrate_data(apps, schema_editor):
     Vote = apps.get_model('theses', 'Vote')
     Remark = apps.get_model('theses', 'Remark')
     for t in Thesisvotebinding.objects.all():
-        print(t.reason, t.thesis)
         Vote.objects.create(owner=t.voter, vote=t.value, thesis=t.thesis)
         Remark.objects.create(author=t.voter, text=t.reason, thesis=t.thesis)
 
