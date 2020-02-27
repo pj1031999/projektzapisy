@@ -8,6 +8,7 @@ from apps.theses.enums import ThesisKind, ThesisStatus, ThesisVote
 from apps.theses.users import is_theses_board_member
 from apps.theses.validators import validate_master_rejecter, validate_num_required_votes
 from apps.users.models import Employee, Student
+from apps.notifications.custom_signals import thesis_voting_activated
 
 MAX_THESIS_TITLE_LEN = 300
 MAX_REJECTION_REASON_LENGTH = 500
@@ -86,6 +87,13 @@ class Thesis(models.Model):
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
+
+    def save(self, *args, **kwargs):
+        """Overloaded save method - during save check changes and send signals to notifications app"""
+        old = self.pk and type(self).objects.get(pk=self.pk)
+        super(Thesis, self).save(*args, **kwargs)
+        if not old or (old.status != ThesisStatus.BEING_EVALUATED and self.status == ThesisStatus.BEING_EVALUATED):
+            thesis_voting_activated.send(sender=self.__class__, instance=self)
 
     def can_see_thesis(self, user):
         return ((self.status != ThesisStatus.BEING_EVALUATED and self.status != ThesisStatus.RETURNED_FOR_CORRECTIONS) or

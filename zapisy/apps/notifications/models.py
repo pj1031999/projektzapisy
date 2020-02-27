@@ -20,3 +20,4 @@ class NotificationPreferencesTeacher(models.Model):
     user = models.ForeignKey(User, verbose_name='użytkownik', on_delete=models.CASCADE)
     assigned_to_new_group_as_teacher = models.BooleanField("Przydzielenie do grupy", default=True)
     news_has_been_added = models.BooleanField("Nowa wiadomość w Aktualnościach", default=True)
+    thesis_voting_has_been_activated = models.BooleanField("Powiadomienie o głosowaniu (dotyczy członka Komisji Prac Dyplomowych)", default=True)
