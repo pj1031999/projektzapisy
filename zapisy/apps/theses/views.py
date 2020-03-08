@@ -211,6 +211,9 @@ def edit_thesis(request, id):
             form.save_m2m()
             messages.success(request, 'Zapisano zmiany')
             return redirect('theses:selected_thesis', id=id)
+        else:
+            print("nope")
+
     else:
         form = EditThesisForm(request.user, instance=thesis)
 
