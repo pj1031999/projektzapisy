@@ -51,6 +51,9 @@ class ThesisFormBase(forms.ModelForm):
         if user.is_staff:
             self.fields['advisor'].queryset = Employee.objects.all()
         else:
+            print("user", user)
+            print("all", Employee.objects.filter(
+                pk=user.employee.pk))
             self.fields['advisor'].queryset = Employee.objects.filter(
                 pk=user.employee.pk)
             self.fields['advisor'].initial = user.employee

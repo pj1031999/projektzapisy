@@ -45,14 +45,9 @@ class ThesisStatusChangeTestCase(TestCase):
         thesis = Thesis.objects.get(title="NoStudentsEdit")
         id = thesis.id
 
-        form = EditThesisForm(instance=thesis,
-                              user=self.thesis_owner.user)
-
-        print("Errors:", form.errors)
-
         self.client.force_login(self.thesis_owner.user)
 
         response = self.client.post('/theses/' + str(id) + '/edit',
-                                    {'thesis_form': form, 'id': id})
+                                    {'title': thesis.title, 'advisor': thesis.advisor, 'supporting_advisor': thesis.supporting_advisor, 'reserved_until': thesis.reserved_until, 'kind': thesis.kind, 'status': thesis.status, 'description': thesis.description})
         self.assertEqual(thesis.status,
                          ThesisStatus.IN_PROGRESS.value)

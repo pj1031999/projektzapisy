@@ -190,6 +190,7 @@ def edit_thesis(request, id):
         raise PermissionDenied
 
     if request.method == "POST":
+        print(request.POST)
         thesis_status = thesis.status
         form = EditThesisForm(request.user, request.POST, instance=thesis)
         # check whether it's valid:
