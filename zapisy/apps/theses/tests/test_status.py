@@ -9,9 +9,8 @@ from apps.users.tests.factories import EmployeeFactory, StudentFactory, UserFact
 
 class ThesisStatusChangeTestCase(TestCase):
     def setUp(self):
-        self.user_owner = User.objects.create()
-        self.thesis_owner = Employee.objects.create(user=self.user_owner)
-        self.student = Student.objects.create(user=UserFactory())
+        self.thesis_owner = EmployeeFactory()
+        self.student = StudentFactory()
 
         Thesis.objects.create(title="NoStudents",
                               advisor=self.thesis_owner, kind=0, status=ThesisStatus.BEING_EVALUATED)
@@ -21,7 +20,7 @@ class ThesisStatusChangeTestCase(TestCase):
 
         thesis_with_students = Thesis.objects.create(
             title="WithStudents", advisor=self.thesis_owner, kind=0, status=ThesisStatus.BEING_EVALUATED)
-        thesis_with_students.students.add(StudentFactory())
+        thesis_with_students.students.add(self.student)
 
         settings = ThesesSystemSettings.objects.get()
         settings.num_required_votes = 1
@@ -46,14 +45,8 @@ class ThesisStatusChangeTestCase(TestCase):
         thesis = Thesis.objects.get(title="NoStudentsEdit")
         id = thesis.id
 
-        form_data = {'title': thesis.title,
-                     'advisor': Employee.objects.filter(
-                         pk=self.thesis_owner.pk)[0], 'kind': 0,
-                     'students': [StudentFactory()], 'status': 3
-                     }
-
         form = EditThesisForm(instance=thesis,
-                              user=self.thesis_owner.user, data=form_data)
+                              user=self.thesis_owner.user)
 
         print("Errors:", form.errors)
 
@@ -62,4 +55,4 @@ class ThesisStatusChangeTestCase(TestCase):
         response = self.client.post('/theses/' + str(id) + '/edit',
                                     {'thesis_form': form, 'id': id})
         self.assertEqual(thesis.status,
-                         ThesisStatus.IN_PROGRESS)
+                         ThesisStatus.IN_PROGRESS.value)
