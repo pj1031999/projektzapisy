@@ -14,15 +14,6 @@ from zapisy import common
 from .term import Term
 
 
-class GetterManager(models.Manager):
-
-    def get_next(self):
-        try:
-            return self.get(visible=True, records_closing__gte=datetime.now())
-        except (ObjectDoesNotExist, MultipleObjectsReturned):
-            return self.filter(visible=True).order_by('records_closing').last()
-
-
 class Semester(models.Model):
     """semester in academic year"""
     TYPE_WINTER = 'z'
@@ -82,7 +73,7 @@ class Semester(models.Model):
         max_length=20,
         verbose_name='Kod semestru w systemie USOS')
 
-    objects = GetterManager()
+    objects = models.Manager()
 
     def clean(self):
         """
@@ -265,6 +256,14 @@ class Semester(models.Model):
             weeks.append((week_start, week_end))
             week_start += timedelta(days=7)
         return weeks
+
+    @staticmethod
+    def get_next():
+        """returns visible semester that has latest records_closing time"""
+        try:
+            return Semester.objects.get(visible=True, records_closing__gte=datetime.now())
+        except (ObjectDoesNotExist, MultipleObjectsReturned):
+            return Semester.objects.filter(visible=True).order_by('records_closing').last()
 
     @staticmethod
     def get_current_semester():
