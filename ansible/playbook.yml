@@ -1,6 +1,44 @@
 ---
 - hosts: all
-
+​
   tasks:
-    - name: run echo command
-      command: /bin/echo "hello world"
+    - name: apache_setup.sh
+      shell: |
+        apt-get install -y apache2
+        if ! [ -L /var/www ]; then
+          rm -rf /var/www
+          ln -fs /vagrant /var/www
+        fi
+        apt-get install -y apache2-dev
+      become: true
+      become_user: root
+​
+    - name: apt.sh
+      shell: |
+        apt-get update
+        apt-get -y upgrade
+      become: true
+      become_user: root
+​
+    - name: bash_setup.sh
+      shell: |
+        echo "alias run='python /vagrant/zapisy/run.py'" >> .bash_aliases
+        echo "source ~/env3/bin/activate" >> .bashrc
+      args:
+        chdir: ~/
+​
+    - name: env3_setup.sh
+      shell: |
+        # set up virtualenv
+        cd $HOME
+        python3.6 -m venv env3
+        source env3/bin/activate
+        
+        # The version of python we've built won't necessarily
+        # have the latest version of pip bundled with it
+        pip install --upgrade pip
+        
+        # get requirements
+        pip install -r /vagrant/zapisy/requirements.development.txt
+        
+        echo "Python 3.6 environment has been set up."
