@@ -30,3 +30,41 @@
         upgrade: yes
       become: yes
       become_user: root
+    - name: Add alias to .bash_alises
+      lineinfile:
+        path: ~/.bash_aliases
+        line: "alias run='python /vagrant/zapisy/run.py'"
+        regex: "^alias run='python /vagrant/zapisy/run.py'$"
+        state: present
+        insertafter: EOF
+        create: yes
+    - name: Add source command to .bashrc
+      lineinfile:
+        path: ~/.bashrc
+        line: "source ~/env3/bin/activate"
+        regex: "^source ~/env3/bin/activate$"
+        state: present
+        insertafter: EOF
+        create: yes
+    - name: Run python script
+      shell: python3.6 -m venv env3
+      args:
+        chdir: ~/
+    - name: Run source command
+      shell: bash env3/bin/activate
+      args:
+        chdir: ~/
+    - name: Install pip
+      apt:
+        name: python-pip
+        update_cache: yes
+      become: yes
+      become_user: root
+    - name: Upgrade pip
+      pip:
+        name: pip
+        state: latest
+    - name: Get requirements
+      pip:
+        requirements: /vagrant/zapisy/requirements.development.txt
+        
