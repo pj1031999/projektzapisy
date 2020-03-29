@@ -10,7 +10,7 @@
     - stat:
         path: /var/www
       register: sym_link
-    - name: Delete /var/www in case it is not symbolic link.
+    - name: Delete /var/www in case it is not symbolic link
       file:
         path: sym_link.path
         state: absent
@@ -46,14 +46,6 @@
         state: present
         insertafter: EOF
         create: yes
-    - name: Run python script
-      shell: python3.6 -m venv env3
-      args:
-        chdir: ~/
-    - name: Run source command
-      shell: bash env3/bin/activate
-      args:
-        chdir: ~/
     - name: Install pip
       apt:
         name: python-pip
@@ -64,7 +56,12 @@
       pip:
         name: pip
         state: latest
-    - name: Get requirements
+      args:
+        chdir: ~/
+    - name: Set up virtualenv and get requirements
       pip:
+        virtualenv: env3
+        virtualenv_python: python3.6
         requirements: /vagrant/zapisy/requirements.development.txt
-        
+      args:
+        chdir: ~/
