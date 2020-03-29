@@ -1,44 +1,32 @@
 ---
 - hosts: all
-​
+
   tasks:
-    - name: apache_setup.sh
-      shell: |
-        apt-get install -y apache2
-        if ! [ -L /var/www ]; then
-          rm -rf /var/www
-          ln -fs /vagrant /var/www
-        fi
-        apt-get install -y apache2-dev
-      become: true
+    - name: Install apache2
+      apt:
+        name: apache2
+      become: yes
       become_user: root
-​
-    - name: apt.sh
-      shell: |
-        apt-get update
-        apt-get -y upgrade
-      become: true
+    - stat:
+        path: /var/www
+      register: sym_link
+    - name: Delete /var/www in case it is not symbolic link.
+      file:
+        path: sym_link.path
+        state: absent
+      when: sym_link.stat.exists and not sym_link.stat.islnk
+    - name: Create /var/www if necessary
+      file:
+        src: /vagrant
+        dest: /var/www
+        state: link
+      when: not sym_link.stat.exists or not sym_link.stat.islnk
+    - name: Install apache2-dev
+      apt:
+        name: apache2-dev
+    - name: Apt update and upgrade
+      apt: 
+        update_cache: yes
+        upgrade: yes
+      become: yes
       become_user: root
-​
-    - name: bash_setup.sh
-      shell: |
-        echo "alias run='python /vagrant/zapisy/run.py'" >> .bash_aliases
-        echo "source ~/env3/bin/activate" >> .bashrc
-      args:
-        chdir: ~/
-​
-    - name: env3_setup.sh
-      shell: |
-        # set up virtualenv
-        cd $HOME
-        python3.6 -m venv env3
-        source env3/bin/activate
-        
-        # The version of python we've built won't necessarily
-        # have the latest version of pip bundled with it
-        pip install --upgrade pip
-        
-        # get requirements
-        pip install -r /vagrant/zapisy/requirements.development.txt
-        
-        echo "Python 3.6 environment has been set up."
