@@ -44,7 +44,8 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     http_method_names = ['get', 'patch']
     permission_classes = (IsAdminUser,)
-    queryset = CourseInstance.objects.select_related('course_type', 'semester').order_by('id')
+    queryset = CourseInstance.objects.select_related(
+        'course_type', 'semester').order_by('id')
     filterset_fields = ['semester']
     serializer_class = serializers.CourseSerializer
     pagination_class = StandardResultsSetPagination
@@ -70,7 +71,8 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 class TermViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch']
     permission_classes = (IsAdminUser,)
-    queryset = Term.objects.select_related('group').prefetch_related('classrooms').order_by('id')
+    queryset = Term.objects.select_related(
+        'group').prefetch_related('classrooms').order_by('id')
     filterset_fields = ['group__course__semester']
     serializer_class = serializers.TermSerializer
     pagination_class = StandardResultsSetPagination
@@ -98,14 +100,14 @@ class StudentViewSet(viewsets.ModelViewSet):
     """Dumps the list of all the students.
 
     To only list active students query:
-        /api/v1/students/?status=0.
+        /api/v1/students/?is_active=true.
     """
     http_method_names = ['get', 'patch', 'post']
     permission_classes = (IsAdminUser,)
     queryset = Student.objects.select_related('user')
     serializer_class = serializers.StudentSerializer
     pagination_class = StandardResultsSetPagination
-    filterset_fields = ['status']
+    filterset_fields = ['is_active']
 
 
 class DesiderataViewSet(viewsets.ModelViewSet):
