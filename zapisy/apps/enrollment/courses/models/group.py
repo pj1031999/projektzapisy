@@ -28,6 +28,7 @@ class GroupType(models.TextChoices):
     TUTORING = '11', _('tutoring')
     PRO_SEMINAR = '12', _('proseminarium')
 
+
 GROUP_EXTRA_CHOICES = [('', ''),
                        ("pierwsze 7 tygodni", "pierwsze 7 tygodni"),
                        ("drugie 7 tygodni", "drugie 7 tygodni"),
