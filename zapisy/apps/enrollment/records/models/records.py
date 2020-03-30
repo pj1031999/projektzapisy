@@ -54,7 +54,7 @@ from django.db import DatabaseError, models, transaction
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 from apps.enrollment.courses.models import CourseInstance, Group, Semester
-from apps.enrollment.courses.models.group import GuaranteedSpots
+from apps.enrollment.courses.models.group import GuaranteedSpots, GroupType
 from apps.enrollment.records.models.opening_times import GroupOpeningTimes
 from apps.enrollment.records.signals import GROUP_CHANGE_SIGNAL
 from apps.users.models import Student
@@ -375,7 +375,7 @@ class Record(models.Model):
         if not cls.can_enqueue(student, group, cur_time):
             return []
         enqueued_groups = []
-        if group.type != Group.GROUP_TYPE_LECTURE:
+        if group.type != GroupType.LECTURE:
             lecture_group = Group.get_lecture_group(group.course_id)
             if lecture_group is not None:
                 enqueued_lecture_groups = cls.enqueue_student(student, lecture_group)
@@ -416,7 +416,7 @@ class Record(models.Model):
             return []
         removed_groups = []
         # If this is a lecture, remove him from all other groups as well.
-        if record.group.type == Group.GROUP_TYPE_LECTURE:
+        if record.group.type == GroupType.LECTURE:
             other_groups_query = Record.objects.filter(
                 student=student, group__course_id=record.group.course_id).exclude(
                     status=RecordStatus.REMOVED).exclude(pk=record.pk)
@@ -469,7 +469,7 @@ class Record(models.Model):
         # records into that group in order to avoid dropping the record, when a
         # student enqueues into the groups at the same time, and this group is
         # being worked before the lecture group.
-        if group.type != Group.GROUP_TYPE_LECTURE:
+        if group.type != GroupType.LECTURE:
             lecture_group = Group.get_lecture_group(group.course_id)
             if lecture_group is not None:
                 cls.fill_group(lecture_group.pk)
@@ -552,7 +552,7 @@ class Record(models.Model):
                 status=RecordStatus.REMOVED).select_for_update()
 
             # Check if he is enrolled into the lecture group.
-            if group.type != Group.GROUP_TYPE_LECTURE:
+            if group.type != GroupType.LECTURE:
                 lecture_group = Group.get_lecture_group(group.course_id)
                 if lecture_group is not None:
                     lecture_group_is_enrolled = self.is_enrolled(self.student.id, lecture_group.id)

@@ -7,6 +7,7 @@ from typing import Optional
 
 from django.db import models, transaction
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 
 from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.notifications.custom_signals import teacher_changed
@@ -14,11 +15,18 @@ from apps.users.models import Employee
 
 
 # w przypadku edycji, poprawić też javascript: Fereol.Enrollment.CourseGroup.groupTypes
-GROUP_TYPE_CHOICES = [('1', 'wykład'), ('2', 'ćwiczenia'), ('3', 'pracownia'),
-                      ('5', 'ćwiczenio-pracownia'),
-                      ('6', 'seminarium'), ('7', 'lektorat'), ('8', 'WF'),
-                      ('9', 'repetytorium'), ('10', 'projekt'),
-                      ('11', 'tutoring'), ('12', 'proseminarium')]
+class GroupType(models.TextChoices):
+    LECTURE = '1', _('wykład')
+    EXERCISES = '2', _('ćwiczenia')
+    LAB = '3', _('pracownia')
+    EXERCISES_LAB = '5', _('ćwiczenio-pracownia')
+    SEMINAR = '6', _('seminarium')
+    LANGUAGE_COURSE = '7', _('lektor')
+    PE = '8', _('WF')
+    COMPENDIUM = '9', _('repetytorium')
+    PROJECT = '10', _('projekt')
+    TUTORING = '11', _('tutoring')
+    PRO_SEMINAR = '12', _('proseminarium')
 
 GROUP_EXTRA_CHOICES = [('', ''),
                        ("pierwsze 7 tygodni", "pierwsze 7 tygodni"),
@@ -54,8 +62,7 @@ class Group(models.Model):
         blank=True,
         verbose_name='prowadzący',
         on_delete=models.CASCADE)
-    type = models.CharField(max_length=2, choices=GROUP_TYPE_CHOICES, verbose_name='typ zajęć')
-    GROUP_TYPE_LECTURE = '1'
+    type = models.CharField(max_length=2, choices=GroupType.choices, verbose_name='typ zajęć')
     limit = models.PositiveSmallIntegerField(default=0, verbose_name='limit miejsc')
     extra = models.CharField(
         max_length=20,
@@ -178,7 +185,7 @@ class Group(models.Model):
         The Group.MultipleObjectsReturned exception will be raised when many
         lecture groups exist for course.
         """
-        group_query = cls.objects.filter(course_id=course_id, type=Group.GROUP_TYPE_LECTURE)
+        group_query = cls.objects.filter(course_id=course_id, type=GroupType.LECTURE)
         try:
             return group_query.get()
         except cls.DoesNotExist:
