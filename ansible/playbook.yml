@@ -12,18 +12,24 @@
       register: sym_link
     - name: Delete /var/www in case it is not symbolic link
       file:
-        path: sym_link.path
+        path: /var/www
         state: absent
       when: sym_link.stat.exists and not sym_link.stat.islnk
+      become: yes
+      become_user: root
     - name: Create /var/www if necessary
       file:
         src: /vagrant
         dest: /var/www
         state: link
       when: not sym_link.stat.exists or not sym_link.stat.islnk
+      become: yes
+      become_user: root
     - name: Install apache2-dev
       apt:
         name: apache2-dev
+      become: yes
+      become_user: root
     - name: Apt update and upgrade
       apt: 
         update_cache: yes
@@ -48,7 +54,9 @@
         create: yes
     - name: Install pip
       apt:
-        name: python-pip
+        pkg: 
+        - python-pip
+        - python3-venv
         update_cache: yes
       become: yes
       become_user: root
@@ -58,10 +66,13 @@
         state: latest
       args:
         chdir: ~/
-    - name: Set up virtualenv and get requirements
+    - name: Set up virtualenv
+      shell: python3.6 -m venv env3
+      args:
+        chdir: ~/
+    - name: Get requirements
       pip:
         virtualenv: env3
-        virtualenv_python: python3.6
         requirements: /vagrant/zapisy/requirements.development.txt
       args:
         chdir: ~/
