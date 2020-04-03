@@ -29,25 +29,27 @@ class GroupType(models.TextChoices):
     PRO_SEMINAR = '12', _('proseminarium')
 
 
-GROUP_EXTRA_CHOICES = [('', ''),
-                       ("pierwsze 7 tygodni", "pierwsze 7 tygodni"),
-                       ("drugie 7 tygodni", "drugie 7 tygodni"),
-                       ('grupa rezerwowa', 'grupa rezerwowa'),
-                       ('grupa licencjacka', 'grupa licencjacka'),
-                       ('grupa magisterska', 'grupa magisterska'),
-                       ('grupa zaawansowana', 'grupa zaawansowana'),
-                       ('zajecia na mat.', 'zajęcia na matematyce'),
-                       ('wykład okrojony', 'wykład okrojony'),
-                       ('grupa 1', 'grupa 1'),
-                       ('grupa 2', 'grupa 2'),
-                       ('grupa 3', 'grupa 3'),
-                       ('grupa 4', 'grupa 4'),
-                       ('grupa 5', 'grupa 5'),
-                       ('pracownia linuksowa', 'pracownia linuksowa'),
-                       ('grupa anglojęzyczna', 'grupa anglojęzyczna'),
-                       ('I rok', 'I rok'), ('II rok', 'II rok'), ('ISIM', 'ISIM'),
-                       ('hidden', 'grupa ukryta'),
-                       ]
+class GroupExtra(models.TextChoices):
+    EMPTY = '', _('')
+    FIRST_SEV_WEEKS = 'pierwsez 7 tygodni', _('pierwsze 7 tygodni')
+    SEC_SEV_WEEKS = 'drugie 7 tygodni', _('drugie 7 tygodni')
+    BACKUP_GROUP = 'grupa rezerwowa', _('grupa rezerwowa')
+    BACHELOR_GROUP = 'grupa licencjacka', _('grupa licencjacka')
+    MASTERS_GROUP = 'grupa magisterska', _('grupa magisterska')
+    ADVANCED_GROUP = 'grupa zaawansowana', _('grupa zaawansowana')
+    MATH_DEP_CLASS = 'zajęcia na mat.', _('zajęcia na matematyce')
+    STRIPPLED_LECTURE = 'wykład okrojony', _('wykład okrojony')
+    GROUP_ONE = 'grupa 1', _('grupa 1')
+    GROUP_TWO = 'grupa 2', _('grupa 2')
+    GROUP_THREE = 'grupa 3', _('grupa 3')
+    GROUP_FOUR = 'grupa 4', _('grupa 4')
+    GROUP_FIVE = 'grupa 5', _('grupa 5')
+    LINUX_LAB = 'pracownia linuksowa', _('pracownia linuksowa')
+    ENGLISH_GROUP = 'grupa anglojęzyczna', _('grupa anglojęzyczna')
+    FIRST_YEAR = 'I rok', _('I rok')
+    SEC_YEAR = 'II rok', _('II rok')
+    ISIM = 'ISIM', _('ISIM')
+    HIDDEN_GROUP = 'hidden', _('grupa ukryta')
 
 
 class Group(models.Model):
@@ -63,15 +65,18 @@ class Group(models.Model):
         blank=True,
         verbose_name='prowadzący',
         on_delete=models.CASCADE)
-    type = models.CharField(max_length=2, choices=GroupType.choices, verbose_name='typ zajęć')
-    limit = models.PositiveSmallIntegerField(default=0, verbose_name='limit miejsc')
+    type = models.CharField(
+        max_length=2, choices=GroupType.choices, verbose_name='typ zajęć')
+    limit = models.PositiveSmallIntegerField(
+        default=0, verbose_name='limit miejsc')
     extra = models.CharField(
         max_length=20,
-        choices=GROUP_EXTRA_CHOICES,
+        choices=GroupExtra.choices,
         verbose_name='dodatkowe informacje',
         default='',
         blank=True)
-    export_usos = models.BooleanField(default=True, verbose_name='czy eksportować do usos?')
+    export_usos = models.BooleanField(
+        default=True, verbose_name='czy eksportować do usos?')
 
     disable_update_signal = False
 
@@ -181,7 +186,8 @@ class Group(models.Model):
         The Group.MultipleObjectsReturned exception will be raised when many
         lecture groups exist for course.
         """
-        group_query = cls.objects.filter(course_id=course_id, type=GroupType.LECTURE)
+        group_query = cls.objects.filter(
+            course_id=course_id, type=GroupType.LECTURE)
         try:
             return group_query.get()
         except cls.DoesNotExist:
@@ -193,11 +199,13 @@ class Group(models.Model):
         super(Group, self).save(*args, **kwargs)
         if old:
             if old.teacher != self.teacher:
-                teacher_changed.send(sender=self.__class__, instance=self, teacher=self.teacher)
+                teacher_changed.send(sender=self.__class__,
+                                     instance=self, teacher=self.teacher)
 
 
 class GuaranteedSpotsManager(models.Manager):
     """This thin manager always pulls auth.Group names for efficiency."""
+
     def get_queryset(self):
         return super().get_queryset().select_related('role')
 
