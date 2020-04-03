@@ -8,31 +8,34 @@ from django_extensions.db.fields import AutoSlugField
 from django.utils.translation import gettext_lazy as _
 
 
-class Floors(models.TextChoices):
-    GROUND_FLOOR = '0', _('Parter')
-    FIRST_FLOOR = '1', _('I piętro')
-    SEC_FLOOR = '2', _('II piętro')
-    THIRD_FLOOR = '3', _('III piętro')
+class Floors(models.IntegerChoices):
+    GROUND_FLOOR = 0, _('Parter')
+    FIRST_FLOOR = 1, _('I piętro')
+    SEC_FLOOR = 2, _('II piętro')
+    THIRD_FLOOR = 3, _('III piętro')
 
 
-class Types(models.TextChoices):
-    LECTURE_HALL = '0', _('Sala wykładowa')
-    CLASSROOM = '1', _('Sala ćwiczeniowa')
-    WINDOWS_LAB = '2', _('Pracownia komputerowa - Windows')
-    LINUX_LAB = '3', _('Pracownia komputerowa - Linux')
-    DOUBLE_OS_LAB = '4', _('Pracownia dwusystemowa (Winodws+Linux)')
-    POLIGON = '5', _('Poligon (109)')
+class Types(models.IntegerChoices):
+    LECTURE_HALL = 0, _('Sala wykładowa')
+    CLASSROOM = 1, _('Sala ćwiczeniowa')
+    WINDOWS_LAB = 2, _('Pracownia komputerowa - Windows')
+    LINUX_LAB = 3, _('Pracownia komputerowa - Linux')
+    DOUBLE_OS_LAB = 4, _('Pracownia dwusystemowa (Winodws+Linux)')
+    POLIGON = 5, _('Poligon (109)')
 
 
 class Classroom(models.Model):
     """classroom in institute"""
-    type = models.IntegerField(choices=Types.choices, default=1, verbose_name='typ')
+    type = models.IntegerField(
+        choices=Types.choices, default=1, verbose_name='typ')
     description = models.TextField(null=True, blank=True, verbose_name='opis')
     number = models.CharField(max_length=20, verbose_name='numer sali')
     # we don't use ordering properly
     order = models.IntegerField(null=True, blank=True)
-    building = models.CharField(max_length=75, verbose_name='budynek', blank=True, default='')
-    capacity = models.PositiveSmallIntegerField(default=0, verbose_name='liczba miejsc')
+    building = models.CharField(
+        max_length=75, verbose_name='budynek', blank=True, default='')
+    capacity = models.PositiveSmallIntegerField(
+        default=0, verbose_name='liczba miejsc')
     floor = models.IntegerField(choices=Floors.choices, null=True, blank=True)
     can_reserve = models.BooleanField(default=False)
     slug = AutoSlugField(populate_from='number')
