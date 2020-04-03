@@ -7,6 +7,7 @@ from django.db.models import Q
 from django_extensions.db.fields import AutoSlugField
 from django.utils.translation import gettext_lazy as _
 
+
 class Floors(models.TextChoices):
     GROUND_FLOOR = '0', _('Parter')
     FIRST_FLOOR = '1', _('I piętro')
