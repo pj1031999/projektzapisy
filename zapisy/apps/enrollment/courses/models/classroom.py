@@ -26,16 +26,13 @@ class Types(models.IntegerChoices):
 
 class Classroom(models.Model):
     """classroom in institute"""
-    type = models.IntegerField(
-        choices=Types.choices, default=1, verbose_name='typ')
+    type = models.IntegerField(choices=Types.choices, default=1, verbose_name='typ')
     description = models.TextField(null=True, blank=True, verbose_name='opis')
     number = models.CharField(max_length=20, verbose_name='numer sali')
     # we don't use ordering properly
     order = models.IntegerField(null=True, blank=True)
-    building = models.CharField(
-        max_length=75, verbose_name='budynek', blank=True, default='')
-    capacity = models.PositiveSmallIntegerField(
-        default=0, verbose_name='liczba miejsc')
+    building = models.CharField(max_length=75, verbose_name='budynek', blank=True, default='')
+    capacity = models.PositiveSmallIntegerField(default=0, verbose_name='liczba miejsc')
     floor = models.IntegerField(choices=Floors.choices, null=True, blank=True)
     can_reserve = models.BooleanField(default=False)
     slug = AutoSlugField(populate_from='number')

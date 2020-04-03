@@ -7,11 +7,11 @@ from typing import Optional
 
 from django.db import models, transaction
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 
 from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.notifications.custom_signals import teacher_changed
 from apps.users.models import Employee
+from django.utils.translation import gettext_lazy as _
 
 
 # w przypadku edycji, poprawić też javascript: Fereol.Enrollment.CourseGroup.groupTypes
@@ -65,18 +65,15 @@ class Group(models.Model):
         blank=True,
         verbose_name='prowadzący',
         on_delete=models.CASCADE)
-    type = models.CharField(
-        max_length=2, choices=GroupType.choices, verbose_name='typ zajęć')
-    limit = models.PositiveSmallIntegerField(
-        default=0, verbose_name='limit miejsc')
+    type = models.CharField(max_length=2, choices=GroupType.choices, verbose_name='typ zajęć')
+    limit = models.PositiveSmallIntegerField(default=0, verbose_name='limit miejsc')
     extra = models.CharField(
         max_length=20,
         choices=GroupExtra.choices,
         verbose_name='dodatkowe informacje',
         default='',
         blank=True)
-    export_usos = models.BooleanField(
-        default=True, verbose_name='czy eksportować do usos?')
+    export_usos = models.BooleanField(default=True, verbose_name='czy eksportować do usos?')
 
     disable_update_signal = False
 
@@ -186,8 +183,7 @@ class Group(models.Model):
         The Group.MultipleObjectsReturned exception will be raised when many
         lecture groups exist for course.
         """
-        group_query = cls.objects.filter(
-            course_id=course_id, type=GroupType.LECTURE)
+        group_query = cls.objects.filter(course_id=course_id, type=Group.GROUP_TYPE_LECTURE)
         try:
             return group_query.get()
         except cls.DoesNotExist:
@@ -199,13 +195,11 @@ class Group(models.Model):
         super(Group, self).save(*args, **kwargs)
         if old:
             if old.teacher != self.teacher:
-                teacher_changed.send(sender=self.__class__,
-                                     instance=self, teacher=self.teacher)
+                teacher_changed.send(sender=self.__class__, instance=self, teacher=self.teacher)
 
 
 class GuaranteedSpotsManager(models.Manager):
     """This thin manager always pulls auth.Group names for efficiency."""
-
     def get_queryset(self):
         return super().get_queryset().select_related('role')
 

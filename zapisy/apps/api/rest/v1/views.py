@@ -44,8 +44,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     """
     http_method_names = ['get', 'patch']
     permission_classes = (IsAdminUser,)
-    queryset = CourseInstance.objects.select_related(
-        'course_type', 'semester').order_by('id')
+    queryset = CourseInstance.objects.select_related('course_type', 'semester').order_by('id')
     filterset_fields = ['semester']
     serializer_class = serializers.CourseSerializer
     pagination_class = StandardResultsSetPagination
@@ -71,8 +70,7 @@ class ClassroomViewSet(viewsets.ModelViewSet):
 class TermViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'patch']
     permission_classes = (IsAdminUser,)
-    queryset = Term.objects.select_related(
-        'group').prefetch_related('classrooms').order_by('id')
+    queryset = Term.objects.select_related('group').prefetch_related('classrooms').order_by('id')
     filterset_fields = ['group__course__semester']
     serializer_class = serializers.TermSerializer
     pagination_class = StandardResultsSetPagination
