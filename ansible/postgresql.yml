@@ -142,6 +142,16 @@
         lc_ctype: pl_PL.UTF-8
         template: template0
 
+    - name: Update the database
+      become: yes
+      become_user: postgres
+      vars:
+        ansible_python_interpreter: "{{ PYTHON }}"
+      postgresql_db:
+        name: "{{ APP_DB_NAME }}"
+        state: restore
+        target: "/vagrant/ii_zapisy_dump_dev.sql"
+
     - name: Create the test database
       become: yes
       become_user: postgres
