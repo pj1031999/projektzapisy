@@ -9,7 +9,9 @@
     PG_CONF: "/etc/postgresql/{{ PG_VERSION }}/main/postgresql.conf"
     PG_HBA: "/etc/postgresql/{{ PG_VERSION }}/main/pg_hba.conf"
     PG_DIR: "/var/lib/postgresql/{{ PG_VERSION }}/main"
-    PYTHON: "/usr/bin/python3"
+    RE_SQL: "/var/lib/postgresql/reset_zapisy.sql"
+    PYTHON: "/home/vagrant/env3/bin/python"
+    #PYTHON: "/usr/bin/python3"
 
   tasks:
     - name: Ensure a locale exists
@@ -33,6 +35,7 @@
       become: yes
       become_user: root
 
+    # Do usunięcia jeśli korzystamy z venv
     - name: Temp Install psycopg2
       apt:
         name: python3-psycopg2
@@ -88,11 +91,16 @@
       become: yes
       become_user: root
 
+    - name: Check if sql for recreating database exists
+      stat:
+        path: "{{ RE_SQL }}"
+      register: sql1_stat
+
     - name: Create sql for recreating database
       become: yes
       become_user: root
       blockinfile:
-        path: /var/lib/postgresql/reset_zapisy.sql
+        path: "{{ RE_SQL }}"
         create: yes
         block: |
           DROP DATABASE $APP_DB_NAME;
@@ -109,6 +117,7 @@
                                             LC_CTYPE='pl_PL.UTF-8'
                                             ENCODING='UTF8'
                                             TEMPLATE=template0;
+      when: sql1_stat.stat.exists == False
 
     - name: Create the database user
       become: yes
@@ -169,3 +178,4 @@
         - ""
         - "Local command to access the database via psql:"
         - "PGUSER={{ APP_DB_USER }} PGPASSWORD={{ APP_DB_PASS}} psql -h localhost -p 15432 {{ APP_DB_NAME }}"
+      when: sql1_stat.stat.exists == False
