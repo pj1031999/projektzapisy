@@ -1,9 +1,6 @@
 ---
 - hosts: all
 
-  become: yes
-  become_user: root
-
   vars:
     APP_DB_USER: fereol
     APP_DB_PASS: fereolpass
@@ -251,39 +248,55 @@
         - xvfb
         - firefox
         - memcached
+      become: yes
+      become_user: root
 
     # nodejs_setup.sh
     - name: Install the gpg key for nodejs LTS
       apt_key:
         url: "https://deb.nodesource.com/gpgkey/nodesource.gpg.key"
         state: present
+      become: yes
+      become_user: root
 
     - name: Install the nodejs LTS repos
       apt_repository:
         repo: "deb https://deb.nodesource.com/node_{{ NODEJS_VERSION }}.x {{ ansible_distribution_release }} main"
         state: present
         update_cache: yes
+      become: yes
+      become_user: root
 
     - name: Install the nodejs
       apt:
         name: nodejs
         state: present
+      become: yes
+      become_user: root
 
     - name: Instal yarn
       package:
         name: yarn
         state: present
+      become: yes
+      become_user: root
 
     
     # py3.sh
     - debug:
         msg: Install Python 3.6...
+
     - name: Install python3
       apt:
         name: python3
+      become: yes
+      become_user: root
+
     - name: Install python3-venv
       apt:
         name: python3-venv
+      become: yes
+      become_user: root
 
 
     # bash_setup.sh
@@ -311,6 +324,8 @@
     - name: Install redis
       apt:
         name: redis-server
+      become: yes
+      become_user: root
 
     # env3_setup.sh
     - name: Install pip
