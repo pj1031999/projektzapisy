@@ -31,7 +31,7 @@ class GroupType(models.TextChoices):
 
 class GroupExtra(models.TextChoices):
     EMPTY = '', _('')
-    FIRST_SEV_WEEKS = 'pierwsez 7 tygodni', _('pierwsze 7 tygodni')
+    FIRST_SEV_WEEKS = 'pierwsze 7 tygodni', _('pierwsze 7 tygodni')
     SEC_SEV_WEEKS = 'drugie 7 tygodni', _('drugie 7 tygodni')
     BACKUP_GROUP = 'grupa rezerwowa', _('grupa rezerwowa')
     BACHELOR_GROUP = 'grupa licencjacka', _('grupa licencjacka')
