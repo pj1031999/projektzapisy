@@ -19,7 +19,7 @@ from apps.schedule.models.event import Event
 from apps.schedule.models.term import Term
 from apps.schedule.models.specialreservation import SpecialReservation
 from apps.schedule.filters import EventFilter, ExamFilter
-from apps.schedule.forms import EventForm, TermFormSet, DecisionForm, \
+from apps.schedule.forms import NewEventForm, EventForm, TermFormSet, DecisionForm, \
     EventModerationMessageForm, EventMessageForm, ConflictsForm
 from apps.schedule.utils import EventAdapter, get_week_range_by_date
 from apps.utils.fullcalendar import FullCalendarView
@@ -52,6 +52,12 @@ def classroom(request, slug):
 
 
 @login_required
+def new_reservation(request, event_id=None):
+    form = NewEventForm(request.user)
+    return render(request, 'schedule/new_reservation.html', {'form': form})
+
+
+@login_required
 def reservation(request, event_id=None):
     form = EventForm(data=request.POST or None, user=request.user)
 
@@ -75,7 +81,8 @@ def reservation(request, event_id=None):
 def edit_event(request, event_id=None):
     is_edit = True
     event = Event.get_event_for_moderation_or_404(event_id, request.user)
-    form = EventForm(data=request.POST or None, instance=event, user=request.user)
+    form = EventForm(data=request.POST or None,
+                     instance=event, user=request.user)
     formset = TermFormSet(request.POST or None, instance=event)
     reservation = event.reservation
 
@@ -147,7 +154,8 @@ def conflicts(request):
 
 @login_required
 def history(request):
-    events = EventFilter(request.GET, queryset=Event.get_for_user(request.user))
+    events = EventFilter(
+        request.GET, queryset=Event.get_for_user(request.user))
     qs = Paginator(events.qs, 10).get_page(request.GET.get('page', 1))
     title = 'Moje rezerwacje'
     return TemplateResponse(request, 'schedule/history.html', locals())
@@ -178,7 +186,8 @@ def decision(request, event_id):
             messages.success(request, "Status wydarzenia został zmieniony")
             if event_obj.status == Event.STATUS_ACCEPTED:
                 for conflict in conflicts:
-                    messages.warning(request, "Powstał konflikt: " + conflict.title)
+                    messages.warning(
+                        request, "Powstał konflikt: " + conflict.title)
     else:
         messages.error(request, form.non_field_errors())
 
@@ -290,7 +299,8 @@ class MyScheduleAjaxView(FullCalendarView):
         query = []
 
         if self.request.user.student:
-            query.append(Q(record__student=self.request.user.student) & Q(record__status='1'))
+            query.append(Q(record__student=self.request.user.student)
+                         & Q(record__status='1'))
 
         if self.request.user.employee:
             query.append(Q(teacher=self.request.user.employee))
@@ -369,7 +379,8 @@ def display_report(request, form, report_type: 'Literal["table", "doors"]'):
                               title=term.group.course.name,
                               type=term.group.human_readable_type(),
                               author=term.group.teacher.get_full_name()))
-        terms = SpecialReservation.objects.filter(semester=semester, classroom__in=rooms).select_related('classroom')
+        terms = SpecialReservation.objects.filter(
+            semester=semester, classroom__in=rooms).select_related('classroom')
         for term in terms:
             events.append(
                 ListEvent(date=None,
@@ -381,7 +392,8 @@ def display_report(request, form, report_type: 'Literal["table", "doors"]'):
                           type="",
                           author=""))
     elif 'week' in form.cleaned_data:
-        beg_date = datetime.datetime.strptime(form.cleaned_data['week'], "%Y-%m-%d")
+        beg_date = datetime.datetime.strptime(
+            form.cleaned_data['week'], "%Y-%m-%d")
         end_date = beg_date + datetime.timedelta(days=6)
     if beg_date and end_date:
         terms = Term.objects.filter(day__gte=beg_date,
@@ -396,15 +408,18 @@ def display_report(request, form, report_type: 'Literal["table", "doors"]'):
                           begin=term.start,
                           end=term.end,
                           room=term.room,
-                          title=term.event.title or str(term.event.course) or "",
+                          title=term.event.title or str(
+                              term.event.course) or "",
                           type=term.event.group.human_readable_type()
                           if term.event.group else term.event.get_type_display(),
                           author=term.event.author.get_full_name()))
 
     if report_type == 'table':
-        events = sorted(events, key=operator.attrgetter('room.id', 'date', 'begin'))
+        events = sorted(events, key=operator.attrgetter(
+            'room.id', 'date', 'begin'))
     else:
-        events = sorted(events, key=operator.attrgetter('room.id', 'weekday', 'begin'))
+        events = sorted(events, key=operator.attrgetter(
+            'room.id', 'weekday', 'begin'))
     terms_by_room = groupby(events, operator.attrgetter('room.number'))
     terms_by_room = sorted([(int(k), list(g)) for k, g in terms_by_room])
 

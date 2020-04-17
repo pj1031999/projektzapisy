@@ -40,6 +40,22 @@ class TermForm(forms.ModelForm):
 TermFormSet = inlineformset_factory(Event, Term, extra=0, form=TermForm)
 
 
+class NewEventForm(forms.ModelForm):
+    class Meta:
+        model = Event
+        exclude = ('status', 'author', 'created',
+                   'edited', 'group', 'interested')
+
+    def __init__(self, user, data=None, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = 'POST'
+
+        self.helper.layout = Layout(
+            'type',
+            'course',
+            'description'
+        )
+
 class EventForm(forms.ModelForm):
 
     class Meta:
