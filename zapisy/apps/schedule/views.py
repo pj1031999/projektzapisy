@@ -19,7 +19,7 @@ from apps.schedule.models.event import Event
 from apps.schedule.models.term import Term
 from apps.schedule.models.specialreservation import SpecialReservation
 from apps.schedule.filters import EventFilter, ExamFilter
-from apps.schedule.forms import NewEventForm, EventForm, TermFormSet, DecisionForm, \
+from apps.schedule.forms import NewEventForm, EventForm, NewTermFormSet, TermFormSet, DecisionForm, \
     EventModerationMessageForm, EventMessageForm, ConflictsForm
 from apps.schedule.utils import EventAdapter, get_week_range_by_date
 from apps.utils.fullcalendar import FullCalendarView
@@ -54,7 +54,20 @@ def classroom(request, slug):
 @login_required
 def new_reservation(request, event_id=None):
     form = NewEventForm(request.user)
-    return render(request, 'schedule/new_reservation.html', {'form': form})
+
+    if form.is_valid():
+        event = form.save(commit=False)
+        event.author = request.user
+        formset = NewTermFormSet(request.POST or None, instance=event)
+        if formset.is_valid():
+            event.save()
+            formset.save()
+
+            return redirect(event)
+        errors = True
+    else:
+        formset = NewTermFormSet(data=request.POST or None, instance=Event())
+    return render(request, 'schedule/new_reservation.html', {'form': form, 'formset': formset})
 
 
 @login_required

@@ -16,6 +16,7 @@ export default {
       ]
    },
    rawfiles: [
-      "feed-icon.png"
+      "feed-icon.png",
+      "choose.png"
    ],
 };
