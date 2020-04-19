@@ -11,45 +11,44 @@ from django.urls import reverse
 from apps.enrollment.courses.models.course_instance import CourseInstance
 from apps.notifications.custom_signals import teacher_changed
 from apps.users.models import Employee
-from django.utils.translation import gettext_lazy as _
 
 
 # w przypadku edycji, poprawić też javascript: Fereol.Enrollment.CourseGroup.groupTypes
 class GroupType(models.TextChoices):
-    LECTURE = '1', _('wykład')
-    EXERCISES = '2', _('ćwiczenia')
-    LAB = '3', _('pracownia')
-    EXERCISES_LAB = '5', _('ćwiczenio-pracownia')
-    SEMINAR = '6', _('seminarium')
-    LANGUAGE_COURSE = '7', _('lektor')
-    PE = '8', _('WF')
-    COMPENDIUM = '9', _('repetytorium')
-    PROJECT = '10', _('projekt')
-    TUTORING = '11', _('tutoring')
-    PRO_SEMINAR = '12', _('proseminarium')
+    LECTURE = '1', 'wykład'
+    EXERCISES = '2', 'ćwiczenia'
+    LAB = '3', 'pracownia'
+    EXERCISES_LAB = '5', 'ćwiczenio-pracownia'
+    SEMINAR = '6', 'seminarium'
+    LANGUAGE_COURSE = '7', 'lektor'
+    PE = '8', 'WF'
+    COMPENDIUM = '9', 'repetytorium'
+    PROJECT = '10', 'projekt'
+    TUTORING = '11', 'tutoring'
+    PRO_SEMINAR = '12', 'proseminarium'
 
 
 class GroupExtra(models.TextChoices):
-    EMPTY = '', _('')
-    FIRST_SEV_WEEKS = 'pierwsze 7 tygodni', _('pierwsze 7 tygodni')
-    SEC_SEV_WEEKS = 'drugie 7 tygodni', _('drugie 7 tygodni')
-    BACKUP_GROUP = 'grupa rezerwowa', _('grupa rezerwowa')
-    BACHELOR_GROUP = 'grupa licencjacka', _('grupa licencjacka')
-    MASTERS_GROUP = 'grupa magisterska', _('grupa magisterska')
-    ADVANCED_GROUP = 'grupa zaawansowana', _('grupa zaawansowana')
-    MATH_DEP_CLASS = 'zajęcia na mat.', _('zajęcia na matematyce')
-    STRIPPLED_LECTURE = 'wykład okrojony', _('wykład okrojony')
-    GROUP_ONE = 'grupa 1', _('grupa 1')
-    GROUP_TWO = 'grupa 2', _('grupa 2')
-    GROUP_THREE = 'grupa 3', _('grupa 3')
-    GROUP_FOUR = 'grupa 4', _('grupa 4')
-    GROUP_FIVE = 'grupa 5', _('grupa 5')
-    LINUX_LAB = 'pracownia linuksowa', _('pracownia linuksowa')
-    ENGLISH_GROUP = 'grupa anglojęzyczna', _('grupa anglojęzyczna')
-    FIRST_YEAR = 'I rok', _('I rok')
-    SEC_YEAR = 'II rok', _('II rok')
-    ISIM = 'ISIM', _('ISIM')
-    HIDDEN_GROUP = 'hidden', _('grupa ukryta')
+    EMPTY = '', ''
+    FIRST_SEV_WEEKS = 'pierwsze 7 tygodni', 'pierwsze 7 tygodni'
+    SEC_SEV_WEEKS = 'drugie 7 tygodni', 'drugie 7 tygodni'
+    BACKUP_GROUP = 'grupa rezerwowa', 'grupa rezerwowa'
+    BACHELOR_GROUP = 'grupa licencjacka', 'grupa licencjacka'
+    MASTERS_GROUP = 'grupa magisterska', 'grupa magisterska'
+    ADVANCED_GROUP = 'grupa zaawansowana', 'grupa zaawansowana'
+    MATH_DEP_CLASS = 'zajęcia na mat.', 'zajęcia na matematyce'
+    STRIPPLED_LECTURE = 'wykład okrojony', 'wykład okrojony'
+    GROUP_ONE = 'grupa 1', 'grupa 1'
+    GROUP_TWO = 'grupa 2', 'grupa 2'
+    GROUP_THREE = 'grupa 3', 'grupa 3'
+    GROUP_FOUR = 'grupa 4', 'grupa 4'
+    GROUP_FIVE = 'grupa 5', 'grupa 5'
+    LINUX_LAB = 'pracownia linuksowa', 'pracownia linuksowa'
+    ENGLISH_GROUP = 'grupa anglojęzyczna', 'grupa anglojęzyczna'
+    FIRST_YEAR = 'I rok', 'I rok'
+    SEC_YEAR = 'II rok', 'II rok'
+    ISIM = 'ISIM', 'ISIM'
+    HIDDEN_GROUP = 'hidden', 'grupa ukryta'
 
 
 class Group(models.Model):
