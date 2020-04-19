@@ -1,0 +1,9 @@
+[Unit]
+Description=Yarn devw service
+[Service]
+User=vagrant
+Group=vagrant
+WorkingDirectory=/vagrant/zapisy/
+ExecStartPre= /usr/local/bin/yarn
+ExecStart=/usr/local/bin/yarn devw
+Type=simple

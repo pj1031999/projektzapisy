@@ -1,0 +1,44 @@
+---
+- hosts: all
+
+  vars:
+    IP: "0.0.0.0"
+    PORT: "8000"
+
+  tasks:
+    # Runserver service
+    - name: Deploy runserver 
+      copy:
+        src: runserver.service
+        dest: /etc/systemd/system/
+        force: yes
+      become: yes
+
+    - name: Set ip:port configuration in service file
+      replace:
+        path: /etc/systemd/system/runserver.service
+        regexp: "ip:port"
+        replace: "{{IP}}:{{PORT}}"
+      become: yes
+
+    - name: Start runserver
+      systemd:
+        name: runserver
+        state: started
+        enabled: yes
+      become: yes
+
+    # Yarn devw service
+    - name: Deploy yarn devw
+      copy:
+        src: yarn_devw.service
+        dest: /etc/systemd/system/
+        force: yes
+      become: yes
+
+    - name: Start yarn devw
+      systemd:
+        name: yarn_devw
+        state: started
+        enabled: yes
+      become: yes
