@@ -47,7 +47,6 @@ import logging
 from datetime import datetime
 from typing import DefaultDict, Dict, Iterable, List, Optional, Set
 
-from choicesenum import ChoicesEnum
 from enum import Enum
 from django.contrib.auth.models import User
 from django.db import DatabaseError, models, transaction
@@ -63,7 +62,7 @@ from apps.notifications.custom_signals import student_pulled, student_not_pulled
 LOGGER = logging.getLogger(__name__)
 
 
-class RecordStatus(ChoicesEnum):
+class RecordStatus(models.TextChoices):
     """RecordStatus describes a lifetime of a record."""
     QUEUED = '0'
     ENROLLED = '1'
@@ -86,7 +85,7 @@ class Record(models.Model):
     """
     group = models.ForeignKey(Group, verbose_name='grupa', on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    status = models.CharField(max_length=1, choices=RecordStatus.choices())
+    status = models.CharField(max_length=1, choices=RecordStatus.choices)
     priority = models.IntegerField(
         verbose_name='priorytet',
         default=5,
