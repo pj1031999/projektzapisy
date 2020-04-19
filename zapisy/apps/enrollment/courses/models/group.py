@@ -13,7 +13,6 @@ from apps.notifications.custom_signals import teacher_changed
 from apps.users.models import Employee
 
 
-# w przypadku edycji, poprawić też javascript: Fereol.Enrollment.CourseGroup.groupTypes
 class GroupType(models.TextChoices):
     LECTURE = '1', 'wykład'
     EXERCISES = '2', 'ćwiczenia'
