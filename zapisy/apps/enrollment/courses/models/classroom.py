@@ -5,23 +5,22 @@ from django.db import models
 import json
 from django.db.models import Q
 from django_extensions.db.fields import AutoSlugField
-from django.utils.translation import gettext_lazy as _
 
 
 class Floors(models.IntegerChoices):
-    GROUND_FLOOR = 0, _('Parter')
-    FIRST_FLOOR = 1, _('I piętro')
-    SEC_FLOOR = 2, _('II piętro')
-    THIRD_FLOOR = 3, _('III piętro')
+    GROUND_FLOOR = 0, 'Parter'
+    FIRST_FLOOR = 1, 'I piętro'
+    SEC_FLOOR = 2, 'II piętro'
+    THIRD_FLOOR = 3, 'III piętro'
 
 
 class Types(models.IntegerChoices):
-    LECTURE_HALL = 0, _('Sala wykładowa')
-    CLASSROOM = 1, _('Sala ćwiczeniowa')
-    WINDOWS_LAB = 2, _('Pracownia komputerowa - Windows')
-    LINUX_LAB = 3, _('Pracownia komputerowa - Linux')
-    DOUBLE_OS_LAB = 4, _('Pracownia dwusystemowa (Winodws+Linux)')
-    POLIGON = 5, _('Poligon (109)')
+    LECTURE_HALL = 0, 'Sala wykładowa'
+    CLASSROOM = 1, 'Sala ćwiczeniowa'
+    WINDOWS_LAB = 2, 'Pracownia komputerowa - Windows'
+    LINUX_LAB = 3, 'Pracownia komputerowa - Linux'
+    DOUBLE_OS_LAB = 4, 'Pracownia dwusystemowa (Winodws+Linux)'
+    POLIGON = 5, 'Poligon (109)'
 
 
 class Classroom(models.Model):
