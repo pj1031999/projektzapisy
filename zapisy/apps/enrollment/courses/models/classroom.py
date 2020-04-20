@@ -25,7 +25,7 @@ class Types(models.IntegerChoices):
 
 class Classroom(models.Model):
     """classroom in institute"""
-    type = models.IntegerField(choices=Types.choices, default=1, verbose_name='typ')
+    type = models.IntegerField(choices=Types.choices, default=Types.CLASSROOM, verbose_name='typ')
     description = models.TextField(null=True, blank=True, verbose_name='opis')
     number = models.CharField(max_length=20, verbose_name='numer sali')
     # we don't use ordering properly
