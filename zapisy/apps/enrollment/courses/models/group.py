@@ -19,7 +19,7 @@ class GroupType(models.TextChoices):
     LAB = '3', 'pracownia'
     EXERCISES_LAB = '5', 'ćwiczenio-pracownia'
     SEMINAR = '6', 'seminarium'
-    LANGUAGE_COURSE = '7', 'lektor'
+    LANGUAGE_COURSE = '7', 'lektorat'
     PE = '8', 'WF'
     COMPENDIUM = '9', 'repetytorium'
     PROJECT = '10', 'projekt'

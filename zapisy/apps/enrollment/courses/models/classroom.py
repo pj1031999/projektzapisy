@@ -19,7 +19,7 @@ class Types(models.IntegerChoices):
     CLASSROOM = 1, 'Sala ćwiczeniowa'
     WINDOWS_LAB = 2, 'Pracownia komputerowa - Windows'
     LINUX_LAB = 3, 'Pracownia komputerowa - Linux'
-    DOUBLE_OS_LAB = 4, 'Pracownia dwusystemowa (Winodws+Linux)'
+    DOUBLE_OS_LAB = 4, 'Pracownia dwusystemowa (Windows+Linux)'
     POLIGON = 5, 'Poligon (109)'
 
 
