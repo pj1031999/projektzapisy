@@ -1,5 +1,8 @@
 export default {
    bundles: {
+      "classroom-picker-widget": [
+         "classroom-picker-widget.js"
+      ],
       "reservation": [
          "reservation.js",
       ],

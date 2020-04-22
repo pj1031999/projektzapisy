@@ -113,6 +113,7 @@ var ReservationView = function () {
 
     var loadTerms = function (value) {
         Ajax.getJson(value, function (data) {
+            console.log(data);
             rooms.load(data);
             rooms.setLines($('#begin').val(), $('#end').val());
             rooms.draw();

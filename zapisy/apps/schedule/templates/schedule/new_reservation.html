@@ -43,7 +43,13 @@
     {% for term_form in formset %}
         {% crispy term_form %}
     {% endfor %}
+
+    <div id="classroom-picker"></div>
+    
     <button type="submit" class="save btn btn-default">Save</button>
 </form>
 {% endblock %}
 
+{% block rendered_bundles %}
+    {% render_bundle 'schedule-classroom-picker-widget' %}
+{% endblock %}

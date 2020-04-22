@@ -22,21 +22,27 @@ class NewTermForm(forms.ModelForm):
     class Meta:
         model = Term
         exclude = ["event"]
-    
-    day = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}), label="")
-    start = forms.TimeField(widget=forms.TextInput(attrs={'type': 'time'}), label="")
-    end = forms.TimeField(widget=forms.TextInput(attrs={'type': 'time'}), label="")
+
+    day = forms.DateField(widget=forms.TextInput(
+        attrs={'type': 'date'}), label="")
+    start = forms.TimeField(widget=forms.TextInput(
+        attrs={'type': 'time'}), label="")
+    end = forms.TimeField(widget=forms.TextInput(
+        attrs={'type': 'time'}), label="")
     room = forms.ModelChoiceField(queryset=Classroom.objects.all(), label="")
-    ignore_conflicts = forms.BooleanField(required=False, label="Ignoruj konflikty")
+    ignore_conflicts = forms.BooleanField(
+        required=False, label="Ignoruj konflikty")
 
     def __init__(self, *args, **kwargs):
         super(NewTermForm, self).__init__(*args, **kwargs)
         self.helper = FormHelper()
 
         self.helper.layout = Layout(
-            Row(Column('day', css_class='form-group col-md-2 mb-0'), Column('start', css_class='form-group col-md-2 mb-0'), Column('end', css_class='form-group col-md-2 mb-0'), Column('room', css_class='form-group col-md-2 mb-0'), css_class='form-row'))
+            Row(Column('day', css_class='col-2 mb-0'), Column('start', css_class='form-group col-2 mb-0'), Column('end', css_class='form-group col-2 mb-0'), Column('room', css_class='form-group col-2 mb-0'), css_class='form-row'))
+
 
 NewTermFormSet = inlineformset_factory(Event, Term, extra=1, form=NewTermForm)
+
 
 class TermForm(forms.ModelForm):
     ignore_conflicts = forms.BooleanField(
@@ -72,7 +78,8 @@ class NewEventForm(forms.ModelForm):
 
     title = forms.CharField(label="Nazwa")
     type = forms.ChoiceField(choices=Event.TYPES_FOR_STUDENT, label="Rodzaj")
-    course = forms.ModelChoiceField(queryset=CourseInstance.objects.none(), label="Przedmiot")
+    course = forms.ModelChoiceField(
+        queryset=CourseInstance.objects.none(), label="Przedmiot")
 
     def __init__(self, user, *args, **kwargs):
         super(NewEventForm, self).__init__(*args, **kwargs)
@@ -101,8 +108,8 @@ class NewEventForm(forms.ModelForm):
         self.helper.layout = Layout(
             'type',
             'course',
-            Div('description', 
-                    HTML('<small class="form-text text-muted">Opis wydarzenia widoczny jest dla wszystkich, jeśli wydarzenie jest publiczne; widoczny tylko dla rezerwującego i administratora sal, gdy wydarzenie jest prywatne.</small>')),
+            Div('description',
+                HTML('<small class="form-text text-muted">Opis wydarzenia widoczny jest dla wszystkich, jeśli wydarzenie jest publiczne; widoczny tylko dla rezerwującego i administratora sal, gdy wydarzenie jest prywatne.</small>')),
         )
 
 
